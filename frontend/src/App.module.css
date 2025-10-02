@@ -1,0 +1,37 @@
+.container {
+  width: 100%;
+  min-height: 100vh;
+  display: flex; /* NOVO */
+  flex-direction: column; /* NOVO */
+}
+
+.contentWrapper {
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 0;
+  flex-grow: 1; /* NOVO: Faz o conteúdo principal crescer e empurrar o rodapé */
+}
+
+.contentWrapper {
+  width: 90%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 0;
+}
+
+/* --- CLASSE DE GRID ADICIONADA AQUI --- */
+.grid {
+  display: grid;
+  /* Cria colunas responsivas: no mínimo 280px, crescendo para preencher o espaço */
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  /* A "margem" que você pediu entre os cards */
+  gap: 2rem; 
+}
+
+/* Ajustes para telas maiores */
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  }
+}

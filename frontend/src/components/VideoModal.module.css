@@ -1,0 +1,67 @@
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateY(-30px) scale(0.95); }
+  to { transform: translateY(0) scale(1); }
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.8); /* Um pouco mais escuro */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.modalContent {
+  position: relative;
+  background: transparent;
+  width: 90%;
+  max-width: 900px; /* Um pouco maior para vídeos */
+  animation: slideIn 0.3s ease-out;
+}
+
+.closeButton {
+  position: absolute;
+  top: -40px; /* Mais espaço */
+  right: -10px;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 2rem;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.closeButton:hover {
+  transform: scale(1.2);
+}
+
+.videoContainer {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* Proporção 16:9 para vídeos */
+  height: 0;
+  background-color: #000; /* Fundo preto para o player */
+  border-radius: 12px;
+  overflow: hidden; /* Garante que o player fique dentro das bordas arredondadas */
+}
+
+/* ATUALIZADO: O estilo agora se aplica tanto ao iframe quanto à tag video */
+.videoContainer iframe,
+.videoContainer video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}

@@ -1,0 +1,30 @@
+.emptyContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem;
+  text-align: center;
+  background-color: var(--surface-color);
+  border-radius: 20px;
+  border: 2px dashed #e5e7eb;
+}
+
+.icon {
+  font-size: 4rem;
+  color: var(--primary-color);
+  opacity: 0.5;
+  margin-bottom: 1rem;
+}
+
+.title {
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  color: var(--text-light-color);
+}
+
+.message {
+  font-size: 1.1rem;
+  color: var(--text-light-color);
+  max-width: 300px;
+}

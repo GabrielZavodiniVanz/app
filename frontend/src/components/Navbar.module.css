@@ -1,0 +1,124 @@
+/* Estilos base para o Navbar (Mobile First) */
+.navbar {
+  background-color: var(--surface-color);
+  box-shadow: var(--shadow);
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.brand {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.hamburger {
+  display: block;
+  font-size: 1.8rem;
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  cursor: pointer;
+  z-index: 101;
+}
+
+.links {
+  display: none;
+  flex-direction: column;
+  background: var(--surface-color);
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  padding: 1rem;
+  box-shadow: var(--shadow);
+  gap: 1rem;
+  align-items: center;
+}
+
+.links.menuOpen {
+  display: flex;
+}
+
+.link, .logoutButton, .welcomeMessage, .dropdownButton {
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 0.5rem 1rem;
+  white-space: nowrap;
+}
+
+.logoutButton {
+  background: var(--secondary-color);
+  color: var(--surface-color);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* --- NOVO: ESTILOS DO DROPDOWN --- */
+.dropdown {
+  position: relative;
+}
+
+.dropdownButton {
+  background: none;
+  border: none;
+  color: var(--text-dark);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.dropdownContent {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  background-color: var(--surface-color);
+  box-shadow: var(--shadow-lg);
+  border-radius: 8px;
+  top: 120%; /* Posição abaixo do botão */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 110;
+  min-width: 200px;
+  overflow: hidden;
+}
+
+.dropdownContent a {
+  padding: 0.75rem 1.5rem;
+  text-decoration: none;
+  color: var(--text-dark);
+  font-weight: 600;
+  display: block;
+}
+
+.dropdownContent a:hover {
+  background-color: var(--background-color);
+  color: var(--primary-color);
+}
+
+
+/* --- Estilos para Telas Maiores (Desktop) --- */
+@media (min-width: 768px) {
+  .hamburger {
+    display: none;
+  }
+  .links {
+    display: flex;
+    flex-direction: row;
+    position: static;
+    box-shadow: none;
+    width: auto;
+    padding: 0;
+    align-items: center;
+    gap: 1.5rem;
+  }
+}

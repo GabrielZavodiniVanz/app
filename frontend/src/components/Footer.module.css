@@ -1,0 +1,35 @@
+.footer {
+  width: 100%;
+  padding: 2rem;
+  text-align: center;
+  background-color: #e0f0ff; /* Um azul um pouco mais escuro que o fundo do site */
+  color: var(--text-light-color);
+  font-weight: 600;
+  margin-top: auto; /* Empurra o rodapé para o final da página */
+  flex-shrink: 0; /* Garante que o rodapé não encolha */
+}
+
+.footer p {
+  margin: 0;
+}
+
+/* NOVO: Estilos para o link de contato */
+.contactLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem; /* Espaço entre o ícone e o texto */
+  margin-top: 0.75rem;
+}
+
+.contactLink a {
+  color: var(--text-dark);
+  font-weight: 700;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.contactLink a:hover {
+  color: var(--primary-color);
+  text-decoration: underline;
+}

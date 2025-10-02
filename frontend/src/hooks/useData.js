@@ -1,0 +1,37 @@
+import { useState, useEffect } from 'react';
+
+/**
+ * Um Hook customizado para buscar dados de qualquer função de serviço da API.
+ * @param {Function} apiFunc - A função do serviço que busca os dados (ex: getVideos).
+ * @param {any} key - Uma "chave" opcional. Se a chave mudar, o hook buscará os dados novamente.
+ * @returns {object} - Um objeto contendo { data, loading, error }.
+ */
+function useData(apiFunc, key = 0) { // Adicionamos o 'key' para recarregamentos manuais
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const result = await apiFunc();
+        setData(result);
+      } catch (err) {
+        setError('Ocurrió un error al cargar los datos.');
+        console.error("Erro ao buscar dados:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  // MUDANÇA PRINCIPAL AQUI: de [apiFunc] para [key]
+  // Isso garante que o hook só rode novamente se a gente explicitamente mandar.
+  }, [key]); 
+
+  return { data, loading, error };
+}
+
+export default useData;
