@@ -9,152 +9,614 @@ const adminMiddleware = require('../middleware/adminMiddleware');
 const upload = require('../middleware/uploadMiddleware');
 const cloudinary = require('../config/cloudinaryConfig');
 
-// Função auxiliar para extrair o Public ID da URL do Cloudinary
+// ==========================================================
+// FUNÇÕES AUXILIARES
+// ==========================================================
+
+/**
+ * Extrai o Public ID da URL do Cloudinary
+ * @param {string} url - URL do Cloudinary
+ * @returns {string|null} - Public ID ou null se inválido
+ */
 const getPublicIdFromUrl = (url) => {
   try {
     if (!url || !url.includes('cloudinary')) return null;
+    
     const parts = url.split('/');
     const versionIndex = parts.indexOf('upload') + 2;
+    
     if (versionIndex < 2 || versionIndex >= parts.length) return null;
+    
     const publicIdWithExtension = parts.slice(versionIndex).join('/');
     const publicId = publicIdWithExtension.split('.')[0];
+    
     return publicId;
   } catch (error) {
-    console.error("Erro ao extrair Public ID:", error);
+    console.error("❌ Erro ao extrair Public ID:", error);
     return null;
   }
 };
 
+/**
+ * Remove arquivo do Cloudinary
+ * @param {string} url - URL do arquivo
+ * @param {string} resourceType - Tipo do recurso ('image', 'video', 'raw')
+ */
+const removeFromCloudinary = async (url, resourceType = 'image') => {
+  try {
+    if (!url || !url.includes('cloudinary')) return;
+    
+    const publicId = getPublicIdFromUrl(url);
+    if (!publicId) return;
+    
+    await cloudinary.uploader.destroy(publicId, { resource_type: resourceType });
+    console.log(`✅ Arquivo removido do Cloudinary: ${publicId}`);
+  } catch (error) {
+    console.error(`❌ Erro ao remover arquivo do Cloudinary:`, error);
+  }
+};
+
+// Funções de validação removidas - usando validação inline
+
 // ==========================================================
-// --- ROTAS PÚBLICAS ---
+// ROTAS PÚBLICAS
 // ==========================================================
+
+/**
+ * GET /videos - Listar todos os vídeos
+ */
 router.get('/videos', async (req, res) => {
   try {
-    const videos = await Video.findAll({ order: [['createdAt', 'DESC']] });
+    const videos = await Video.findAll({ 
+      order: [['createdAt', 'DESC']],
+      attributes: ['id', 'titulo', 'descripcion', 'urlVideo', 'urlImagen', 'createdAt']
+    });
+    
+    console.log(`✅ Listados ${videos.length} vídeos`);
     res.json(videos);
+    
   } catch (error) {
-    console.error("=====================================\n[ERRO EM GET /videos]:\n", util.inspect(error, false, null, true), "\n=====================================");
-    res.status(500).json({ message: 'Error al buscar videos' });
+    console.error("❌ Erro ao buscar vídeos:", error);
+    res.status(500).json({ 
+      message: 'Erro ao buscar vídeos',
+      code: 'FETCH_VIDEOS_ERROR'
+    });
   }
 });
 
+/**
+ * GET /documentos - Listar todos os documentos
+ */
 router.get('/documentos', async (req, res) => {
   try {
-    const documents = await Document.findAll({ order: [['createdAt', 'DESC']] });
+    const documents = await Document.findAll({ 
+      order: [['createdAt', 'DESC']],
+      attributes: ['id', 'titulo', 'descripcion', 'urlDocumento', 'urlImagen', 'createdAt']
+    });
+    
+    console.log(`✅ Listados ${documents.length} documentos`);
     res.json(documents);
+    
   } catch (error) {
-    console.error("=====================================\n[ERRO EM GET /documentos]:\n", util.inspect(error, false, null, true), "\n=====================================");
-    res.status(500).json({ message: 'Error al buscar documentos' });
+    console.error("❌ Erro ao buscar documentos:", error);
+    res.status(500).json({ 
+      message: 'Erro ao buscar documentos',
+      code: 'FETCH_DOCUMENTS_ERROR'
+    });
   }
 });
 
-// ===============================================================
-// --- ROTA DE DOWNLOAD (COM DEBUG ADICIONAL) ---
-// ===============================================================
+/**
+ * GET /documentos/:id/download - Download de documento
+ */
 router.get('/documentos/:id/download', authMiddleware, async (req, res) => {
-  let document; // Declarado aqui para ser acessível no catch
+  let document;
+  
   try {
-    document = await Document.findByPk(req.params.id);
+    const { id } = req.params;
+    
+    // Buscar documento
+    document = await Document.findByPk(id);
     if (!document || !document.urlDocumento) {
-      return res.status(404).json({ message: 'Documento no encontrado.' });
+      return res.status(404).json({ 
+        message: 'Documento não encontrado',
+        code: 'DOCUMENT_NOT_FOUND'
+      });
     }
+    
     const originalUrl = document.urlDocumento;
-    const extension = originalUrl.split('.').pop().split('?')[0] || 'file';
-    const filename = `${document.titulo.replace(/[\s/]/g, '_')}.${extension}`;
-    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-    const response = await axios({ method: 'GET', url: originalUrl, responseType: 'stream' });
+    
+    // Extrair extensão da URL de forma mais robusta
+    let extension = 'pdf'; // Extensão padrão
+    try {
+      // Tentar extrair da URL
+      const urlParts = originalUrl.split('/');
+      const lastPart = urlParts[urlParts.length - 1];
+      
+      // Se o último parte tem extensão, usar ela
+      if (lastPart.includes('.')) {
+        const possibleExtension = lastPart.split('.').pop().split('?')[0];
+        if (possibleExtension && possibleExtension.length <= 5) {
+          extension = possibleExtension;
+        }
+      }
+      
+      // Se não conseguiu extrair, tentar pelo Content-Type (se disponível)
+      // Isso será feito após a requisição
+    } catch (error) {
+      console.log('Usando extensão padrão devido a erro na extração:', error.message);
+    }
+    
+    const filename = `${document.titulo.replace(/[\s/\\:*?"<>|]/g, '_')}.${extension}`;
+    
+    // Fazer download do arquivo primeiro para obter headers
+    const response = await axios({
+      method: 'GET',
+      url: originalUrl,
+      responseType: 'stream',
+      timeout: 30000 // 30 segundos de timeout
+    });
+    
+    // Tentar melhorar a extensão baseada no Content-Type
+    let finalFilename = filename;
     if (response.headers['content-type']) {
-        res.setHeader('Content-Type', response.headers['content-type']);
+      const contentType = response.headers['content-type'].toLowerCase();
+      
+      // Mapear Content-Types comuns para extensões
+      const contentTypeMap = {
+        'application/pdf': 'pdf',
+        'application/msword': 'doc',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'docx',
+        'application/vnd.ms-excel': 'xls',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'xlsx',
+        'application/vnd.ms-powerpoint': 'ppt',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'pptx',
+        'text/plain': 'txt',
+        'image/jpeg': 'jpg',
+        'image/png': 'png',
+        'image/gif': 'gif',
+        'application/zip': 'zip',
+        'application/x-rar-compressed': 'rar'
+      };
+      
+      // Se o Content-Type mapeia para uma extensão conhecida, usar ela
+      for (const [type, ext] of Object.entries(contentTypeMap)) {
+        if (contentType.includes(type)) {
+          const titlePart = document.titulo.replace(/[\s/\\:*?"<>|]/g, '_');
+          finalFilename = `${titlePart}.${ext}`;
+          break;
+        }
+      }
+      
+      res.setHeader('Content-Type', response.headers['content-type']);
     }
+    
+    // Configurar headers para download com nome final
+    res.setHeader('Content-Disposition', `attachment; filename="${finalFilename}"`);
+    
+    if (response.headers['content-length']) {
+      res.setHeader('Content-Length', response.headers['content-length']);
+    }
+    
+    // Headers adicionais para melhor compatibilidade
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    
+    console.log(`✅ Download iniciado: ${document.titulo} por usuário ${req.user.email}`);
     response.data.pipe(res);
+    
   } catch (error) {
-    // A LINHA DE DEBUG QUE ADICIONAMOS:
     if (document) {
-      console.log('>>> URL COM PROBLEMA:', document.urlDocumento);
+      console.error(`❌ URL com problema: ${document.urlDocumento}`);
     }
-    console.error("=====================================\n[ERRO NO DOWNLOAD]:\n", util.inspect(error, false, null, true), "\n=====================================");
-    res.status(500).json({ message: 'Error al descargar el archivo.' });
+    console.error("❌ Erro no download:", error);
+    
+    if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED') {
+      return res.status(404).json({ 
+        message: 'Arquivo não encontrado no servidor',
+        code: 'FILE_NOT_FOUND'
+      });
+    }
+    
+    res.status(500).json({ 
+      message: 'Erro ao fazer download do arquivo',
+      code: 'DOWNLOAD_ERROR'
+    });
   }
 });
 
-// ===============================================================
-// --- ROTAS DE ADMIN ---
-// ===============================================================
+// ==========================================================
+// ROTAS DE ADMINISTRAÇÃO - VÍDEOS
+// ==========================================================
 
-// --- VÍDEOS ---
-router.post('/videos', [authMiddleware, adminMiddleware, upload.fields([{ name: 'videoFile', maxCount: 1 }, { name: 'imageFile', maxCount: 1 }])], async (req, res) => {
-    try {
-      const { titulo, descripcion, urlVideo } = req.body;
-      let videoPath = ''; let imagePath = null;
-      if (req.files && req.files.imageFile) { imagePath = req.files.imageFile[0].path; }
-      if (req.files && req.files.videoFile) { videoPath = req.files.videoFile[0].path; } else if (urlVideo && urlVideo.trim() !== '') { videoPath = urlVideo; } else { return res.status(400).json({ message: 'É necessário enviar um arquivo de vídeo ou fornecer uma URL.' }); }
-      const novoVideo = await Video.create({ titulo, descripcion, urlVideo: videoPath, urlImagen: imagePath });
-      res.status(201).json(novoVideo);
-    } catch (error) { console.error("=====================================\n[ERRO EM POST /videos]:\n", util.inspect(error, false, null, true), "\n====================================="); res.status(500).json({ message: 'Error al crear el video' }); }
+/**
+ * POST /videos - Criar novo vídeo (Admin)
+ */
+router.post('/videos', [authMiddleware, adminMiddleware, upload.fields([
+  { name: 'videoFile', maxCount: 1 }, 
+  { name: 'imageFile', maxCount: 1 }
+])], async (req, res) => {
+  try {
+    const { titulo, descripcion, urlVideo } = req.body;
+    
+    // Validação básica
+    if (!titulo || titulo.trim().length < 1) {
+      return res.status(400).json({
+        message: 'Título deve ter pelo menos 3 caracteres',
+        code: 'VALIDATION_ERROR'
+      });
+    }
+    
+    if (descripcion && descripcion.trim().length < 1) {
+      return res.status(400).json({
+        message: 'Descrição deve ter pelo menos 10 caracteres (se fornecida)',
+        code: 'VALIDATION_ERROR'
+      });
+    }
+    
+    let videoPath = '';
+    let imagePath = null;
+    
+    // Processar arquivos enviados
+    if (req.files && req.files.imageFile) {
+      imagePath = req.files.imageFile[0].path;
+    }
+    
+    if (req.files && req.files.videoFile) {
+      videoPath = req.files.videoFile[0].path;
+    } else if (urlVideo && urlVideo.trim() !== '') {
+      videoPath = urlVideo.trim();
+    } else {
+      return res.status(400).json({ 
+        message: 'É necessário enviar um arquivo de vídeo ou fornecer uma URL',
+        code: 'NO_VIDEO_SOURCE'
+      });
+    }
+    
+    // Criar vídeo
+    const novoVideo = await Video.create({
+      titulo: titulo.trim(),
+      descripcion: descripcion ? descripcion.trim() : null,
+      urlVideo: videoPath,
+      urlImagen: imagePath
+    });
+    
+    console.log(`✅ Vídeo criado: ${titulo} por ${req.user.email}`);
+    res.status(201).json({
+      message: 'Vídeo criado com sucesso',
+      video: novoVideo
+    });
+    
+  } catch (error) {
+    console.error("❌ Erro ao criar vídeo:", error);
+    res.status(500).json({ 
+      message: 'Erro ao criar vídeo',
+      code: 'CREATE_VIDEO_ERROR'
+    });
+  }
 });
 
-router.put('/videos/:id', [authMiddleware, adminMiddleware, upload.fields([{ name: 'videoFile', maxCount: 1 }, { name: 'imageFile', maxCount: 1 }])], async (req, res) => {
-    try {
-      const video = await Video.findByPk(req.params.id);
-      if (!video) { return res.status(404).json({ message: 'Video no encontrado.' }); }
-      const dataToUpdate = { ...req.body };
-      if (req.files) {
-        if (req.files.videoFile) { if (video.urlVideo && video.urlVideo.includes('cloudinary')) { const publicId = getPublicIdFromUrl(video.urlVideo); if (publicId) await cloudinary.uploader.destroy(publicId, { resource_type: 'video' }); } dataToUpdate.urlVideo = req.files.videoFile[0].path; }
-        if (req.files.imageFile) { if (video.urlImagen && video.urlImagen.includes('cloudinary')) { const publicId = getPublicIdFromUrl(video.urlImagen); if (publicId) await cloudinary.uploader.destroy(publicId, { resource_type: 'image' }); } dataToUpdate.urlImagen = req.files.imageFile[0].path; }
+/**
+ * PUT /videos/:id - Atualizar vídeo (Admin)
+ */
+router.put('/videos/:id', [authMiddleware, adminMiddleware, upload.fields([
+  { name: 'videoFile', maxCount: 1 }, 
+  { name: 'imageFile', maxCount: 1 }
+])], async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { titulo, descripcion } = req.body;
+    
+    // Validar ID
+    if (!id || isNaN(id)) {
+      return res.status(400).json({ 
+        message: 'ID do vídeo inválido',
+        code: 'INVALID_VIDEO_ID'
+      });
+    }
+    
+    // Buscar vídeo
+    const video = await Video.findByPk(id);
+    if (!video) {
+      return res.status(404).json({ 
+        message: 'Vídeo não encontrado',
+        code: 'VIDEO_NOT_FOUND'
+      });
+    }
+    
+    // Validação básica se fornecidos
+    if (titulo && titulo.trim().length < 3) {
+      return res.status(400).json({
+        message: 'Título deve ter pelo menos 3 caracteres',
+        code: 'VALIDATION_ERROR'
+      });
+    }
+    
+    if (descripcion && descripcion.trim().length < 10) {
+      return res.status(400).json({
+        message: 'Descrição deve ter pelo menos 10 caracteres',
+        code: 'VALIDATION_ERROR'
+      });
+    }
+    
+    const dataToUpdate = { ...req.body };
+    
+    // Processar novos arquivos
+    if (req.files) {
+      if (req.files.videoFile) {
+        // Remover vídeo antigo do Cloudinary
+        await removeFromCloudinary(video.urlVideo, 'video');
+        dataToUpdate.urlVideo = req.files.videoFile[0].path;
       }
-      await Video.update(dataToUpdate, { where: { id: req.params.id } });
-      const updatedVideo = await Video.findByPk(req.params.id);
-      res.json({ message: 'Video actualizado con éxito', video: updatedVideo });
-    } catch (error) { console.error("=====================================\n[ERRO EM PUT /videos/:id]:\n", util.inspect(error, false, null, true), "\n====================================="); res.status(500).json({ message: 'Error al actualizar el video' }); }
+      
+      if (req.files.imageFile) {
+        // Remover imagem antiga do Cloudinary
+        await removeFromCloudinary(video.urlImagen, 'image');
+        dataToUpdate.urlImagen = req.files.imageFile[0].path;
+      }
+    }
+    
+    // Atualizar vídeo
+    await Video.update(dataToUpdate, { where: { id } });
+    const updatedVideo = await Video.findByPk(id);
+    
+    console.log(`✅ Vídeo atualizado: ${updatedVideo.titulo} por ${req.user.email}`);
+    res.json({ 
+      message: 'Vídeo atualizado com sucesso', 
+      video: updatedVideo 
+    });
+    
+  } catch (error) {
+    console.error("❌ Erro ao atualizar vídeo:", error);
+    res.status(500).json({ 
+      message: 'Erro ao atualizar vídeo',
+      code: 'UPDATE_VIDEO_ERROR'
+    });
+  }
 });
 
+/**
+ * DELETE /videos/:id - Deletar vídeo (Admin)
+ */
 router.delete('/videos/:id', [authMiddleware, adminMiddleware], async (req, res) => {
   try {
-    const video = await Video.findByPk(req.params.id);
-    if (!video) { return res.status(404).json({ message: 'Video no encontrado.' }); }
-    if (video.urlVideo && video.urlVideo.includes('cloudinary')) { const publicId = getPublicIdFromUrl(video.urlVideo); if (publicId) await cloudinary.uploader.destroy(publicId, { resource_type: 'video' }); }
-    if (video.urlImagen && video.urlImagen.includes('cloudinary')) { const publicId = getPublicIdFromUrl(video.urlImagen); if (publicId) await cloudinary.uploader.destroy(publicId, { resource_type: 'image' }); }
-    await Video.destroy({ where: { id: req.params.id } });
-    res.status(200).json({ message: 'Video eliminado con éxito' });
-  } catch (error) { console.error("=====================================\n[ERRO EM DELETE /videos/:id]:\n", util.inspect(error, false, null, true), "\n====================================="); res.status(500).json({ message: 'Error al eliminar el video' }); }
-});
-
-// --- DOCUMENTOS ---
-router.post('/documentos', [authMiddleware, adminMiddleware, upload.fields([{ name: 'docFile', maxCount: 1 }, { name: 'imageFile', maxCount: 1 }])], async (req, res) => {
-    try {
-      const { titulo, descripcion, urlDocumento } = req.body;
-      let docPath = ''; let imagePath = null;
-      if (req.files && req.files.imageFile) { imagePath = req.files.imageFile[0].path; }
-      if (req.files && req.files.docFile) { docPath = req.files.docFile[0].path; } else if (urlDocumento && urlDocumento.trim() !== '') { docPath = urlDocumento; } else { return res.status(400).json({ message: 'É necessário enviar um arquivo de documento ou fornecer uma URL.' }); }
-      const novoDocumento = await Document.create({ titulo, descripcion, urlDocumento: docPath, urlImagen: imagePath });
-      res.status(201).json(novoDocumento);
-    } catch (error) { console.error("=====================================\n[ERRO EM POST /documentos]:\n", util.inspect(error, false, null, true), "\n====================================="); res.status(500).json({ message: 'Error al agregar el documento' }); }
-});
-
-router.put('/documentos/:id', [authMiddleware, adminMiddleware, upload.fields([{ name: 'docFile', maxCount: 1 }, { name: 'imageFile', maxCount: 1 }])], async (req, res) => {
-  try {
-    const document = await Document.findByPk(req.params.id);
-    if (!document) { return res.status(404).json({ message: 'Documento no encontrado.' }); }
-    const dataToUpdate = { ...req.body };
-    if (req.files) {
-      if (req.files.docFile) { if (document.urlDocumento && document.urlDocumento.includes('cloudinary')) { const publicId = getPublicIdFromUrl(document.urlDocumento); if (publicId) await cloudinary.uploader.destroy(publicId); } dataToUpdate.urlDocumento = req.files.docFile[0].path; }
-      if (req.files.imageFile) { if (document.urlImagen && document.urlImagen.includes('cloudinary')) { const publicId = getPublicIdFromUrl(document.urlImagen); if (publicId) await cloudinary.uploader.destroy(publicId); } dataToUpdate.urlImagen = req.files.imageFile[0].path; }
+    const { id } = req.params;
+    
+    // Validar ID
+    if (!id || isNaN(id)) {
+      return res.status(400).json({ 
+        message: 'ID do vídeo inválido',
+        code: 'INVALID_VIDEO_ID'
+      });
     }
-    await Document.update(dataToUpdate, { where: { id: req.params.id } });
-    const updatedDocument = await Document.findByPk(req.params.id);
-    res.json({ message: 'Documento actualizado con éxito', document: updatedDocument });
-  } catch (error) { console.error("=====================================\n[ERRO EM PUT /documentos/:id]:\n", util.inspect(error, false, null, true), "\n====================================="); res.status(500).json({ message: 'Error al actualizar el documento' }); }
+    
+    // Buscar vídeo
+    const video = await Video.findByPk(id);
+    if (!video) {
+      return res.status(404).json({ 
+        message: 'Vídeo não encontrado',
+        code: 'VIDEO_NOT_FOUND'
+      });
+    }
+    
+    // Remover arquivos do Cloudinary
+    await removeFromCloudinary(video.urlVideo, 'video');
+    await removeFromCloudinary(video.urlImagen, 'image');
+    
+    // Deletar vídeo do banco
+    await Video.destroy({ where: { id } });
+    
+    console.log(`✅ Vídeo deletado: ${video.titulo} por ${req.user.email}`);
+    res.json({ 
+      message: 'Vídeo deletado com sucesso',
+      deletedVideo: { id: video.id, titulo: video.titulo }
+    });
+    
+  } catch (error) {
+    console.error("❌ Erro ao deletar vídeo:", error);
+    res.status(500).json({ 
+      message: 'Erro ao deletar vídeo',
+      code: 'DELETE_VIDEO_ERROR'
+    });
+  }
 });
 
+// ==========================================================
+// ROTAS DE ADMINISTRAÇÃO - DOCUMENTOS
+// ==========================================================
+
+/**
+ * POST /documentos - Criar novo documento (Admin)
+ */
+router.post('/documentos', [authMiddleware, adminMiddleware, upload.fields([
+  { name: 'docFile', maxCount: 1 }, 
+  { name: 'imageFile', maxCount: 1 }
+])], async (req, res) => {
+  try {
+    const { titulo, descripcion, urlDocumento } = req.body;
+    
+    // Validação básica
+    if (!titulo || titulo.trim().length < 3) {
+      return res.status(400).json({
+        message: 'Título deve ter pelo menos 3 caracteres',
+        code: 'VALIDATION_ERROR'
+      });
+    }
+    
+    if (descripcion && descripcion.trim().length < 10) {
+      return res.status(400).json({
+        message: 'Descrição deve ter pelo menos 10 caracteres (se fornecida)',
+        code: 'VALIDATION_ERROR'
+      });
+    }
+    
+    let docPath = '';
+    let imagePath = null;
+    
+    // Processar arquivos enviados
+    if (req.files && req.files.imageFile) {
+      imagePath = req.files.imageFile[0].path;
+    }
+    
+    if (req.files && req.files.docFile) {
+      docPath = req.files.docFile[0].path;
+    } else if (urlDocumento && urlDocumento.trim() !== '') {
+      docPath = urlDocumento.trim();
+    } else {
+      return res.status(400).json({ 
+        message: 'É necessário enviar um arquivo de documento ou fornecer uma URL',
+        code: 'NO_DOCUMENT_SOURCE'
+      });
+    }
+    
+    // Criar documento
+    const novoDocumento = await Document.create({
+      titulo: titulo.trim(),
+      descripcion: descripcion ? descripcion.trim() : null,
+      urlDocumento: docPath,
+      urlImagen: imagePath
+    });
+    
+    console.log(`✅ Documento criado: ${titulo} por ${req.user.email}`);
+    res.status(201).json({
+      message: 'Documento criado com sucesso',
+      document: novoDocumento
+    });
+    
+  } catch (error) {
+    console.error("❌ Erro ao criar documento:", error);
+    res.status(500).json({ 
+      message: 'Erro ao criar documento',
+      code: 'CREATE_DOCUMENT_ERROR'
+    });
+  }
+});
+
+/**
+ * PUT /documentos/:id - Atualizar documento (Admin)
+ */
+router.put('/documentos/:id', [authMiddleware, adminMiddleware, upload.fields([
+  { name: 'docFile', maxCount: 1 }, 
+  { name: 'imageFile', maxCount: 1 }
+])], async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { titulo, descripcion } = req.body;
+    
+    // Validar ID
+    if (!id || isNaN(id)) {
+      return res.status(400).json({ 
+        message: 'ID do documento inválido',
+        code: 'INVALID_DOCUMENT_ID'
+      });
+    }
+    
+    // Buscar documento
+    const document = await Document.findByPk(id);
+    if (!document) {
+      return res.status(404).json({ 
+        message: 'Documento não encontrado',
+        code: 'DOCUMENT_NOT_FOUND'
+      });
+    }
+    
+    // Validação básica se fornecidos
+    if (titulo && titulo.trim().length < 3) {
+      return res.status(400).json({
+        message: 'Título deve ter pelo menos 3 caracteres',
+        code: 'VALIDATION_ERROR'
+      });
+    }
+    
+    if (descripcion && descripcion.trim().length < 10) {
+      return res.status(400).json({
+        message: 'Descrição deve ter pelo menos 10 caracteres',
+        code: 'VALIDATION_ERROR'
+      });
+    }
+    
+    const dataToUpdate = { ...req.body };
+    
+    // Processar novos arquivos
+    if (req.files) {
+      if (req.files.docFile) {
+        // Remover documento antigo do Cloudinary
+        await removeFromCloudinary(document.urlDocumento, 'raw');
+        dataToUpdate.urlDocumento = req.files.docFile[0].path;
+      }
+      
+      if (req.files.imageFile) {
+        // Remover imagem antiga do Cloudinary
+        await removeFromCloudinary(document.urlImagen, 'image');
+        dataToUpdate.urlImagen = req.files.imageFile[0].path;
+      }
+    }
+    
+    // Atualizar documento
+    await Document.update(dataToUpdate, { where: { id } });
+    const updatedDocument = await Document.findByPk(id);
+    
+    console.log(`✅ Documento atualizado: ${updatedDocument.titulo} por ${req.user.email}`);
+    res.json({ 
+      message: 'Documento atualizado com sucesso', 
+      document: updatedDocument 
+    });
+    
+  } catch (error) {
+    console.error("❌ Erro ao atualizar documento:", error);
+    res.status(500).json({ 
+      message: 'Erro ao atualizar documento',
+      code: 'UPDATE_DOCUMENT_ERROR'
+    });
+  }
+});
+
+/**
+ * DELETE /documentos/:id - Deletar documento (Admin)
+ */
 router.delete('/documentos/:id', [authMiddleware, adminMiddleware], async (req, res) => {
   try {
-    const document = await Document.findByPk(req.params.id);
-    if (!document) { return res.status(404).json({ message: 'Documento no encontrado.' }); }
-    if (document.urlDocumento && document.urlDocumento.includes('cloudinary')) { const publicId = getPublicIdFromUrl(document.urlDocumento); if (publicId) await cloudinary.uploader.destroy(publicId); }
-    if (document.urlImagen && document.urlImagen.includes('cloudinary')) { const publicId = getPublicIdFromUrl(document.urlImagen); if (publicId) await cloudinary.uploader.destroy(publicId); }
-    await Document.destroy({ where: { id: req.params.id } });
-    res.status(200).json({ message: 'Documento eliminado con éxito' });
-  } catch (error) { console.error("=====================================\n[ERRO EM DELETE /documentos/:id]:\n", util.inspect(error, false, null, true), "\n====================================="); res.status(500).json({ message: 'Error al eliminar el documento' }); }
+    const { id } = req.params;
+    
+    // Validar ID
+    if (!id || isNaN(id)) {
+      return res.status(400).json({ 
+        message: 'ID do documento inválido',
+        code: 'INVALID_DOCUMENT_ID'
+      });
+    }
+    
+    // Buscar documento
+    const document = await Document.findByPk(id);
+    if (!document) {
+      return res.status(404).json({ 
+        message: 'Documento não encontrado',
+        code: 'DOCUMENT_NOT_FOUND'
+      });
+    }
+    
+    // Remover arquivos do Cloudinary
+    await removeFromCloudinary(document.urlDocumento, 'raw');
+    await removeFromCloudinary(document.urlImagen, 'image');
+    
+    // Deletar documento do banco
+    await Document.destroy({ where: { id } });
+    
+    console.log(`✅ Documento deletado: ${document.titulo} por ${req.user.email}`);
+    res.json({ 
+      message: 'Documento deletado com sucesso',
+      deletedDocument: { id: document.id, titulo: document.titulo }
+    });
+    
+  } catch (error) {
+    console.error("❌ Erro ao deletar documento:", error);
+    res.status(500).json({ 
+      message: 'Erro ao deletar documento',
+      code: 'DELETE_DOCUMENT_ERROR'
+    });
+  }
 });
+
 
 module.exports = router;

@@ -2,39 +2,99 @@ import React, { useState } from 'react';
 import styles from './Card.module.css';
 import { FaDownload } from 'react-icons/fa';
 
-/**
- * VERSÃO CORRIGIDA da função que modifica a URL do Cloudinary para forçar o download.
- * Ela encontra o segmento '/upload/' e insere 'fl_attachment/' logo depois.
- */
-function getCloudinaryDownloadUrl(url) {
-  if (!url || !url.includes('/upload/')) {
-    return url;
-  }
-  
-  // Encontra o índice onde '/upload/' termina
-  const uploadIndex = url.indexOf('/upload/') + '/upload/'.length;
-  
-  // Divide a URL em duas partes: antes e depois de '/upload/'
-  const baseUrl = url.substring(0, uploadIndex);
-  const restOfUrl = url.substring(uploadIndex);
-
-  // Insere o flag de download entre as duas partes
-  return `${baseUrl}fl_attachment/${restOfUrl}`;
-}
-
-
 function DocumentCard({ document, viewMode = 'grid' }) {
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   
-  // Gera a URL de download forçado com a nova função
-  const downloadUrl = getCloudinaryDownloadUrl(document.urlDocumento);
-
-  const originalUrl = document.urlDocumento || '';
-  const extension = originalUrl.split('.').pop().split('?')[0] || 'file';
-  
-  // 2. Cria um nome de arquivo limpo a partir do título, substituindo espaços por '_'.
-  const filename = `${document.titulo.replace(/[\s/]/g, '_')}.${extension}`;
-  // -----------------------------
+  // Função para lidar com o download usando a API do backend
+  const handleDownload = async (e) => {
+    e.preventDefault();
+    
+    if (isDownloading) return;
+    
+    try {
+      setIsDownloading(true);
+      
+      const token = localStorage.getItem('token');
+      
+      // Verificar se o usuário está logado
+      if (!token) {
+        alert('Você precisa fazer login para baixar documentos.');
+        window.location.href = '/login';
+        return;
+      }
+      
+      // Usar fetch diretamente (mesmo código que funcionou no teste)
+      const response = await fetch(`http://localhost:3001/api/content/documentos/${document.id}/download`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Erro ${response.status}: ${response.statusText}`);
+      }
+      
+      const blob = await response.blob();
+      
+      // Criar URL temporária para o blob
+      const url = window.URL.createObjectURL(blob);
+      
+      // Verificar se o DOM está disponível
+      if (typeof window === 'undefined' || !window.document) {
+        throw new Error('DOM não está disponível');
+      }
+      
+      // Criar elemento <a> temporário para download
+      const link = window.document.createElement('a');
+      link.href = url;
+      
+      // O backend já define o nome correto no Content-Disposition
+      // Vamos usar um nome padrão baseado no título do documento
+      const filename = `${document.titulo.replace(/[\s/\\:*?"<>|]/g, '_')}.pdf`;
+      
+      link.download = filename;
+      link.style.display = 'none';
+      window.document.body.appendChild(link);
+      link.click();
+      
+      // Limpar após um pequeno delay
+      setTimeout(() => {
+        window.document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }, 100);
+      
+    } catch (error) {
+      
+      let errorMessage = 'Erro ao baixar o documento. Tente novamente.';
+      
+      if (error.message.includes('Token de autenticação não encontrado')) {
+        errorMessage = 'Você precisa fazer login para baixar documentos.';
+        // Redirecionar para login
+        window.location.href = '/login';
+        return;
+      } else if (error.message.includes('401')) {
+        errorMessage = 'Sua sessão expirou. Faça login novamente.';
+        // Limpar token e redirecionar
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+        return;
+      } else if (error.message.includes('404')) {
+        errorMessage = 'Documento não encontrado.';
+      } else if (error.message.includes('500')) {
+        errorMessage = 'Erro interno do servidor. Tente novamente mais tarde.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      alert(errorMessage);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   if (viewMode === 'list') {
     return (
@@ -57,14 +117,13 @@ function DocumentCard({ document, viewMode = 'grid' }) {
           <p className={styles.description}>{document.descripcion}</p>
           
           <div className={styles.listActions}>
-            <a 
-              href={downloadUrl}
-              download
-              rel="noopener noreferrer" 
+            <button 
+              onClick={handleDownload}
+              disabled={isDownloading}
               className={styles.downloadButton}
             >
-              <FaDownload /> Descargar
-            </a>
+              <FaDownload /> {isDownloading ? 'Descargando...' : 'Descargar'}
+            </button>
           </div>
         </div>
       </div>
@@ -90,18 +149,15 @@ function DocumentCard({ document, viewMode = 'grid' }) {
         <h3 className={styles.title}>{document.titulo}</h3>
         <p className={styles.description}>{document.descripcion}</p>
         
-        {/* Voltamos a usar um link '<a>' simples, mas com a URL corrigida */}
-        <a 
-          href={downloadUrl}
-          // O atributo 'download' ajuda, mas o 'fl_attachment' na URL é o que realmente força
-          download
-          rel="noopener noreferrer" 
+        <button 
+          onClick={handleDownload}
+          disabled={isDownloading}
           className={styles.downloadButton}
         >
           <span className={styles.buttonContent}>
-            <FaDownload /> Descargar
+            <FaDownload /> {isDownloading ? 'Descargando...' : 'Descargar'}
           </span>
-        </a>
+        </button>
       </div>
     </div>
   );

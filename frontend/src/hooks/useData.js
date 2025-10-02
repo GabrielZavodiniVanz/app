@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
  * @param {any} key - Uma "chave" opcional. Se a chave mudar, o hook buscará os dados novamente.
  * @returns {object} - Um objeto contendo { data, loading, error }.
  */
-function useData(apiFunc, key = 0) { // Adicionamos o 'key' para recarregamentos manuais
+function useData(apiFunc, key = 0) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -20,15 +20,12 @@ function useData(apiFunc, key = 0) { // Adicionamos o 'key' para recarregamentos
         setData(result);
       } catch (err) {
         setError('Ocurrió un error al cargar los datos.');
-        console.error("Erro ao buscar dados:", err);
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  // MUDANÇA PRINCIPAL AQUI: de [apiFunc] para [key]
-  // Isso garante que o hook só rode novamente se a gente explicitamente mandar.
   }, [key]); 
 
   return { data, loading, error };

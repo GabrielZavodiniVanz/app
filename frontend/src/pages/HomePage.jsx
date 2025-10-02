@@ -19,7 +19,8 @@ function HomePage() {
         setVideoCount(videos?.length || 0);
         setDocumentCount(documents?.length || 0);
       } catch (error) {
-        console.error('Error fetching counts:', error);
+        console.error('❌ Erro ao buscar dados:', error);
+        console.error('❌ Detalhes do erro:', error.response?.data || error.message);
       } finally {
         setTimeout(() => setIsLoaded(true), 300); // Delay para animação
       }

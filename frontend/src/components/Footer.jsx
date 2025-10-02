@@ -8,7 +8,7 @@ function Footer() {
 
   return (
     <footer className={styles.footer}>
-      <p>Mundo Mágico © {new Date().getFullYear()} - Todos os direitos reservados.</p>
+      <p>Niños de Luz © {new Date().getFullYear()} - Reservados todos los derechos.</p>
       
       <div className={styles.contactLink}>
         <FaEnvelope />

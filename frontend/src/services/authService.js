@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // URL base da nossa API de autenticação
-const API_URL = 'http://localhost:5000/api/auth';
+const API_URL = 'http://localhost:3001/api/auth';
 
 /**
  * Registra um novo usuário.

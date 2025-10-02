@@ -105,8 +105,24 @@ export const deleteDocument = async (id) => {
  * @returns {Promise<Blob>} O arquivo como um objeto Blob.
  */
 export const downloadDocument = async (id) => {
-  const response = await apiClient.get(`/content/documentos/${id}/download`, {
-    responseType: 'blob', // MUITO IMPORTANTE: diz ao axios para tratar a resposta como um arquivo
+  const token = localStorage.getItem('token');
+  
+  if (!token) {
+    throw new Error('Token de autenticação não encontrado. Faça login novamente.');
+  }
+  
+  const response = await fetch(`http://localhost:3001/api/content/documentos/${id}/download`, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
   });
-  return response.data;
+  
+  if (!response.ok) {
+    const errorData = await response.text();
+    throw new Error(`Erro ${response.status}: ${response.statusText}`);
+  }
+  
+  return await response.blob();
 };

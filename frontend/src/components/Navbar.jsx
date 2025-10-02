@@ -41,7 +41,7 @@ function Navbar() {
     <nav className={styles.navbar}> 
       <NavLink to="/" className={styles.brand} onClick={closeAllMenus}>
         <FaStar className={styles.brandIcon} />
-        <span className={styles.brandText}>Mundo Mágico</span>
+        <span className={styles.brandText}>Niños de Luz</span>
       </NavLink>
 
       <button className={styles.hamburger} onClick={() => setMenuOpen(!menuOpen)}>

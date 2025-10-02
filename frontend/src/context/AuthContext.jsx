@@ -14,7 +14,6 @@ export function AuthProvider({ children }) {
         setUser({ name: decodedUser.name, role: decodedUser.role });
       } catch (e) {
         console.error("Token inválido ou expirado:", e);
-        // Limpa o estado se o token for inválido
         localStorage.removeItem('token');
         setUser(null);
         setToken(null);
@@ -40,6 +39,6 @@ export function AuthProvider({ children }) {
   return (
     <AuthContext.Provider value={contextValue}>
       {children}
-    </AuthContext.Provider> // <-- A CORREÇÃO ESTÁ AQUI
+    </AuthContext.Provider>
   );
 }
