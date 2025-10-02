@@ -1,7 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styles from './Card.module.css';
 import { FaDownload } from 'react-icons/fa';
-// Não precisamos mais do 'useState', 'toast' ou do 'contentService' aqui.
 
 /**
  * VERSÃO CORRIGIDA da função que modifica a URL do Cloudinary para forçar o download.
@@ -24,7 +23,9 @@ function getCloudinaryDownloadUrl(url) {
 }
 
 
-function DocumentCard({ document }) {
+function DocumentCard({ document, viewMode = 'grid' }) {
+  const [imageLoaded, setImageLoaded] = useState(false);
+  
   // Gera a URL de download forçado com a nova função
   const downloadUrl = getCloudinaryDownloadUrl(document.urlDocumento);
 
@@ -35,10 +36,53 @@ function DocumentCard({ document }) {
   const filename = `${document.titulo.replace(/[\s/]/g, '_')}.${extension}`;
   // -----------------------------
 
+  if (viewMode === 'list') {
+    return (
+      <div className={`${styles.card} ${styles.listCard}`}>
+        <div className={styles.listImageContainer}>
+          {document.urlImagen ? (
+            <img 
+              src={document.urlImagen} 
+              alt={document.titulo} 
+              className={`${styles.listImage} ${imageLoaded ? styles.loaded : ''}`}
+              onLoad={() => setImageLoaded(true)}
+            />
+          ) : (
+            <div className={styles.iconWrapper} style={{ width: '100%', height: '100%', fontSize: '2rem' }}>📄</div>
+          )}
+        </div>
+        
+        <div className={styles.listContent}>
+          <h3 className={styles.title}>{document.titulo}</h3>
+          <p className={styles.description}>{document.descripcion}</p>
+          
+          <div className={styles.listActions}>
+            <a 
+              href={downloadUrl}
+              download
+              rel="noopener noreferrer" 
+              className={styles.downloadButton}
+            >
+              <FaDownload /> Descargar
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className={styles.card}>
+    <div className={`${styles.card} ${styles.gridCard}`}>
       {document.urlImagen ? (
-        <img src={document.urlImagen} alt={document.titulo} className={styles.image} />
+        <div className={styles.imageContainer}>
+          <img 
+            src={document.urlImagen} 
+            alt={document.titulo} 
+            className={`${styles.image} ${imageLoaded ? styles.loaded : ''}`}
+            onLoad={() => setImageLoaded(true)}
+          />
+          {!imageLoaded && <div className={styles.imageSkeleton}></div>}
+        </div>
       ) : (
         <div className={styles.iconWrapper}>📄</div>
       )}

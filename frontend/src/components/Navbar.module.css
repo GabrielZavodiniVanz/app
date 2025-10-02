@@ -1,116 +1,318 @@
 /* Estilos base para o Navbar (Mobile First) */
 .navbar {
-  background-color: var(--surface-color);
-  box-shadow: var(--shadow);
-  padding: 1rem;
+  background: linear-gradient(135deg, var(--surface-color) 0%, #fefefe 100%);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(59, 130, 246, 0.1);
+  padding: 1rem 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
   position: sticky;
   top: 0;
   z-index: 100;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 .brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
   font-family: var(--font-heading);
   font-size: 1.5rem;
-  color: var(--primary-color);
   text-decoration: none;
+  transition: all 0.3s ease;
+  padding: 0.5rem;
+  border-radius: 12px;
+}
+
+.brand:hover {
+  background: rgba(59, 130, 246, 0.05);
+  transform: translateY(-1px);
+}
+
+.brandIcon {
+  color: var(--secondary-color);
+  font-size: 1.8rem;
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+@keyframes sparkle {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  50% { transform: rotate(180deg) scale(1.1); }
+}
+
+.brandText {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .hamburger {
   display: block;
   font-size: 1.8rem;
-  background: none;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
   border: none;
-  color: var(--primary-color);
+  color: white;
   cursor: pointer;
   z-index: 101;
+  padding: 0.75rem;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+}
+
+.hamburger:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
 }
 
 .links {
   display: none;
   flex-direction: column;
-  background: var(--surface-color);
+  background: linear-gradient(135deg, var(--surface-color) 0%, #fefefe 100%);
   position: absolute;
   top: 100%;
   left: 0;
   width: 100%;
-  padding: 1rem;
-  box-shadow: var(--shadow);
+  padding: 1.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
   gap: 1rem;
   align-items: center;
+  border-radius: 0 0 20px 20px;
+  backdrop-filter: blur(10px);
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .links.menuOpen {
   display: flex;
 }
 
-.link, .logoutButton, .welcomeMessage, .dropdownButton {
+/* User Profile Styles */
+.userProfile {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(245, 158, 11, 0.1) 100%);
+  border-radius: 16px;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  margin-bottom: 0.5rem;
+}
+
+.avatar {
+  width: 45px;
+  height: 45px;
+  background: transparent;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-color);
+  font-size: 1.2rem;
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.welcomeMessage {
   font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--text-light-color);
+  font-weight: 500;
+}
+
+.userName {
+  font-family: var(--font-heading);
   font-size: 1.1rem;
+  color: var(--primary-color);
   font-weight: 700;
-  padding: 0.5rem 1rem;
-  white-space: nowrap;
+}
+
+/* Link Styles */
+.link, .activeLink {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.875rem 1.5rem;
+  text-decoration: none;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  min-width: 140px;
+  justify-content: flex-start;
+}
+
+.link {
+  color: var(--text-color);
+  background: transparent;
+}
+
+.link:hover {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(245, 158, 11, 0.1) 100%);
+  color: var(--primary-color);
+  transform: translateY(-2px);
+}
+
+.activeLink {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+  color: white;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+}
+
+.linkIcon {
+  font-size: 1.1rem;
+  transition: transform 0.3s ease;
+}
+
+.link:hover .linkIcon,
+.activeLink .linkIcon {
+  transform: scale(1.1);
 }
 
 .logoutButton {
-  background: var(--secondary-color);
-  color: var(--surface-color);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.875rem 1.5rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+  min-width: 140px;
 }
 
-/* --- NOVO: ESTILOS DO DROPDOWN --- */
+.logoutButton:hover {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+}
+
+/* Dropdown Styles */
 .dropdown {
   position: relative;
 }
 
 .dropdownButton {
-  background: none;
-  border: none;
-  color: var(--text-dark);
-  cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.75rem;
+  background: linear-gradient(135deg, rgba(156, 163, 175, 0.1) 0%, rgba(107, 114, 128, 0.1) 100%);
+  border: 1px solid rgba(156, 163, 175, 0.3);
+  color: var(--text-color);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 0.875rem 1.5rem;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  min-width: 140px;
+}
+
+.dropdownButton:hover {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(245, 158, 11, 0.1) 100%);
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  transform: translateY(-2px);
+}
+
+.dropdownArrow {
+  font-size: 0.8rem;
+  transition: transform 0.3s ease;
+  margin-left: auto;
+}
+
+.dropdownArrow.rotated {
+  transform: rotate(180deg);
 }
 
 .dropdownContent {
   display: flex;
   flex-direction: column;
   position: absolute;
-  background-color: var(--surface-color);
-  box-shadow: var(--shadow-lg);
-  border-radius: 8px;
-  top: 120%; /* Posição abaixo do botão */
+  background: linear-gradient(135deg, var(--surface-color) 0%, #fefefe 100%);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  border-radius: 16px;
+  top: 120%;
   left: 50%;
   transform: translateX(-50%);
   z-index: 110;
-  min-width: 200px;
+  min-width: 220px;
   overflow: hidden;
+  border: 1px solid rgba(59, 130, 246, 0.1);
+  animation: dropdownSlide 0.3s ease-out;
 }
 
-.dropdownContent a {
-  padding: 0.75rem 1.5rem;
+@keyframes dropdownSlide {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
   text-decoration: none;
-  color: var(--text-dark);
+  color: var(--text-color);
   font-weight: 600;
-  display: block;
+  font-family: var(--font-body);
+  transition: all 0.3s ease;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-.dropdownContent a:hover {
-  background-color: var(--background-color);
+.dropdownItem:last-child {
+  border-bottom: none;
+}
+
+.dropdownItem:hover {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(245, 158, 11, 0.1) 100%);
   color: var(--primary-color);
+  transform: translateX(5px);
 }
 
 
 /* --- Estilos para Telas Maiores (Desktop) --- */
 @media (min-width: 768px) {
+  .navbar {
+    padding: 1rem 2rem;
+  }
+
   .hamburger {
     display: none;
   }
+  
   .links {
     display: flex;
     flex-direction: row;
@@ -119,6 +321,53 @@
     width: auto;
     padding: 0;
     align-items: center;
-    gap: 1.5rem;
+    gap: 1rem;
+    background: transparent;
+    border-radius: 0;
+    animation: none;
+  }
+
+  .userProfile {
+    margin-bottom: 0;
+    margin-right: 1rem;
+  }
+
+  .link, .activeLink, .logoutButton, .dropdownButton {
+    min-width: auto;
+    padding: 0.75rem 1.25rem;
+  }
+
+  .userInfo {
+    display: none;
+  }
+
+  .avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar {
+    padding: 1rem;
+  }
+
+  .brand {
+    font-size: 1.3rem;
+  }
+
+  .brandIcon {
+    font-size: 1.5rem;
+  }
+
+  .links {
+    padding: 1rem;
+  }
+
+  .link, .activeLink, .logoutButton, .dropdownButton {
+    min-width: 120px;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
   }
 }

@@ -3,23 +3,38 @@ import { Link } from 'react-router-dom';
 import { getVideos, deleteVideo } from '../../services/contentService';
 import useData from '../../hooks/useData';
 import toast from 'react-hot-toast';
+import ConfirmModal from '../../components/ConfirmModal';
 import styles from './AdminPages.module.css'; // Importa nosso estilo de admin
 
 function ManageVideosPage() {
   // O 'key' é uma forma de forçar o hook a recarregar os dados após uma deleção
   const [key, setKey] = React.useState(0); 
+  const [showConfirmModal, setShowConfirmModal] = React.useState(false);
+  const [videoToDelete, setVideoToDelete] = React.useState(null);
   const { data: videos, loading, error } = useData(() => getVideos(), key);
 
-  const handleDelete = async (id) => {
-    if (window.confirm('¿Estás seguro de que quieres eliminar este video?')) {
+  const handleDeleteClick = (video) => {
+    setVideoToDelete(video);
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (videoToDelete) {
       try {
-        await deleteVideo(id);
+        await deleteVideo(videoToDelete.id);
         toast.success('¡Video eliminado con éxito!');
         setKey(prevKey => prevKey + 1); // Força o recarregamento da lista
       } catch (err) {
         toast.error('No se pudo eliminar el video.');
       }
     }
+    setShowConfirmModal(false);
+    setVideoToDelete(null);
+  };
+
+  const handleCancelDelete = () => {
+    setShowConfirmModal(false);
+    setVideoToDelete(null);
   };
 
   return (
@@ -41,13 +56,24 @@ function ManageVideosPage() {
             <div className={styles.actions}>
               {/* O Link de Editar está comentado para implementação futura */}
               {/* <Link to={`/admin/videos/editar/${video.id}`} className={styles.editButton}>Editar</Link> */}
-              <button onClick={() => handleDelete(video.id)} className={styles.deleteButton}>Deletar</button>
+              <button onClick={() => handleDeleteClick(video)} className={styles.deleteButton}>Deletar</button>
             </div>
           </li>
         )) : (
           !loading && <p>Nenhum vídeo encontrado.</p>
         )}
       </ul>
+
+      <ConfirmModal
+        isOpen={showConfirmModal}
+        title="Confirmar Exclusão"
+        message={`¿Estás seguro de que quieres eliminar el video "${videoToDelete?.titulo}"?`}
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        type="delete"
+      />
     </div>
   );
 }

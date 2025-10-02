@@ -2,7 +2,7 @@ import React, { useState, useContext, useEffect, useRef } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import styles from './Navbar.module.css';
 import { AuthContext } from '../context/AuthContext.jsx';
-import { FaBars, FaTimes, FaCaretDown } from 'react-icons/fa';
+import { FaBars, FaTimes, FaCaretDown, FaUser, FaVideo, FaFileAlt, FaCog, FaSignOutAlt, FaStar } from 'react-icons/fa';
 
 function Navbar() {
   const { user, token, logout } = useContext(AuthContext);
@@ -40,7 +40,8 @@ function Navbar() {
   return (
     <nav className={styles.navbar}> 
       <NavLink to="/" className={styles.brand} onClick={closeAllMenus}>
-        Mundo Mágico
+        <FaStar className={styles.brandIcon} />
+        <span className={styles.brandText}>Mundo Mágico</span>
       </NavLink>
 
       <button className={styles.hamburger} onClick={() => setMenuOpen(!menuOpen)}>
@@ -50,13 +51,23 @@ function Navbar() {
       <div className={`${styles.links} ${menuOpen ? styles.menuOpen : ''}`}>
         {token ? (
           <>
-            <span className={styles.welcomeMessage}>¡Hola, {user?.name}!</span>
+            <div className={styles.userProfile}>
+              <div className={styles.avatar}>
+                <FaUser />
+              </div>
+              <div className={styles.userInfo}>
+                <span className={styles.welcomeMessage}>¡Hola!</span>
+                <span className={styles.userName}>{user?.name}</span>
+              </div>
+            </div>
             
             <NavLink to="/videos" className={({ isActive }) => isActive ? styles.activeLink : styles.link} onClick={closeAllMenus}>
-              Videos
+              <FaVideo className={styles.linkIcon} />
+              <span>Videos</span>
             </NavLink>
             <NavLink to="/documentos" className={({ isActive }) => isActive ? styles.activeLink : styles.link} onClick={closeAllMenus}>
-              Documentos
+              <FaFileAlt className={styles.linkIcon} />
+              <span>Documentos</span>
             </NavLink>
 
             {/* ATUALIZADO: Lógica do Dropdown de Admin */}
@@ -66,15 +77,19 @@ function Navbar() {
                   className={styles.dropdownButton} 
                   onClick={() => setAdminMenuOpen(!adminMenuOpen)}
                 >
-                  Admin <FaCaretDown />
+                  <FaCog className={styles.linkIcon} />
+                  <span>Admin</span>
+                  <FaCaretDown className={`${styles.dropdownArrow} ${adminMenuOpen ? styles.rotated : ''}`} />
                 </button>
                 {adminMenuOpen && (
                   <div className={styles.dropdownContent}>
-                    <NavLink to="/admin/videos" onClick={closeAllMenus}>
-                      Gerenciar Vídeos
+                    <NavLink to="/admin/videos" onClick={closeAllMenus} className={styles.dropdownItem}>
+                      <FaVideo />
+                      <span>Gerenciar Vídeos</span>
                     </NavLink>
-                    <NavLink to="/admin/documentos" onClick={closeAllMenus}>
-                      Gerenciar Documentos
+                    <NavLink to="/admin/documentos" onClick={closeAllMenus} className={styles.dropdownItem}>
+                      <FaFileAlt />
+                      <span>Gerenciar Documentos</span>
                     </NavLink>
                   </div>
                 )}
@@ -82,16 +97,19 @@ function Navbar() {
             )}
             
             <button onClick={handleLogout} className={styles.logoutButton}>
-              Salir
+              <FaSignOutAlt className={styles.linkIcon} />
+              <span>Salir</span>
             </button>
           </>
         ) : (
           <>
             <NavLink to="/login" className={({ isActive }) => isActive ? styles.activeLink : styles.link} onClick={closeAllMenus}>
-              Login
+              <FaUser className={styles.linkIcon} />
+              <span>Login</span>
             </NavLink>
             <NavLink to="/register" className={({ isActive }) => isActive ? styles.activeLink : styles.link} onClick={closeAllMenus}>
-              Registrar
+              <FaUser className={styles.linkIcon} />
+              <span>Registrar</span>
             </NavLink>
           </>
         )}
