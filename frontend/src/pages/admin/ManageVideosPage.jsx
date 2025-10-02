@@ -54,8 +54,7 @@ function ManageVideosPage() {
           <li key={video.id} className={styles.listItem}>
             <span>{video.titulo}</span>
             <div className={styles.actions}>
-              {/* O Link de Editar está comentado para implementação futura */}
-              {/* <Link to={`/admin/videos/editar/${video.id}`} className={styles.editButton}>Editar</Link> */}
+              <Link to={`/admin/videos/editar/${video.id}`} className={styles.editButton}>Editar</Link>
               <button onClick={() => handleDeleteClick(video)} className={styles.deleteButton}>Deletar</button>
             </div>
           </li>

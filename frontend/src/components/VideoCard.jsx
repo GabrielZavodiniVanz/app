@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import styles from './Card.module.css';
-import { FaPlay, FaHeart, FaRegHeart, FaClock } from 'react-icons/fa';
+import { FaPlay, FaHeart, FaRegHeart, FaClock, FaEdit } from 'react-icons/fa';
 
 function VideoCard({ video, onPlayClick, viewMode = 'grid' }) {
   const [isFavorite, setIsFavorite] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
 
   const handleFavoriteClick = (e) => {
     e.stopPropagation();
@@ -34,6 +38,11 @@ function VideoCard({ video, onPlayClick, viewMode = 'grid' }) {
             <button onClick={onPlayClick} className={styles.playButton}>
               <FaPlay /> Ver Video
             </button>
+            {isAdmin && (
+              <Link to={`/admin/videos/editar/${video.id}`} className={styles.editButton}>
+                <FaEdit /> Editar
+              </Link>
+            )}
             <button 
               onClick={handleFavoriteClick} 
               className={`${styles.favoriteButton} ${isFavorite ? styles.favorited : ''}`}
@@ -62,6 +71,11 @@ function VideoCard({ video, onPlayClick, viewMode = 'grid' }) {
           <button onClick={onPlayClick} className={styles.playButtonOverlay}>
             <FaPlay />
           </button>
+          {isAdmin && (
+            <Link to={`/admin/videos/editar/${video.id}`} className={styles.editButtonOverlay}>
+              <FaEdit />
+            </Link>
+          )}
           <button 
             onClick={handleFavoriteClick} 
             className={`${styles.favoriteButtonOverlay} ${isFavorite ? styles.favorited : ''}`}
@@ -79,11 +93,18 @@ function VideoCard({ video, onPlayClick, viewMode = 'grid' }) {
         <h3 className={styles.title}>{video.titulo}</h3>
         <p className={styles.description}>{video.descripcion}</p>
         
-        <button onClick={onPlayClick} className={styles.button}>
-          <span className={styles.buttonContent}>
-            <FaPlay /> Ver Video
-          </span>
-        </button>
+        <div className={styles.cardActions}>
+          <button onClick={onPlayClick} className={styles.button}>
+            <span className={styles.buttonContent}>
+              <FaPlay /> Ver Video
+            </span>
+          </button>
+          {isAdmin && (
+            <Link to={`/admin/videos/editar/${video.id}`} className={styles.editButton}>
+              <FaEdit /> Editar
+            </Link>
+          )}
+        </div>
       </div>
     </div>
   );

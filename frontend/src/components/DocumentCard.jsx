@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import styles from './Card.module.css';
-import { FaDownload } from 'react-icons/fa';
+import { FaDownload, FaEdit } from 'react-icons/fa';
 
 function DocumentCard({ document, viewMode = 'grid' }) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
   
   // Função para lidar com o download usando a API do backend
   const handleDownload = async (e) => {
@@ -124,6 +128,11 @@ function DocumentCard({ document, viewMode = 'grid' }) {
             >
               <FaDownload /> {isDownloading ? 'Descargando...' : 'Descargar'}
             </button>
+            {isAdmin && (
+              <Link to={`/admin/documentos/editar/${document.id}`} className={styles.editButton}>
+                <FaEdit /> Editar
+              </Link>
+            )}
           </div>
         </div>
       </div>
@@ -149,15 +158,22 @@ function DocumentCard({ document, viewMode = 'grid' }) {
         <h3 className={styles.title}>{document.titulo}</h3>
         <p className={styles.description}>{document.descripcion}</p>
         
-        <button 
-          onClick={handleDownload}
-          disabled={isDownloading}
-          className={styles.downloadButton}
-        >
-          <span className={styles.buttonContent}>
-            <FaDownload /> {isDownloading ? 'Descargando...' : 'Descargar'}
-          </span>
-        </button>
+        <div className={styles.cardActions}>
+          <button 
+            onClick={handleDownload}
+            disabled={isDownloading}
+            className={styles.downloadButton}
+          >
+            <span className={styles.buttonContent}>
+              <FaDownload /> {isDownloading ? 'Descargando...' : 'Descargar'}
+            </span>
+          </button>
+          {isAdmin && (
+            <Link to={`/admin/documentos/editar/${document.id}`} className={styles.editButton}>
+              <FaEdit /> Editar
+            </Link>
+          )}
+        </div>
       </div>
     </div>
   );

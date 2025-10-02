@@ -53,7 +53,7 @@ function ManageDocumentsPage() {
           <li key={doc.id} className={styles.listItem}>
             <span>{doc.titulo}</span>
             <div className={styles.actions}>
-              {/* <Link to={`/admin/documentos/editar/${doc.id}`} className={styles.editButton}>Editar</Link> */}
+              <Link to={`/admin/documentos/editar/${doc.id}`} className={styles.editButton}>Editar</Link>
               <button onClick={() => handleDeleteClick(doc)} className={styles.deleteButton}>Deletar</button>
             </div>
           </li>

@@ -16,8 +16,10 @@ import RegisterPage from './pages/RegisterPage.jsx';
 // Importa as Páginas da Área de Administração
 import ManageVideosPage from './pages/admin/ManageVideosPage.jsx';
 import VideoFormPage from './pages/admin/VideoFormPage.jsx';
+import EditVideoPage from './pages/admin/EditVideoPage.jsx';
 import ManageDocumentsPage from './pages/admin/ManageDocumentsPage.jsx';
 import DocumentFormPage from './pages/admin/DocumentFormPage.jsx';
+import EditDocumentPage from './pages/admin/EditDocumentPage.jsx';
 
 // Criação e configuração de todas as rotas do aplicativo
 const router = createBrowserRouter([
@@ -56,6 +58,10 @@ const router = createBrowserRouter([
         path: "videos/novo",
         element: <VideoFormPage />,
       },
+      {
+        path: "videos/editar/:id",
+        element: <EditVideoPage />,
+      },
       // Rotas de Gerenciamento de Documentos
       {
         path: "documentos",
@@ -64,6 +70,10 @@ const router = createBrowserRouter([
       {
         path: "documentos/novo",
         element: <DocumentFormPage />,
+      },
+      {
+        path: "documentos/editar/:id",
+        element: <EditDocumentPage />,
       },
     ]
   },
