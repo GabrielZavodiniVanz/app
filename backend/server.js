@@ -17,7 +17,9 @@ const corsOptions = {
     'http://localhost:3000',
     'http://localhost:5173', // Vite dev server
     process.env.FRONTEND_URL,
-    'https://app-frontend-y1u5.onrender.com' // URL temporária do frontend
+    'https://app-frontend-y1u5.onrender.com', // URL temporária do frontend
+    'https://ninosdeluz.site', // Domínio personalizado
+    'https://www.ninosdeluz.site' // Domínio personalizado com www
   ].filter(Boolean),
   credentials: true,
   optionsSuccessStatus: 200
