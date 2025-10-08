@@ -16,7 +16,8 @@ const corsOptions = {
   origin: [
     'http://localhost:3000',
     'http://localhost:5173', // Vite dev server
-    process.env.FRONTEND_URL
+    process.env.FRONTEND_URL,
+    'https://app-frontend-y1u5.onrender.com' // URL temporária do frontend
   ].filter(Boolean),
   credentials: true,
   optionsSuccessStatus: 200
