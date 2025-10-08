@@ -39,6 +39,7 @@ app.use((req, res, next) => {
 // Importar os arquivos de rotas
 const contentRoutes = require('./routes/content');
 const authRoutes = require('./routes/auth');
+const webhookRoutes = require('./routes/webhook');
 
 // Rota de health check
 app.get('/health', (req, res) => {
@@ -52,6 +53,7 @@ app.get('/health', (req, res) => {
 // Usar as rotas
 app.use('/api/content', contentRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/webhook', webhookRoutes);
 
 // Middleware de tratamento de rotas não encontradas
 app.use((req, res, next) => {
