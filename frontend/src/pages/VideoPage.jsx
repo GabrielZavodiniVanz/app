@@ -22,8 +22,8 @@ function VideoPage() {
     if (!videos) return [];
     
     let filtered = videos.filter(video =>
-      video.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      video.descripcion.toLowerCase().includes(searchTerm.toLowerCase())
+      (video.titulo?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+      (video.descripcion?.toLowerCase() || '').includes(searchTerm.toLowerCase())
     );
 
     // Ordenação
@@ -35,7 +35,7 @@ function VideoPage() {
         filtered.sort((a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0));
         break;
       case 'alphabetical':
-        filtered.sort((a, b) => a.titulo.localeCompare(b.titulo));
+        filtered.sort((a, b) => (a.titulo || '').localeCompare(b.titulo || ''));
         break;
       default:
         break;

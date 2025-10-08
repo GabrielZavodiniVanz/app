@@ -1,8 +1,8 @@
 /* Estilos base para o Navbar (Mobile First) */
 .navbar {
-  background: linear-gradient(135deg, var(--surface-color) 0%, #fefefe 100%);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(59, 130, 246, 0.1);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(59, 130, 246, 0.2);
   padding: 1rem 1.5rem;
   display: flex;
   justify-content: space-between;
@@ -10,7 +10,7 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 32px rgba(59, 130, 246, 0.1), 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .brand {
@@ -21,19 +21,26 @@
   font-size: 1.5rem;
   text-decoration: none;
   transition: all 0.3s ease;
-  padding: 0.5rem;
-  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(245, 158, 11, 0.1) 100%);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  position: relative;
+  overflow: hidden;
 }
 
 .brand:hover {
-  background: rgba(59, 130, 246, 0.05);
-  transform: translateY(-1px);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(245, 158, 11, 0.15) 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.3);
 }
 
 .brandIcon {
   color: var(--secondary-color);
   font-size: 1.8rem;
   animation: sparkle 2s ease-in-out infinite;
+  filter: drop-shadow(0 2px 4px rgba(245, 158, 11, 0.3));
 }
 
 @keyframes sparkle {

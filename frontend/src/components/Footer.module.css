@@ -1,35 +1,233 @@
 .footer {
   width: 100%;
-  padding: 2rem;
-  text-align: center;
-  background-color: #e0f0ff; /* Um azul um pouco mais escuro que o fundo do site */
-  color: var(--text-light-color);
-  font-weight: 600;
-  margin-top: auto; /* Empurra o rodapé para o final da página */
-  flex-shrink: 0; /* Garante que o rodapé não encolha */
+  background: linear-gradient(135deg, #e0f2fe 0%, #b3e5fc 100%);
+  color: #374151;
+  margin-top: auto;
+  flex-shrink: 0;
+  border-top: 1px solid #ade4fd;
 }
 
-.footer p {
+.footerContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 2rem 1rem;
+}
+
+/* Seção principal */
+.mainSection {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+/* Logo e descrição */
+.logoSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.logoIcon {
+  font-size: 1.8rem;
+  color: #3b82f6;
+}
+
+.logo h3 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0;
+  color: #3b82f6;
+}
+
+.description {
+  line-height: 1.6;
+  color: #6b7280;
+  font-size: 0.95rem;
   margin: 0;
 }
 
-/* NOVO: Estilos para o link de contato */
-.contactLink {
+/* Links rápidos */
+.quickLinks h4,
+.contactInfo h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #3b82f6;
+}
+
+.quickLinks ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.quickLinks li {
+  margin-bottom: 0.75rem;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.5rem; /* Espaço entre o ícone e o texto */
-  margin-top: 0.75rem;
+  gap: 0.5rem;
 }
 
-.contactLink a {
-  color: var(--text-dark);
-  font-weight: 700;
+.linkIcon {
+  color: #3b82f6;
+  font-size: 0.9rem;
+  min-width: 16px;
+}
+
+.quickLinks a {
+  color: #6b7280;
   text-decoration: none;
-  transition: color 0.2s ease;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+  cursor: pointer;
 }
 
-.contactLink a:hover {
-  color: var(--primary-color);
-  text-decoration: underline;
+.quickLinks a:hover {
+  color: #3b82f6;
+  padding-left: 0.25rem;
+}
+
+/* Informações de contato */
+.contactInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.contactItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.contactIcon {
+  color: #3b82f6;
+  font-size: 1rem;
+  min-width: 16px;
+}
+
+.contactItem a {
+  color: #6b7280;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.contactItem a:hover {
+  color: #3b82f6;
+}
+
+/* Separador */
+.separator {
+  height: 1px;
+  background: #ade4fd;
+  margin: 2rem 0;
+}
+
+/* Seção inferior */
+.bottomSection {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-top: 1rem;
+}
+
+.copyright p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.madeWith {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-top: 0.5rem;
+}
+
+.heartIcon {
+  color: #ef4444;
+}
+
+.legalLinks {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.85rem;
+}
+
+.legalLinks a {
+  color: #6b7280;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.legalLinks a:hover {
+  color: #3b82f6;
+}
+
+.legalLinks span {
+  color: #9ca3af;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .mainSection {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    text-align: center;
+  }
+  
+  .footerContainer {
+    padding: 2rem 1rem 1rem;
+  }
+  
+  .bottomSection {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+  
+  .legalLinks {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .quickLinks ul {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+  }
+  
+  .quickLinks li {
+    margin-bottom: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .footerContainer {
+    padding: 1.5rem 1rem 1rem;
+  }
+  
+  .legalLinks {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .legalLinks span {
+    display: none;
+  }
 }

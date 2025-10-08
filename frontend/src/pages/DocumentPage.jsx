@@ -20,8 +20,8 @@ function DocumentPage() {
     if (!documents) return [];
     
     let filtered = documents.filter(document =>
-      document.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      document.descripcion.toLowerCase().includes(searchTerm.toLowerCase())
+      (document.titulo?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+      (document.descripcion?.toLowerCase() || '').includes(searchTerm.toLowerCase())
     );
 
     // Ordenação
@@ -33,7 +33,7 @@ function DocumentPage() {
         filtered.sort((a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0));
         break;
       case 'alphabetical':
-        filtered.sort((a, b) => a.titulo.localeCompare(b.titulo));
+        filtered.sort((a, b) => (a.titulo || '').localeCompare(b.titulo || ''));
         break;
       default:
         break;

@@ -1,23 +1,17 @@
 .container {
   width: 100%;
   min-height: 100vh;
-  display: flex; /* NOVO */
-  flex-direction: column; /* NOVO */
+  display: flex;
+  flex-direction: column;
 }
 
 .contentWrapper {
   width: 90%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem 0;
-  flex-grow: 1; /* NOVO: Faz o conteúdo principal crescer e empurrar o rodapé */
-}
-
-.contentWrapper {
-  width: 90%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem 0;
+  padding: 3rem 0;
+  flex-grow: 1;
+  min-height: calc(100vh - 200px);
 }
 
 /* --- CLASSE DE GRID ADICIONADA AQUI --- */

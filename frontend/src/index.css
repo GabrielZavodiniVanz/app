@@ -1,17 +1,70 @@
 /* 1. CSS Reset e Definição de Variáveis */
 :root {
+  /* Core Colors */
   --primary-color: #3b82f6; /* Azul Vibrante */
+  --primary-light: #60a5fa;
+  --primary-dark: #1d4ed8;
   --secondary-color: #f59e0b; /* Amarelo/Laranja */
+  --secondary-light: #fbbf24;
+  --secondary-dark: #d97706;
+  
+  /* Background Colors */
   --background-color: #f0f9ff; /* Azul muito claro de fundo */
+  --background-secondary: #e0f2fe;
   --surface-color: #ffffff; /* Cor dos cards */
+  --surface-secondary: #f8fafc;
+  
+  /* Text Colors */
   --text-color: #374151; /* Cinza Escuro */
   --text-light-color: #6b7280; /* Cinza Médio */
+  --text-muted: #9ca3af;
   
+  /* Status Colors */
+  --success-color: #10b981;
+  --warning-color: #f59e0b;
+  --error-color: #ef4444;
+  --info-color: #3b82f6;
+  
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+  --gradient-secondary: linear-gradient(135deg, var(--secondary-color) 0%, var(--secondary-dark) 100%);
+  --gradient-surface: linear-gradient(135deg, var(--surface-color) 0%, #fefefe 100%);
+  --gradient-background: linear-gradient(135deg, var(--background-color) 0%, var(--background-secondary) 100%);
+  
+  /* Typography */
   --font-heading: 'Fredoka One', cursive;
   --font-body: 'Nunito', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
 
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.04);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  
+  /* Border Radius */
+  --radius-sm: 0.375rem;
+  --radius: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+  
+  /* Spacing */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition: 0.3s ease;
+  --transition-slow: 0.5s ease;
+  --transition-bounce: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Reset básico para garantir consistência */
@@ -19,6 +72,32 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+/* Performance optimizations */
+* {
+  will-change: auto;
+}
+
+.animate-float,
+.animate-pulse,
+.animate-bounce,
+.card,
+.playButton,
+.favoriteButton,
+.editButton {
+  will-change: transform, opacity;
+}
+
+/* GPU acceleration for smooth animations */
+.card,
+.playButton,
+.favoriteButton,
+.editButton,
+img {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
 }
 
 /* 2. Estilos Globais do Corpo */
@@ -38,15 +117,127 @@ h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
   color: var(--primary-color);
   line-height: 1.3;
+  font-weight: 700;
+}
+
+/* Aplicar gradiente apenas em títulos específicos que devem ter gradiente */
+.title,
+.gradient-text,
+h1.title,
+h2.gradient-text {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 a {
   color: var(--secondary-color);
   text-decoration: none;
   font-weight: 700;
+  transition: var(--transition);
+}
+
+/* Aplicar gradiente apenas em links específicos */
+a.gradient-text,
+.gradient-link {
+  background: var(--gradient-secondary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+a:hover {
+  transform: translateY(-1px);
+  filter: drop-shadow(0 2px 4px rgba(245, 158, 11, 0.3));
 }
 
 img {
   max-width: 100%;
   display: block;
+  border-radius: var(--radius-md);
+  transition: var(--transition);
+}
+
+img:hover {
+  transform: scale(1.02);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Utility Classes */
+.glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.gradient-text {
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.shadow-glow {
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-bounce {
+  animation: bounce 1s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(-25%);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  50% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--surface-secondary);
+  border-radius: var(--radius);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--gradient-primary);
+  border-radius: var(--radius);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-dark);
+}
+
+/* Focus styles */
+*:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Selection styles */
+::selection {
+  background: var(--primary-color);
+  color: white;
+}
+
+::-moz-selection {
+  background: var(--primary-color);
+  color: white;
 }

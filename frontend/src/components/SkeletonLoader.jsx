@@ -1,7 +1,7 @@
 import React from 'react';
 import styles from './SkeletonLoader.module.css';
 
-function SkeletonLoader({ type = 'card', count = 6 }) {
+function SkeletonLoader({ type = 'card', count = 6, viewMode = 'grid' }) {
   const renderCardSkeleton = () => (
     <div className={styles.skeletonCard}>
       <div className={styles.skeletonImage}></div>
@@ -30,7 +30,7 @@ function SkeletonLoader({ type = 'card', count = 6 }) {
 
   return (
     <div className={styles.skeletonContainer}>
-      {type === 'card' && (
+      {(type === 'card' || viewMode === 'grid') && (
         <div className={styles.skeletonGrid}>
           {Array.from({ length: count }, (_, i) => (
             <div key={i}>{renderCardSkeleton()}</div>
@@ -38,7 +38,7 @@ function SkeletonLoader({ type = 'card', count = 6 }) {
         </div>
       )}
       
-      {type === 'list' && (
+      {(type === 'list' || viewMode === 'list') && (
         <div className={styles.skeletonList}>
           {Array.from({ length: count }, (_, i) => (
             <div key={i}>{renderListSkeleton()}</div>
