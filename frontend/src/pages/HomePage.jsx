@@ -57,7 +57,20 @@ function HomePage() {
 
       <div className={`${styles.selectionGrid} ${isLoaded ? styles.loaded : ''}`}>
         <Link to="/videos" className={`${styles.selectionCard} ${styles.videoCard}`}>
-          <div className={styles.cardBackground}></div>
+          <div 
+            className={styles.cardBackground}
+            style={{
+              backgroundImage: `url('/images/FundoCard.jpeg')`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+              width: '100%',
+              height: '100%',
+              position: 'absolute',
+              top: 0,
+              left: 0
+            }}
+          ></div>
           <FaPlayCircle className={styles.icon} />
           <h2>Videos Divertidos</h2>
           <p className={styles.cardDescription}>Descubre contenido educativo y entretenido</p>
@@ -67,7 +80,20 @@ function HomePage() {
         </Link>
         
         <Link to="/documentos" className={`${styles.selectionCard} ${styles.documentCard}`}>
-          <div className={styles.cardBackground}></div>
+          <div 
+            className={styles.cardBackground}
+            style={{
+              backgroundImage: `url('/images/FundoCard.jpeg')`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+              width: '100%',
+              height: '100%',
+              position: 'absolute',
+              top: 0,
+              left: 0
+            }}
+          ></div>
           <FaFileAlt className={styles.icon} />
           <h2>Actividades para Imprimir</h2>
           <p className={styles.cardDescription}>Materiales educativos para descargar</p>
