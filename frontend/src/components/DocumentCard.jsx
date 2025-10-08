@@ -29,7 +29,7 @@ function DocumentCard({ document, viewMode = 'grid' }) {
       }
       
       // Usar fetch diretamente (mesmo código que funcionou no teste)
-      const response = await fetch(`http://localhost:3001/api/content/documentos/${document.id}/download`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/content/documentos/${document.id}/download`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,

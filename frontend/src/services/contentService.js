@@ -111,7 +111,7 @@ export const downloadDocument = async (id) => {
     throw new Error('Token de autenticação não encontrado. Faça login novamente.');
   }
   
-  const response = await fetch(`http://localhost:3001/api/content/documentos/${id}/download`, {
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/api/content/documentos/${id}/download`, {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${token}`,
