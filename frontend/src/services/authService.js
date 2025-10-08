@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // URL base da nossa API de autenticação
-const API_URL = `${import.meta.env.VITE_API_URL}/api/auth`;
+const API_URL = `${import.meta.env.VITE_API_URL?.replace(/\/$/, '')}/api/auth`;
 
 /**
  * Registra um novo usuário.
