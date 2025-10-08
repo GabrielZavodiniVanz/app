@@ -128,5 +128,37 @@ const startServer = async () => {
   }
 };
 
+// Keep-alive para manter o serviço ativo
+function startKeepAlive() {
+  const https = require('https');
+  const BACKEND_URL = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
+  
+  function pingSelf() {
+    console.log(`[${new Date().toISOString()}] Keep-alive ping...`);
+    
+    const url = BACKEND_URL.startsWith('https') ? `${BACKEND_URL}/health` : `http://localhost:${PORT}/health`;
+    const client = BACKEND_URL.startsWith('https') ? https : require('http');
+    
+    client.get(url, (res) => {
+      console.log(`✅ Keep-alive OK: ${res.statusCode}`);
+    }).on('error', (err) => {
+      console.log(`❌ Keep-alive erro: ${err.message}`);
+    });
+  }
+  
+  // Ping a cada 14 minutos (antes dos 15 min de timeout do Render)
+  setInterval(pingSelf, 14 * 60 * 1000);
+  
+  // Ping inicial após 1 minuto
+  setTimeout(pingSelf, 60000);
+  
+  console.log('🔄 Keep-alive iniciado - pingando a cada 14 minutos');
+}
+
 // Executa a função principal
 startServer();
+
+// Inicia o keep-alive apenas em produção
+if (process.env.NODE_ENV === 'production') {
+  startKeepAlive();
+}
