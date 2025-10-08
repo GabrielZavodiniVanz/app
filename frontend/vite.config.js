@@ -9,12 +9,14 @@ export default defineConfig({
       output: {
         manualChunks: undefined
       }
-    }
+    },
+    copyPublicDir: true
   },
   preview: {
     historyApiFallback: true
   },
   server: {
     historyApiFallback: true
-  }
+  },
+  publicDir: 'public'
 })
