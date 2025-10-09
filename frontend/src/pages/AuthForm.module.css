@@ -9,6 +9,15 @@
   overflow: hidden;
 }
 
+/* Ocultar elementos de validação em toda a tela de login */
+.authContainer *::-webkit-validation-bubble,
+.authContainer *::-webkit-validation-bubble-message,
+.authContainer *::-webkit-validation-bubble-icon,
+.authContainer *::-webkit-validation-bubble-arrow-clipper,
+.authContainer *::-webkit-validation-bubble-arrow {
+  display: none !important;
+}
+
 .authContainer::before {
   content: '';
   position: absolute;
@@ -156,7 +165,44 @@
 }
 
 .validationIcon {
-  display: none;
+  display: none !important;
+}
+
+/* Fix para pontos de interrogação no mobile */
+.inputGroup input::-webkit-validation-bubble-message {
+  display: none !important;
+}
+
+.inputGroup input::-webkit-validation-bubble-icon {
+  display: none !important;
+}
+
+/* Ocultar elementos de validação do navegador no mobile */
+@media (max-width: 768px) {
+  .inputGroup input::-webkit-validation-bubble-message,
+  .inputGroup input::-webkit-validation-bubble-icon,
+  .inputGroup input::-webkit-validation-bubble-arrow-clipper,
+  .inputGroup input::-webkit-validation-bubble-arrow {
+    display: none !important;
+  }
+  
+  /* Garantir que não apareçam elementos de validação */
+  input::-webkit-validation-bubble-message,
+  input::-webkit-validation-bubble-icon,
+  input::-webkit-validation-bubble-arrow-clipper,
+  input::-webkit-validation-bubble-arrow {
+    display: none !important;
+  }
+  
+  /* Fix específico para Safari iOS */
+  .inputGroup input::-webkit-validation-bubble {
+    display: none !important;
+  }
+  
+  /* Ocultar qualquer elemento de validação que possa aparecer */
+  input::-webkit-validation-bubble {
+    display: none !important;
+  }
 }
 
 .inputGroup.valid input,

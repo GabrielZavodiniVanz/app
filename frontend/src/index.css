@@ -241,3 +241,23 @@ img:hover {
   background: var(--primary-color);
   color: white;
 }
+
+/* Ocultar elementos de validação do navegador globalmente */
+::-webkit-validation-bubble,
+::-webkit-validation-bubble-message,
+::-webkit-validation-bubble-icon,
+::-webkit-validation-bubble-arrow-clipper,
+::-webkit-validation-bubble-arrow {
+  display: none !important;
+}
+
+/* Fix específico para mobile */
+@media (max-width: 768px) {
+  *::-webkit-validation-bubble,
+  *::-webkit-validation-bubble-message,
+  *::-webkit-validation-bubble-icon,
+  *::-webkit-validation-bubble-arrow-clipper,
+  *::-webkit-validation-bubble-arrow {
+    display: none !important;
+  }
+}
