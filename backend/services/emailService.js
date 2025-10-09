@@ -111,38 +111,105 @@ class EmailService {
 
   // Método alternativo via HTTPS (para quando SMTP está bloqueado)
   async sendViaHTTPS(mailOptions) {
-    console.log('🌐 Tentando envio via HTTPS como alternativa ao SMTP...');
+    console.log('🌐 Tentando envio via Resend como alternativa ao SMTP...');
     
     try {
-      // Usar EmailJS como alternativa (serviço gratuito que funciona via HTTPS)
-      const emailJsUrl = 'https://api.emailjs.com/api/v1.0/email/send';
+      // Usar Resend (gratuito até 3.000 e-mails/mês)
+      const resendUrl = 'https://api.resend.com/emails';
       
       const requestBody = {
-        service_id: 'gmail', // ou outro serviço configurado
-        template_id: 'template_password_reset',
-        user_id: process.env.EMAILJS_USER_ID,
-        template_params: {
-          to_email: mailOptions.to,
-          from_name: 'App Infantil',
-          subject: mailOptions.subject,
-          message: mailOptions.html,
-          reply_to: mailOptions.from
-        }
+        from: mailOptions.from,
+        to: [mailOptions.to],
+        subject: mailOptions.subject,
+        html: mailOptions.html,
+        text: mailOptions.text || mailOptions.html.replace(/<[^>]*>/g, '')
       };
 
-      // Fazer requisição para EmailJS
-      const response = await this.makeHTTPSRequest(emailJsUrl, requestBody);
+      // Fazer requisição para Resend
+      const response = await this.makeResendRequest(resendUrl, requestBody);
       
-      console.log('✅ E-mail enviado via EmailJS:', response);
-      return { messageId: response, method: 'emailjs' };
+      console.log('✅ E-mail enviado via Resend:', response.id);
+      return { messageId: response.id, method: 'resend' };
       
     } catch (error) {
-      console.error('❌ EmailJS também falhou:', error.message);
+      console.error('❌ Resend também falhou:', error.message);
       
       // Como último recurso, vamos usar um webhook simples
       console.log('🔄 Tentando webhook de notificação como último recurso...');
       return await this.sendViaWebhook(mailOptions);
     }
+  }
+
+  createEmailBody(mailOptions) {
+    const { from, to, subject, html, text } = mailOptions;
+    
+    const emailBody = [
+      `From: ${from}`,
+      `To: ${to}`,
+      `Subject: ${subject}`,
+      `MIME-Version: 1.0`,
+      `Content-Type: multipart/alternative; boundary="boundary123"`,
+      ``,
+      `--boundary123`,
+      `Content-Type: text/plain; charset=utf-8`,
+      ``,
+      text || html.replace(/<[^>]*>/g, ''), // Remove HTML tags for text version
+      ``,
+      `--boundary123`,
+      `Content-Type: text/html; charset=utf-8`,
+      ``,
+      html,
+      ``,
+      `--boundary123--`
+    ].join('\n');
+
+    return emailBody;
+  }
+
+  async makeResendRequest(url, body) {
+    return new Promise((resolve, reject) => {
+      const postData = JSON.stringify(body);
+      
+      const options = {
+        hostname: 'api.resend.com',
+        port: 443,
+        path: '/emails',
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+          'Content-Type': 'application/json',
+          'Content-Length': Buffer.byteLength(postData)
+        }
+      };
+
+      const req = https.request(options, (res) => {
+        let data = '';
+        
+        res.on('data', (chunk) => {
+          data += chunk;
+        });
+        
+        res.on('end', () => {
+          try {
+            const response = JSON.parse(data);
+            if (res.statusCode === 200) {
+              resolve(response);
+            } else {
+              reject(new Error(`Resend error: ${response.message || data}`));
+            }
+          } catch (error) {
+            reject(new Error(`Failed to parse Resend response: ${error.message}`));
+          }
+        });
+      });
+
+      req.on('error', (error) => {
+        reject(error);
+      });
+
+      req.write(postData);
+      req.end();
+    });
   }
 
   async makeHTTPSRequest(url, body) {
@@ -169,11 +236,12 @@ class EmailService {
         
         res.on('end', () => {
           try {
-            const response = JSON.parse(data);
+            // EmailJS retorna texto simples, não JSON
             if (res.statusCode === 200) {
-              resolve(response);
+              console.log('✅ EmailJS response:', data);
+              resolve({ success: true, message: data });
             } else {
-              reject(new Error(`EmailJS error: ${response.error || data}`));
+              reject(new Error(`EmailJS error: ${data}`));
             }
           } catch (error) {
             reject(new Error(`Failed to parse EmailJS response: ${error.message}`));
