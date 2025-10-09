@@ -28,6 +28,10 @@ function LoginPage() {
     setError('');
     setIsLoading(true);
     
+    // Desabilitar validação do navegador
+    const form = e.target;
+    form.noValidate = true;
+    
     try {
       const receivedToken = await loginUser({ email, password });
       login(receivedToken);
@@ -50,7 +54,7 @@ function LoginPage() {
           <p className={styles.authSubtitle}>¡Bienvenido de vuelta!</p>
         </div>
 
-        <form onSubmit={handleSubmit} className={styles.authForm}>
+        <form onSubmit={handleSubmit} className={styles.authForm} noValidate>
           {error && (
             <div className={styles.errorMessage}>
               <p>{error}</p>
@@ -65,6 +69,8 @@ function LoginPage() {
               value={email} 
               onChange={(e) => setEmail(e.target.value)} 
               required 
+              noValidate
+              autoComplete="email"
             />
           </div>
           
@@ -76,6 +82,8 @@ function LoginPage() {
               value={password} 
               onChange={(e) => setPassword(e.target.value)} 
               required 
+              noValidate
+              autoComplete="current-password"
             />
             <button
               type="button"

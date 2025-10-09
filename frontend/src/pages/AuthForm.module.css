@@ -18,6 +18,27 @@
   display: none !important;
 }
 
+/* Ocultar elementos de validação de forma mais agressiva */
+.authContainer *,
+.authContainer *::before,
+.authContainer *::after {
+  -webkit-validation-bubble: none !important;
+}
+
+/* Ocultar elementos de validação específicos do iOS Safari */
+@supports (-webkit-touch-callout: none) {
+  .authContainer *::-webkit-validation-bubble,
+  .authContainer *::-webkit-validation-bubble-message,
+  .authContainer *::-webkit-validation-bubble-icon,
+  .authContainer *::-webkit-validation-bubble-arrow-clipper,
+  .authContainer *::-webkit-validation-bubble-arrow {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+}
+
 .authContainer::before {
   content: '';
   position: absolute;
@@ -177,6 +198,28 @@
   display: none !important;
 }
 
+/* Ocultar elementos de validação mais específicos */
+.inputGroup input::-webkit-validation-bubble {
+  display: none !important;
+}
+
+.inputGroup input::-webkit-validation-bubble-arrow-clipper {
+  display: none !important;
+}
+
+.inputGroup input::-webkit-validation-bubble-arrow {
+  display: none !important;
+}
+
+/* Ocultar elementos de validação HTML5 */
+.inputGroup input:invalid {
+  box-shadow: none !important;
+}
+
+.inputGroup input:invalid:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+}
+
 /* Ocultar elementos de validação do navegador no mobile */
 @media (max-width: 768px) {
   .inputGroup input::-webkit-validation-bubble-message,
@@ -201,6 +244,20 @@
   
   /* Ocultar qualquer elemento de validação que possa aparecer */
   input::-webkit-validation-bubble {
+    display: none !important;
+  }
+  
+  /* Ocultar elementos de validação em todos os inputs */
+  input[type="email"]::-webkit-validation-bubble,
+  input[type="password"]::-webkit-validation-bubble,
+  input[type="text"]::-webkit-validation-bubble {
+    display: none !important;
+  }
+  
+  /* Ocultar elementos de validação específicos do iOS */
+  .authContainer *::-webkit-validation-bubble,
+  .authWrapper *::-webkit-validation-bubble,
+  .authForm *::-webkit-validation-bubble {
     display: none !important;
   }
 }
