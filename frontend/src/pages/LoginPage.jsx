@@ -28,9 +28,26 @@ function LoginPage() {
     setError('');
     setIsLoading(true);
     
-    // Desabilitar validação do navegador
-    const form = e.target;
-    form.noValidate = true;
+    // Validação customizada antes de enviar
+    if (!email.trim()) {
+      setError('Por favor, ingresa tu email.');
+      setIsLoading(false);
+      return;
+    }
+    
+    if (!password.trim()) {
+      setError('Por favor, ingresa tu contraseña.');
+      setIsLoading(false);
+      return;
+    }
+    
+    // Validar formato de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError('Por favor, ingresa un email válido.');
+      setIsLoading(false);
+      return;
+    }
     
     try {
       const receivedToken = await loginUser({ email, password });
@@ -54,7 +71,7 @@ function LoginPage() {
           <p className={styles.authSubtitle}>¡Bienvenido de vuelta!</p>
         </div>
 
-        <form onSubmit={handleSubmit} className={styles.authForm} noValidate>
+        <form onSubmit={handleSubmit} className={styles.authForm}>
           {error && (
             <div className={styles.errorMessage}>
               <p>{error}</p>
@@ -69,7 +86,6 @@ function LoginPage() {
               value={email} 
               onChange={(e) => setEmail(e.target.value)} 
               required 
-              noValidate
               autoComplete="email"
             />
           </div>
@@ -82,7 +98,6 @@ function LoginPage() {
               value={password} 
               onChange={(e) => setPassword(e.target.value)} 
               required 
-              noValidate
               autoComplete="current-password"
             />
             <button
