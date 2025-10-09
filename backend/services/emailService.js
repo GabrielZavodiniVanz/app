@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const https = require('https');
 
 class EmailService {
   constructor() {
@@ -14,21 +15,31 @@ class EmailService {
       return;
     }
 
-    // Configuração simplificada para Gmail
+    // Configuração específica para Gmail no Render
     this.transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false, // true para 465, false para outras portas
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS // Use App Password para Gmail
       },
-      // Configurações básicas
-      connectionTimeout: 10000, // 10 segundos
-      greetingTimeout: 5000,    // 5 segundos
-      socketTimeout: 10000,     // 10 segundos
-      // Pool de conexões
-      pool: true,
-      maxConnections: 3,
-      maxMessages: 50
+      // Configurações específicas para Render
+      connectionTimeout: 30000, // 30 segundos
+      greetingTimeout: 15000,   // 15 segundos
+      socketTimeout: 30000,     // 30 segundos
+      // Desabilitar pool para evitar problemas de conexão
+      pool: false,
+      // Configurações de rede para Render
+      tls: {
+        ciphers: 'SSLv3',
+        rejectUnauthorized: false
+      },
+      // Configurações adicionais para Render
+      ignoreTLS: false,
+      requireTLS: true,
+      // Configurações de proxy (se necessário)
+      proxy: process.env.PROXY_URL || undefined
     });
 
     // Verificar conexão com retry automático
@@ -36,43 +47,75 @@ class EmailService {
   }
 
   async verifyConnection(retryCount = 0) {
-    const maxRetries = 2;
-    const retryDelay = 3000; // 3 segundos
+    const maxRetries = 5;
+    const retryDelay = Math.min(5000 * Math.pow(2, retryCount), 30000); // Exponential backoff, max 30s
 
     try {
       await this.transporter.verify();
       console.log('✅ Serviço de email configurado com sucesso');
     } catch (error) {
       console.error(`❌ Erro na configuração do email (tentativa ${retryCount + 1}/${maxRetries + 1}):`, error.message);
+      console.error(`🔍 Detalhes do erro:`, {
+        code: error.code,
+        command: error.command,
+        response: error.response
+      });
       
       if (retryCount < maxRetries) {
-        console.log(`🔄 Tentando novamente em ${retryDelay/1000} segundos...`);
+        console.log(`🔄 Tentando novamente em ${retryDelay/1000} segundos... (delay progressivo)`);
         setTimeout(() => {
           this.verifyConnection(retryCount + 1);
         }, retryDelay);
       } else {
         console.error('❌ Falha ao configurar email após todas as tentativas. E-mails serão ignorados.');
+        console.log('💡 Sugestões: Verifique se o Render permite conexões SMTP ou configure um proxy.');
       }
     }
   }
 
   async sendWithRetry(mailOptions, retryCount = 0) {
-    const maxRetries = 1;
-    const retryDelay = 2000; // 2 segundos
+    const maxRetries = 3;
+    const retryDelay = Math.min(3000 * Math.pow(2, retryCount), 15000); // Exponential backoff, max 15s
 
     try {
       return await this.transporter.sendMail(mailOptions);
     } catch (error) {
       console.error(`❌ Erro ao enviar email (tentativa ${retryCount + 1}/${maxRetries + 1}):`, error.message);
+      console.error(`🔍 Detalhes do erro de envio:`, {
+        code: error.code,
+        command: error.command,
+        response: error.response,
+        to: mailOptions.to
+      });
+      
+      // Se for erro de conexão e estivermos em produção, tentar método alternativo
+      if (error.code === 'ETIMEDOUT' && process.env.NODE_ENV === 'production' && retryCount === 0) {
+        console.log('🔄 Tentando método alternativo via HTTPS...');
+        try {
+          return await this.sendViaHTTPS(mailOptions);
+        } catch (httpsError) {
+          console.error('❌ Método HTTPS também falhou:', httpsError.message);
+        }
+      }
       
       if (retryCount < maxRetries) {
-        console.log(`🔄 Tentando reenviar em ${retryDelay/1000} segundos...`);
+        console.log(`🔄 Tentando reenviar em ${retryDelay/1000} segundos... (delay progressivo)`);
         await new Promise(resolve => setTimeout(resolve, retryDelay));
         return await this.sendWithRetry(mailOptions, retryCount + 1);
       } else {
+        console.error(`❌ Falha definitiva ao enviar email para ${mailOptions.to}`);
         throw error;
       }
     }
+  }
+
+  // Método alternativo via HTTPS (para quando SMTP está bloqueado)
+  async sendViaHTTPS(mailOptions) {
+    console.log('🌐 Tentando envio via HTTPS como alternativa ao SMTP...');
+    
+    // Por enquanto, vamos apenas logar que tentamos o método alternativo
+    // Em uma implementação completa, aqui usaria Gmail API ou outro serviço
+    throw new Error('Método HTTPS não implementado ainda');
   }
 
   async sendWelcomeEmail(userData) {

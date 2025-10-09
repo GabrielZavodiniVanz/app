@@ -272,28 +272,55 @@ router.post('/test-email', async (req, res) => {
     
     console.log(`🔍 Debug - EMAIL_USER configurado: ${hasEmailUser}`);
     console.log(`🔍 Debug - EMAIL_PASS configurado: ${hasEmailPass}`);
+    console.log(`🔍 Debug - NODE_ENV: ${process.env.NODE_ENV}`);
 
-    // Enviar e-mail de teste
-    const result = await emailService.sendTestEmail(email);
-
-    res.status(200).json({
-      success: true,
-      message: 'Test email sent successfully',
-      email: email,
-      emailSent: result.success,
-      debug: {
-        hasEmailUser,
-        hasEmailPass,
-        nodeEnv: process.env.NODE_ENV
-      }
-    });
+    // Testar conectividade SMTP primeiro
+    console.log('🔍 Testando conectividade SMTP...');
+    const startTime = Date.now();
+    
+    try {
+      const result = await emailService.sendTestEmail(email);
+      const endTime = Date.now();
+      
+      res.status(200).json({
+        success: true,
+        message: 'Test email sent successfully',
+        email: email,
+        emailSent: result.success,
+        responseTime: `${endTime - startTime}ms`,
+        debug: {
+          hasEmailUser,
+          hasEmailPass,
+          nodeEnv: process.env.NODE_ENV,
+          smtpWorking: true
+        }
+      });
+    } catch (smtpError) {
+      console.error('❌ SMTP falhou:', smtpError.message);
+      
+      res.status(500).json({
+        success: false,
+        error: 'SMTP Connection Failed',
+        message: 'SMTP connection failed in production',
+        errorMessage: smtpError.message,
+        errorCode: smtpError.code,
+        debug: {
+          hasEmailUser,
+          hasEmailPass,
+          nodeEnv: process.env.NODE_ENV,
+          smtpWorking: false,
+          suggestion: 'Render may be blocking SMTP connections. Consider using SendGrid or Mailgun.'
+        },
+        timestamp: new Date().toISOString()
+      });
+    }
 
   } catch (error) {
-    console.error('❌ Erro ao enviar e-mail de teste:', error);
+    console.error('❌ Erro geral no teste de e-mail:', error);
     res.status(500).json({
       success: false,
       error: 'Internal Server Error',
-      message: 'Failed to send test email',
+      message: 'Failed to test email',
       errorMessage: error.message,
       timestamp: new Date().toISOString()
     });
