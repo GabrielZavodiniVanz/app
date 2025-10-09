@@ -118,9 +118,7 @@ class EmailService {
       throw new Error('A variável de ambiente RESEND_API_KEY não está configurada.');
     }
 
-    // Usando require para compatibilidade com CommonJS
-    const { HttpsProxyAgent } = require('https--proxy-agent');
-    const agent = new HttpsProxyAgent(process.env.PROXY_URL || '');
+    // Usando apenas o módulo HTTPS nativo do Node.js (sem dependências externas)
 
     const requestBody = {
       from: 'App Infantil <onboarding@resend.dev>', // Domínio verificado padrão do Resend
@@ -140,8 +138,7 @@ class EmailService {
         'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
         'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(postData)
-      },
-      agent: agent
+      }
     };
 
     return new Promise((resolve, reject) => {
