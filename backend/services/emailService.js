@@ -10,12 +10,20 @@ class EmailService {
   initializeTransporter() {
     // Verificar se as variáveis de ambiente estão configuradas
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-      console.warn('⚠️ EMAIL_USER ou EMAIL_PASS não configurados. Serviço de email desabilitado.');
+      console.warn('⚠️  Credenciais de e-mail não configuradas. Serviço de email desabilitado.');
       this.transporter = null;
       return;
     }
 
-    // Configuração para Gmail na porta 465 (SSL), uma alternativa para a porta 587
+    // Em produção, não inicializamos o transporter SMTP, pois usaremos apenas Resend.
+    if (process.env.NODE_ENV === 'production') {
+      console.log('✅ Modo de produção: O envio de e-mails será feito via Resend (HTTPS).');
+      this.transporter = null; // Garante que o SMTP não será usado
+      return;
+    }
+
+    // Configuração do Gmail apenas para ambiente de desenvolvimento
+    console.log('✅ Modo de desenvolvimento: Configurando SMTP do Gmail para testes locais.');
     this.transporter = nodemailer.createTransport({
       host: 'smtp.gmail.com',
       port: 465,
@@ -61,48 +69,46 @@ class EmailService {
   }
 
   async sendWithRetry(mailOptions, retryCount = 0) {
+    // Em produção, pula o SMTP e vai direto para o Resend
+    if (process.env.NODE_ENV === 'production') {
+      console.log('🔄 Produção: Pulando SMTP e enviando diretamente via Resend...');
+      try {
+        return await this.sendViaResend(mailOptions);
+      } catch (resendError) {
+        console.error(`❌ Falha no envio via Resend: ${resendError.message}`);
+        await this.sendViaWebhook(mailOptions); // Log final como backup
+        throw resendError;
+      }
+    }
+
+    // Lógica de retry do SMTP apenas para ambiente de desenvolvimento
     const maxRetries = 3;
-    const retryDelay = Math.min(3000 * Math.pow(2, retryCount), 15000); // Exponential backoff, max 15s
+    const retryDelay = 1000 * Math.pow(2, retryCount); // 1s, 2s, 4s
 
     try {
-      // Em produção, se já tentamos uma vez, força o fallback em vez de repetir o SMTP
-      if (process.env.NODE_ENV === 'production' && retryCount > 0) {
-        throw new Error('Primeira tentativa de SMTP falhou, mudando para o fallback.');
-      }
+      console.log(`📨 (Dev) Tentando enviar via SMTP... (tentativa ${retryCount + 1})`);
       return await this.transporter.sendMail(mailOptions);
     } catch (error) {
-      console.error(`❌ Erro ao enviar email via SMTP (tentativa ${retryCount + 1}):`, error.message);
+      console.error(`❌ (Dev) Erro ao enviar email via SMTP:`, error.message);
       
-      // Se for um erro de timeout em produção, muda imediatamente para o Resend
-      if (error.code === 'ETIMEDOUT' && process.env.NODE_ENV === 'production') {
-        console.log('🔄 SMTP falhou com timeout. Mudando para o provedor de fallback (Resend)...');
-        try {
-          return await this.sendViaResend(mailOptions);
-        } catch (resendError) {
-          console.error(`❌ Fallback (Resend) também falhou: ${resendError.message}`);
-          await this.sendViaWebhook(mailOptions); // Log final como backup
-          throw resendError; // Lança o erro do Resend que é mais relevante
-        }
-      }
-      
-      // Se não for um erro de timeout ou não estiver em produção, tenta o SMTP novamente
       if (retryCount < maxRetries) {
-        console.log(`🔄 Tentando reenviar SMTP em ${retryDelay/1000} segundos...`);
+        console.log(`🔄 (Dev) Tentando reenviar SMTP em ${retryDelay/1000} segundos...`);
         await new Promise(resolve => setTimeout(resolve, retryDelay));
         return await this.sendWithRetry(mailOptions, retryCount + 1);
       } else {
-        console.error(`❌ Falha definitiva ao enviar email para ${mailOptions.to} via SMTP.`);
-        await this.sendViaWebhook(mailOptions); // Log final como backup
+        console.error(`❌ (Dev) Falha definitiva ao enviar email para ${mailOptions.to} via SMTP.`);
+        await this.sendViaWebhook(mailOptions); // Log de backup
         throw error;
       }
     }
   }
 
-  // Método alternativo via HTTPS usando Resend
+  // Método de envio principal via Resend (para produção)
   async sendViaResend(mailOptions) {
     console.log('🌐 Tentando envio via Resend...');
 
     if (!process.env.RESEND_API_KEY) {
+      console.error('❌ ERRO CRÍTICO: RESEND_API_KEY não está configurada em produção!');
       throw new Error('A variável de ambiente RESEND_API_KEY não está configurada.');
     }
 
