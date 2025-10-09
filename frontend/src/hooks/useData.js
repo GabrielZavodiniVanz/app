@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
 
 /**
  * Um Hook customizado para buscar dados de qualquer função de serviço da API.
@@ -10,8 +11,16 @@ function useData(apiFunc, key = 0) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { token } = useAuth();
 
   useEffect(() => {
+    // Só busca dados se houver token (usuário logado)
+    if (!token) {
+      setData(null);
+      setLoading(false);
+      return;
+    }
+
     const fetchData = async () => {
       try {
         setLoading(true);
@@ -26,7 +35,7 @@ function useData(apiFunc, key = 0) {
     };
 
     fetchData();
-  }, [key]); 
+  }, [key, token]); // Adiciona token como dependência
 
   return { data, loading, error };
 }

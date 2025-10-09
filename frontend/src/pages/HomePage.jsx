@@ -3,31 +3,22 @@ import { Link } from 'react-router-dom';
 import styles from './HomePage.module.css';
 import { FaPlayCircle, FaFileAlt, FaStar, FaHeart } from 'react-icons/fa';
 import { getVideos, getDocuments } from '../services/contentService';
+import useData from '../hooks/useData';
 
 function HomePage() {
-  const [videoCount, setVideoCount] = useState(0);
-  const [documentCount, setDocumentCount] = useState(0);
+  const { data: videos, loading: videosLoading } = useData(getVideos);
+  const { data: documents, loading: documentsLoading } = useData(getDocuments);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  useEffect(() => {
-    const fetchCounts = async () => {
-      try {
-        const [videos, documents] = await Promise.all([
-          getVideos(),
-          getDocuments()
-        ]);
-        setVideoCount(videos?.length || 0);
-        setDocumentCount(documents?.length || 0);
-      } catch (error) {
-        console.error('❌ Erro ao buscar dados:', error);
-        console.error('❌ Detalhes do erro:', error.response?.data || error.message);
-      } finally {
-        setTimeout(() => setIsLoaded(true), 300); // Delay para animação
-      }
-    };
+  const videoCount = videos?.length || 0;
+  const documentCount = documents?.length || 0;
 
-    fetchCounts();
-  }, []);
+  useEffect(() => {
+    // Aguarda os dados carregarem para mostrar a animação
+    if (!videosLoading && !documentsLoading) {
+      setTimeout(() => setIsLoaded(true), 300); // Delay para animação
+    }
+  }, [videosLoading, documentsLoading]);
 
   return (
     <div className={styles.homeContainer}>
