@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styles from './AuthForm.module.css';
-import { FaEnvelope, FaLock, FaEye, FaEyeSlash, FaUser, FaSpinner } from 'react-icons/fa';
+import { FaEnvelope, FaLock, FaEye, FaEyeSlash, FaSpinner } from 'react-icons/fa';
 import { loginUser } from '../services/authService';
 import { AuthContext } from '../context/AuthContext.jsx';
 
@@ -44,7 +44,7 @@ function LoginPage() {
       <div className={styles.authWrapper}>
         <div className={styles.authHeader}>
           <div className={styles.authIcon}>
-            <FaUser />
+            <span style={{ fontSize: '2.5rem' }}>☀️</span>
           </div>
           <h2>Iniciar Sesión</h2>
           <p className={styles.authSubtitle}>¡Bienvenido de vuelta!</p>

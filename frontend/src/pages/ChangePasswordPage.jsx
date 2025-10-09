@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './AuthForm.module.css';
-import { FaLock, FaEye, FaEyeSlash, FaCheck } from 'react-icons/fa';
+import { FaEnvelope, FaLock, FaEye, FaEyeSlash, FaCheck } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 
@@ -89,7 +89,7 @@ function ChangePasswordPage() {
       <div className={styles.authWrapper}>
         <div className={styles.authHeader}>
           <div className={styles.authIcon}>
-            <FaLock />
+            <span style={{ fontSize: '2.5rem' }}>🔑</span>
           </div>
           <h2>Cambiar Contraseña</h2>
           <p className={styles.authSubtitle}>Ingresa tu contraseña actual y la nueva contraseña</p>
@@ -97,6 +97,7 @@ function ChangePasswordPage() {
 
         <form onSubmit={handleSubmit} className={styles.authForm}>
           <div className={styles.inputGroup}>
+            <FaEnvelope className={styles.inputIcon} />
             <input 
               type="email" 
               name="email"

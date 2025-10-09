@@ -158,7 +158,7 @@
 }
 
 .viewButton.active {
-  background: var(--primary-color);
+  background: var(--primary-dark);
   color: white;
   box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
 }

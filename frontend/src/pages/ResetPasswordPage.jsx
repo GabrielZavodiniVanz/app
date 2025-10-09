@@ -68,7 +68,7 @@ function ResetPasswordPage() {
         <div className={styles.authWrapper}>
           <div className={styles.authHeader}>
             <div className={styles.authIcon} style={{ background: 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)' }}>
-              <FaCheckCircle />
+              <span style={{ fontSize: '2.5rem' }}>✅</span>
             </div>
             <h2>¡Contraseña Restablecida!</h2>
             <p className={styles.authSubtitle}>Tu contraseña ha sido cambiada con éxito</p>
@@ -112,7 +112,7 @@ function ResetPasswordPage() {
       <div className={styles.authWrapper}>
         <div className={styles.authHeader}>
           <div className={styles.authIcon}>
-            <FaLock />
+            <span style={{ fontSize: '2.5rem' }}>🔓</span>
           </div>
             <h2>Restablecer Contraseña</h2>
             <p className={styles.authSubtitle}>Ingresa tu nueva contraseña</p>

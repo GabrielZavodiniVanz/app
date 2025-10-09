@@ -2,7 +2,7 @@ import React, { useState, useContext, useEffect, useRef } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import styles from './Navbar.module.css';
 import { AuthContext } from '../context/AuthContext.jsx';
-import { FaBars, FaTimes, FaCaretDown, FaUser, FaVideo, FaFileAlt, FaCog, FaSignOutAlt, FaStar } from 'react-icons/fa';
+import { FaBars, FaTimes, FaCaretDown, FaVideo, FaFileAlt, FaCog, FaSignOutAlt, FaStar } from 'react-icons/fa';
 
 function Navbar() {
   const { user, token, logout } = useContext(AuthContext);
@@ -53,7 +53,7 @@ function Navbar() {
           <>
             <div className={styles.userProfile}>
               <div className={styles.avatar}>
-                <FaUser />
+                <span style={{ fontSize: '1.2rem' }}>👤</span>
               </div>
               <div className={styles.userInfo}>
                 <span className={styles.welcomeMessage}>¡Hola!</span>
@@ -104,12 +104,8 @@ function Navbar() {
         ) : (
           <>
             <NavLink to="/login" className={({ isActive }) => isActive ? styles.activeLink : styles.link} onClick={closeAllMenus}>
-              <FaUser className={styles.linkIcon} />
+              <span className={styles.linkIcon}>🔑</span>
               <span>Login</span>
-            </NavLink>
-            <NavLink to="/register" className={({ isActive }) => isActive ? styles.activeLink : styles.link} onClick={closeAllMenus}>
-              <FaUser className={styles.linkIcon} />
-              <span>Registrar</span>
             </NavLink>
           </>
         )}

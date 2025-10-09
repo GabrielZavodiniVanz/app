@@ -26,17 +26,23 @@
 }
 
 .addButton {
-  background-color: var(--primary-color);
+  background-color: var(--primary-dark);
   color: white;
   padding: 0.75rem 1.5rem;
   border-radius: 8px;
   text-decoration: none;
-  font-weight: 700;
-  transition: background-color 0.2s;
+  font-family: var(--font-heading);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  transition: all 0.2s ease;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .addButton:hover {
   background-color: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
 }
 
 .list {
@@ -57,7 +63,7 @@
 }
 
 .listItem span {
-  font-weight: 600;
+  font-weight: 500;
   word-break: break-all;
 }
 
@@ -71,7 +77,7 @@
   padding: 0.5rem 1rem;
   border-radius: 6px;
   cursor: pointer;
-  font-weight: 700;
+  font-weight: 500;
   text-decoration: none;
   font-family: var(--font-body);
 }
@@ -79,11 +85,21 @@
 .editButton {
   background-color: #e5e7eb;
   color: #374151;
+  font-family: var(--font-heading);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .deleteButton {
   background-color: #ef4444;
   color: white;
+  font-family: var(--font-heading);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .form {
@@ -99,7 +115,7 @@
 }
 
 .formGroup label {
-  font-weight: 700;
+  font-weight: 500;
   color: var(--text-light-color);
 }
 
@@ -121,18 +137,24 @@
 .submitButton {
   align-self: flex-start;
   padding: 0.8rem 2rem;
-  background-color: var(--primary-color);
+  background-color: var(--primary-dark);
   color: white;
   border: none;
   border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 700;
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s ease;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .submitButton:hover {
   background-color: #2563eb;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
 }
 
 .submitButton:disabled {
@@ -155,7 +177,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .formActions {
@@ -172,7 +194,7 @@
   border: none;
   border-radius: 8px;
   font-size: 1rem;
-  font-weight: 700;
+  font-weight: 500;
   cursor: pointer;
   transition: background-color 0.2s;
 }

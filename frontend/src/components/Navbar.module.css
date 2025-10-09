@@ -147,7 +147,7 @@
   font-family: var(--font-heading);
   font-size: 1.1rem;
   color: var(--primary-color);
-  font-weight: 700;
+  font-weight: 500;
 }
 
 /* Link Styles */
@@ -157,7 +157,7 @@
   gap: 0.75rem;
   font-family: var(--font-body);
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 500;
   padding: 0.875rem 1.5rem;
   text-decoration: none;
   border-radius: 12px;
@@ -204,13 +204,16 @@
   border: none;
   border-radius: 12px;
   cursor: pointer;
-  font-family: var(--font-body);
+  font-family: var(--font-heading);
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
   padding: 0.875rem 1.5rem;
   transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
   min-width: 140px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .logoutButton:hover {
@@ -234,7 +237,7 @@
   cursor: pointer;
   font-family: var(--font-body);
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 500;
   padding: 0.875rem 1.5rem;
   border-radius: 12px;
   transition: all 0.3s ease;
@@ -293,7 +296,7 @@
   padding: 1rem 1.5rem;
   text-decoration: none;
   color: var(--text-color);
-  font-weight: 600;
+  font-weight: 500;
   font-family: var(--font-body);
   transition: all 0.3s ease;
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);

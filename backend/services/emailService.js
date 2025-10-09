@@ -417,24 +417,24 @@ class EmailService {
                 border-radius: 10px;
                 box-shadow: 0 2px 10px rgba(0,0,0,0.1);
               }
-              .header {
-                text-align: center;
-                background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
-                color: white;
-                padding: 20px;
-                border-radius: 8px;
-                margin-bottom: 20px;
-              }
-              .button {
-                display: inline-block;
-                background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
-                color: white;
-                padding: 12px 30px;
-                text-decoration: none;
-                border-radius: 25px;
-                margin: 20px 0;
-                font-weight: bold;
-              }
+               .header {
+                 text-align: center;
+                 background: linear-gradient(135deg, #1d4ed8 0%, #f59e0b 100%);
+                 color: white;
+                 padding: 20px;
+                 border-radius: 8px;
+                 margin-bottom: 20px;
+               }
+               .button {
+                 display: inline-block;
+                 background: #3b82f6;
+                 color: black;
+                 padding: 12px 30px;
+                 text-decoration: none;
+                 border-radius: 25px;
+                 margin: 20px 0;
+                 font-weight: bold;
+               }
               .warning {
                 background-color: #fff3cd;
                 border: 1px solid #ffeaa7;
