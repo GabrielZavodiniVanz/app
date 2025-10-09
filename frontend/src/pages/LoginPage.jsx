@@ -101,9 +101,12 @@ function LoginPage() {
             )}
           </button>
           
-          <p className={styles.switchMessage}>
-            ¿No tienes una cuenta? <Link to="/register">Regístrate aquí</Link>
-          </p>
+        <p className={styles.switchMessage}>
+          ¿Olvidaste tu contraseña? <Link to="/forgot-password">Recuperar contraseña</Link>
+        </p>
+        <p className={styles.switchMessage}>
+          ¿Conoces tu contraseña? <Link to="/change-password">Cambiar contraseña</Link>
+        </p>
         </form>
       </div>
     </div>

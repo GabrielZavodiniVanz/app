@@ -11,7 +11,9 @@ import HomePage from './pages/HomePage.jsx';
 import VideoPage from './pages/VideoPage.jsx';
 import DocumentPage from './pages/DocumentPage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
-import RegisterPage from './pages/RegisterPage.jsx';
+import ChangePasswordPage from './pages/ChangePasswordPage.jsx';
+import ForgotPasswordPage from './pages/ForgotPasswordPage.jsx';
+import ResetPasswordPage from './pages/ResetPasswordPage.jsx';
 
 // Importa as Páginas da Área de Administração
 import ManageVideosPage from './pages/admin/ManageVideosPage.jsx';
@@ -87,8 +89,16 @@ const router = createBrowserRouter([
         element: <LoginPage /> 
       },
       { 
-        path: "/register", 
-        element: <RegisterPage />
+        path: "/change-password", 
+        element: <ChangePasswordPage />
+      },
+      { 
+        path: "/forgot-password", 
+        element: <ForgotPasswordPage />
+      },
+      { 
+        path: "/reset-password", 
+        element: <ResetPasswordPage />
       },
     ]
   }

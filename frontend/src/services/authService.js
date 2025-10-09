@@ -3,13 +3,6 @@ import axios from 'axios';
 // URL base da nossa API de autenticação
 const API_URL = `${import.meta.env.VITE_API_URL?.replace(/\/$/, '')}/api/auth`;
 
-/**
- * Registra um novo usuário.
- * @param {object} userData - Dados do usuário { name, email, password }
- */
-export const registerUser = (userData) => {
-  return axios.post(`${API_URL}/register`, userData);
-};
 
 /**
  * Loga um usuário existente.
@@ -20,4 +13,31 @@ export const loginUser = async (credentials) => {
   const response = await axios.post(`${API_URL}/login`, credentials);
   // Retorna apenas o token para ser usado no AuthContext
   return response.data.token;
+};
+
+/**
+ * Altera a senha de um usuário logado.
+ * @param {object} data - Dados { email, currentPassword, newPassword, confirmPassword }
+ */
+export const changePassword = async (data) => {
+  const response = await axios.put(`${API_URL}/change-password`, data);
+  return response.data;
+};
+
+/**
+ * Solicita recuperação de senha.
+ * @param {string} email - Email do usuário
+ */
+export const forgotPassword = async (email) => {
+  const response = await axios.post(`${API_URL}/forgot-password`, { email });
+  return response.data;
+};
+
+/**
+ * Redefine a senha com token.
+ * @param {object} data - Dados { token, newPassword, confirmPassword }
+ */
+export const resetPassword = async (data) => {
+  const response = await axios.post(`${API_URL}/reset-password`, data);
+  return response.data;
 };

@@ -34,6 +34,14 @@ const User = sequelize.define('User', {
     validate: {
       isIn: [['user', 'admin']]
     }
+  },
+  resetPasswordToken: {
+    type: DataTypes.STRING(255),
+    allowNull: true
+  },
+  resetPasswordExpires: {
+    type: DataTypes.DATE,
+    allowNull: true
   }
 }, {
   tableName: 'users',
