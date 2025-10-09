@@ -148,7 +148,7 @@ router.post('/forgot-password', async (req, res) => {
     // URL para resetar senha
     const resetUrl = process.env.FRONTEND_URL 
       ? `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`
-      : `http://localhost:5173/reset-password?token=${resetToken}`;
+      : `https://www.ninosdeluz.site/reset-password?token=${resetToken}`;
 
     // Resposta imediata para o usuário
     res.status(200).json({
