@@ -14,28 +14,21 @@ class EmailService {
       return;
     }
 
-    // Configuração para Gmail otimizada para produção
+    // Configuração simplificada para Gmail
     this.transporter = nodemailer.createTransport({
       service: 'gmail',
-      host: 'smtp.gmail.com',
-      port: 587,
-      secure: false, // true para 465, false para outras portas
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS // Use App Password para Gmail
       },
-      // Configurações para produção - timeouts otimizados
-      connectionTimeout: 30000, // 30 segundos
-      greetingTimeout: 15000,   // 15 segundos
-      socketTimeout: 30000,     // 30 segundos
-      // Pool de conexões para melhor performance
+      // Configurações básicas
+      connectionTimeout: 10000, // 10 segundos
+      greetingTimeout: 5000,    // 5 segundos
+      socketTimeout: 10000,     // 10 segundos
+      // Pool de conexões
       pool: true,
-      maxConnections: 5,
-      maxMessages: 100,
-      // Configurações de rede
-      tls: {
-        rejectUnauthorized: false
-      }
+      maxConnections: 3,
+      maxMessages: 50
     });
 
     // Verificar conexão com retry automático

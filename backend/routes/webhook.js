@@ -69,16 +69,6 @@ router.post('/kiwify',
         loginUrl: loginUrl
       };
 
-      // Enviar e-mail de boas-vindas de forma assíncrona (não bloquear a resposta)
-      setImmediate(async () => {
-        try {
-          await emailService.sendWelcomeEmail(emailData);
-          console.log(`📧 E-mail enviado com sucesso para: ${customer.email}`);
-        } catch (emailError) {
-          console.error(`❌ Erro ao enviar e-mail para ${customer.email}:`, emailError);
-        }
-      });
-
       // Resposta de sucesso para a Kiwify
       res.status(200).json({
         success: true,
@@ -86,6 +76,13 @@ router.post('/kiwify',
         userId: newUser.id,
         email: customer.email,
         timestamp: new Date().toISOString()
+      });
+
+      // Enviar e-mail após enviar a resposta (não bloquear)
+      emailService.sendWelcomeEmail(emailData).then(() => {
+        console.log(`📧 E-mail enviado com sucesso para: ${customer.email}`);
+      }).catch((emailError) => {
+        console.error(`❌ Erro ao enviar e-mail para ${customer.email}:`, emailError);
       });
 
     } catch (error) {

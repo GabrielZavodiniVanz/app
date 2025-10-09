@@ -150,25 +150,21 @@ router.post('/forgot-password', async (req, res) => {
       ? `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`
       : `http://localhost:5173/reset-password?token=${resetToken}`;
 
-    // Enviar e-mail de forma assíncrona (não bloquear a resposta)
-    setImmediate(async () => {
-      try {
-        await emailService.sendPasswordResetEmail({
-          name: user.name,
-          email: user.email,
-          resetUrl: resetUrl
-        });
-
-        console.log(`✅ E-mail de recuperação enviado para: ${email}`);
-      } catch (emailError) {
-        console.error(`❌ Erro ao enviar e-mail para ${email}:`, emailError);
-      }
-    });
-
     // Resposta imediata para o usuário
     res.status(200).json({
       success: true,
       message: 'Se o email existir, você receberá instruções para recuperar sua senha'
+    });
+
+    // Enviar e-mail após enviar a resposta (não bloquear)
+    emailService.sendPasswordResetEmail({
+      name: user.name,
+      email: user.email,
+      resetUrl: resetUrl
+    }).then(() => {
+      console.log(`✅ E-mail de recuperação enviado para: ${email}`);
+    }).catch((emailError) => {
+      console.error(`❌ Erro ao enviar e-mail para ${email}:`, emailError);
     });
 
   } catch (error) {
@@ -251,6 +247,55 @@ router.post('/reset-password', async (req, res) => {
     res.status(500).json({
       error: 'Internal Server Error',
       message: 'Erro interno do servidor'
+    });
+  }
+});
+
+/**
+ * Endpoint para teste de e-mail (debug)
+ * POST /api/auth/test-email
+ */
+router.post('/test-email', async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ 
+        error: 'Bad Request',
+        message: 'Email é obrigatório' 
+      });
+    }
+
+    // Verificar configuração
+    const hasEmailUser = !!process.env.EMAIL_USER;
+    const hasEmailPass = !!process.env.EMAIL_PASS;
+    
+    console.log(`🔍 Debug - EMAIL_USER configurado: ${hasEmailUser}`);
+    console.log(`🔍 Debug - EMAIL_PASS configurado: ${hasEmailPass}`);
+
+    // Enviar e-mail de teste
+    const result = await emailService.sendTestEmail(email);
+
+    res.status(200).json({
+      success: true,
+      message: 'Test email sent successfully',
+      email: email,
+      emailSent: result.success,
+      debug: {
+        hasEmailUser,
+        hasEmailPass,
+        nodeEnv: process.env.NODE_ENV
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ Erro ao enviar e-mail de teste:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Internal Server Error',
+      message: 'Failed to send test email',
+      errorMessage: error.message,
+      timestamp: new Date().toISOString()
     });
   }
 });
