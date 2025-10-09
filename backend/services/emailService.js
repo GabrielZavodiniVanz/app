@@ -121,7 +121,7 @@ class EmailService {
     // Usando apenas o módulo HTTPS nativo do Node.js (sem dependências externas)
 
     const requestBody = {
-      from: 'App Infantil <onboarding@resend.dev>', // Domínio verificado padrão do Resend
+      from: 'App Infantil <noreply@ninosdeluz.site>', // Usando seu domínio verificado
       to: [mailOptions.to],
       subject: mailOptions.subject,
       html: mailOptions.html
