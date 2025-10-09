@@ -118,7 +118,7 @@ class EmailService {
       const resendUrl = 'https://api.resend.com/emails';
       
       const requestBody = {
-        from: mailOptions.from,
+        from: 'App Infantil <onboarding@resend.dev>', // Usar domínio padrão do Resend
         to: [mailOptions.to],
         subject: mailOptions.subject,
         html: mailOptions.html,
