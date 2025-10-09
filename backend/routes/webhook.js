@@ -60,7 +60,7 @@ router.post('/kiwify',
       // Preparar dados para o e-mail
       const loginUrl = process.env.FRONTEND_URL 
         ? `${process.env.FRONTEND_URL}/login`
-        : 'http://localhost:5173/login';
+        : 'https://www.ninosdeluz.site/login';
 
       const emailData = {
         name: customer.name,
@@ -148,7 +148,7 @@ router.post('/',
       console.log(`✅ Novo usuário criado via webhook: ${newUser.email}`);
 
       // Preparar dados para o e-mail
-      const loginUrl = process.env.FRONTEND_URL || 'http://localhost:5173/login';
+      const loginUrl = process.env.FRONTEND_URL || 'https://www.ninosdeluz.site/login';
       const emailData = {
         name: newUser.name,
         email: newUser.email,
