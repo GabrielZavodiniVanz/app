@@ -237,12 +237,13 @@ router.post('/test-email', async (req, res) => {
       });
     }
 
-    await emailService.sendTestEmail(email);
+    const emailResult = await emailService.sendTestEmail(email);
 
     res.status(200).json({
       success: true,
-      message: 'Test email sent successfully',
-      email: email
+      message: emailResult.success ? 'Test email sent successfully' : 'User created but email failed',
+      email: email,
+      emailSent: emailResult.success
     });
 
   } catch (error) {

@@ -14,23 +14,72 @@ class EmailService {
       return;
     }
 
-    // Configuração para Gmail (você pode mudar para outros provedores)
+    // Configuração para Gmail otimizada para produção
     this.transporter = nodemailer.createTransport({
       service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false, // true para 465, false para outras portas
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS // Use App Password para Gmail
+      },
+      // Configurações para produção - timeouts mais longos
+      connectionTimeout: 60000, // 60 segundos
+      greetingTimeout: 30000,   // 30 segundos
+      socketTimeout: 60000,     // 60 segundos
+      // Pool de conexões para melhor performance
+      pool: true,
+      maxConnections: 5,
+      maxMessages: 100,
+      // Configurações de rede
+      tls: {
+        rejectUnauthorized: false
       }
     });
 
-    // Verificar conexão
-    this.transporter.verify((error, success) => {
-      if (error) {
-        console.error('❌ Erro na configuração do email:', error);
+    // Verificar conexão com retry automático
+    this.verifyConnection();
+  }
+
+  async verifyConnection(retryCount = 0) {
+    const maxRetries = 3;
+    const retryDelay = 5000; // 5 segundos
+
+    try {
+      await this.transporter.verify();
+      console.log('✅ Serviço de email configurado com sucesso');
+    } catch (error) {
+      console.error(`❌ Erro na configuração do email (tentativa ${retryCount + 1}/${maxRetries + 1}):`, error.message);
+      
+      if (retryCount < maxRetries) {
+        console.log(`🔄 Tentando novamente em ${retryDelay/1000} segundos...`);
+        setTimeout(() => {
+          this.verifyConnection(retryCount + 1);
+        }, retryDelay);
       } else {
-        console.log('✅ Servidor de email configurado com sucesso');
+        console.error('❌ Falha ao configurar email após todas as tentativas. E-mails serão ignorados.');
       }
-    });
+    }
+  }
+
+  async sendWithRetry(mailOptions, retryCount = 0) {
+    const maxRetries = 2;
+    const retryDelay = 3000; // 3 segundos
+
+    try {
+      return await this.transporter.sendMail(mailOptions);
+    } catch (error) {
+      console.error(`❌ Erro ao enviar email (tentativa ${retryCount + 1}/${maxRetries + 1}):`, error.message);
+      
+      if (retryCount < maxRetries) {
+        console.log(`🔄 Tentando reenviar em ${retryDelay/1000} segundos...`);
+        await new Promise(resolve => setTimeout(resolve, retryDelay));
+        return await this.sendWithRetry(mailOptions, retryCount + 1);
+      } else {
+        throw error;
+      }
+    }
   }
 
   async sendWelcomeEmail(userData) {
@@ -202,13 +251,14 @@ class EmailService {
         `
       };
 
-      const result = await this.transporter.sendMail(mailOptions);
-      console.log('✅ E-mail enviado com sucesso:', result.messageId);
+      const result = await this.sendWithRetry(mailOptions);
+      console.log('✅ E-mail de boas-vindas enviado:', result.messageId);
       return { success: true, messageId: result.messageId };
       
     } catch (error) {
-      console.error('❌ Erro ao enviar e-mail:', error);
-      throw new Error('Falha ao enviar e-mail de boas-vindas');
+      console.error('❌ Erro ao enviar e-mail de boas-vindas:', error.message);
+      // Não falhar o processo principal por erro de email
+      return { success: false, message: 'Failed to send welcome email' };
     }
   }
 
@@ -226,12 +276,12 @@ class EmailService {
         text: 'Este é um e-mail de teste para verificar se a configuração está funcionando.'
       };
 
-      const result = await this.transporter.sendMail(mailOptions);
+      const result = await this.sendWithRetry(mailOptions);
       console.log('✅ E-mail de teste enviado:', result.messageId);
       return { success: true, messageId: result.messageId };
     } catch (error) {
-      console.error('❌ Erro ao enviar e-mail de teste:', error);
-      throw error;
+      console.error('❌ Erro ao enviar e-mail de teste:', error.message);
+      return { success: false, message: 'Failed to send test email' };
     }
   }
 
@@ -365,12 +415,12 @@ class EmailService {
         `
       };
 
-      const result = await this.transporter.sendMail(mailOptions);
+      const result = await this.sendWithRetry(mailOptions);
       console.log('✅ E-mail de recuperação de senha enviado:', result.messageId);
       return { success: true, messageId: result.messageId };
     } catch (error) {
-      console.error('❌ Erro ao enviar e-mail de recuperação de senha:', error);
-      throw error;
+      console.error('❌ Erro ao enviar e-mail de recuperação de senha:', error.message);
+      return { success: false, message: 'Failed to send password reset email' };
     }
   }
 }
