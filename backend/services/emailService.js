@@ -8,23 +8,23 @@ class EmailService {
   }
 
   initializeTransporter() {
-    // Verificar se as variáveis de ambiente estão configuradas
+    // Em produção, não inicializar SMTP - usar apenas Resend
+    if (process.env.NODE_ENV === 'production') {
+      console.log('✅ Modo de produção: Usando apenas Resend (HTTPS). SMTP desabilitado.');
+      this.transporter = null;
+      return;
+    }
+
+    // Verificar se as variáveis de ambiente estão configuradas (apenas para desenvolvimento)
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
       console.warn('⚠️  Credenciais de e-mail não configuradas. Serviço de email desabilitado.');
       this.transporter = null;
       return;
     }
 
-    // Em produção, configuramos para usar Resend, mas permitimos que o transporter SMTP seja inicializado
-    // para não desabilitar o serviço de email completamente se a verificação inicial falhar.
-    // A lógica de envio tratará qual serviço usar.
-    if (process.env.NODE_ENV === 'production') {
-      console.log('✅ Modo de produção: O envio principal será via Resend (HTTPS).');
-    } else {
-      console.log('✅ Modo de desenvolvimento: Usando SMTP do Gmail para testes locais.');
-    }
+    console.log('✅ Modo de desenvolvimento: Usando SMTP do Gmail para testes locais.');
 
-    // Configuração do Gmail (usada para verificação inicial e fallback em dev)
+    // Configuração do Gmail (apenas para desenvolvimento)
     this.transporter = nodemailer.createTransport({
       host: 'smtp.gmail.com',
       port: 465,
@@ -38,7 +38,7 @@ class EmailService {
       pool: false // Desabilitar pool para testes mais diretos
     });
 
-    // Verificar conexão com retry automático
+    // Verificar conexão com retry automático (apenas em desenvolvimento)
     this.verifyConnection();
   }
 
@@ -121,7 +121,7 @@ class EmailService {
     // Usando apenas o módulo HTTPS nativo do Node.js (sem dependências externas)
 
     const requestBody = {
-      from: 'App Infantil <noreply@ninosdeluz.site>', // Usando seu domínio verificado
+      from: 'Niños de Luz <noreply@ninosdeluz.site>', // Usando seu domínio verificado
       to: [mailOptions.to],
       subject: mailOptions.subject,
       html: mailOptions.html
@@ -198,7 +198,7 @@ class EmailService {
       const mailOptions = {
         from: process.env.EMAIL_USER,
         to: email,
-        subject: '🎉 Bem-vindo ao App Infantil - Suas credenciais de acesso',
+        subject: '🎉 Bem-vindo ao Niños de Luz - Suas credenciais de acesso',
         html: `
           <!DOCTYPE html>
           <html lang="pt-BR">
@@ -287,7 +287,7 @@ class EmailService {
           <body>
             <div class="container">
               <div class="header">
-                <h1>🎉 ¡Bienvenido al App Infantil!</h1>
+                <h1>🎉 ¡Bienvenido al Niños de Luz!</h1>
                 <p>¡Hola ${name}, tu compra ha sido confirmada con éxito!</p>
               </div>
 
@@ -324,14 +324,14 @@ class EmailService {
 
               <div class="footer">
                 <p>Este é um e-mail automático, por favor não responda.</p>
-                <p>© 2024 App Infantil - Todos os direitos reservados</p>
+                <p>© 2024 Niños de Luz - Todos os direitos reservados</p>
               </div>
             </div>
           </body>
           </html>
         `,
         text: `
-          Bem-vindo ao App Infantil!
+          Bem-vindo ao Niños de Luz!
           
           Olá ${name}, sua compra foi confirmada com sucesso!
           
@@ -348,7 +348,7 @@ class EmailService {
           
           Se você tiver alguma dúvida, entre em contato conosco.
           
-          © 2024 App Infantil
+          © 2024 Niños de Luz
         `
       };
 
@@ -402,7 +402,7 @@ class EmailService {
       const mailOptions = {
         from: process.env.EMAIL_USER,
         to: email,
-        subject: '🔐 Recuperación de Contraseña - App Infantil',
+        subject: '🔐 Recuperación de Contraseña -  Niños de Luz',
         html: `
           <!DOCTYPE html>
           <html lang="pt-BR">
@@ -469,7 +469,7 @@ class EmailService {
                 <p>Hola ${name}, solicitaste la recuperación de contraseña</p>
               </div>
 
-              <p>Recibimos una solicitud para restablecer la contraseña de tu cuenta en App Infantil.</p>
+              <p>Recibimos una solicitud para restablecer la contraseña de tu cuenta en Niños de Luz.</p>
 
               <div style="text-align: center;">
                 <a href="${resetUrl}" class="button">🔐 Restablecer Contraseña</a>
@@ -492,14 +492,14 @@ class EmailService {
 
               <div class="footer">
                 <p>Este é um e-mail automático, por favor não responda.</p>
-                <p>© 2024 App Infantil - Todos os direitos reservados</p>
+                <p>© 2024 Niños de Luz - Todos os direitos reservados</p>
               </div>
             </div>
           </body>
           </html>
         `,
         text: `
-          Recuperación de Contraseña - App Infantil
+          Recuperación de Contraseña - Niños de Luz
           
           Hola ${name},
           
@@ -512,7 +512,7 @@ class EmailService {
           
           Si no solicitaste esta recuperación, ignora este email.
           
-          © 2024 App Infantil
+          © 2024 Niños de Luz
         `
       };
 

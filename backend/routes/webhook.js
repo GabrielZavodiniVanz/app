@@ -264,8 +264,8 @@ router.post('/',
   validateWebhookData,
   async (req, res) => {
     try {
-      const { data } = req.body;
-      const { customer } = data;
+      const body = req.body;
+      const customer = body.Customer;
 
       console.log(`🔄 Processando webhook para cliente: ${customer.email}`);
 
@@ -293,7 +293,7 @@ router.post('/',
 
       // Criar novo usuário
       const newUser = await User.create({
-        name: customer.name,
+        name: customer.full_name,
         email: customer.email.toLowerCase(),
         password: hashedPassword,
         role: 'user'
