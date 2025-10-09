@@ -81,11 +81,84 @@ class EmailService {
         return await this.sendWithRetry(mailOptions, retryCount + 1);
       } else {
         console.error(`❌ Falha definitiva ao enviar email para ${mailOptions.to}`);
-        // Como o SMTP falhou, vamos logar o link como último recurso
-        await this.sendViaWebhook(mailOptions);
-        throw error;
+        
+        // Como o SMTP falhou, tentar o método alternativo (Resend)
+        console.log('🔄 Tentando enviar via Resend como alternativa...');
+        try {
+          const resendResult = await this.sendViaResend(mailOptions);
+          // Retornar o resultado do Resend para não quebrar o fluxo
+          return resendResult;
+        } catch (resendError) {
+          // Se o Resend também falhar, logar o link como último recurso
+          await this.sendViaWebhook(mailOptions);
+          // Lançar o erro original do SMTP para manter o log de falha
+          throw error;
+        }
       }
     }
+  }
+
+  // Método alternativo via HTTPS usando Resend
+  async sendViaResend(mailOptions) {
+    console.log('🌐 Tentando envio via Resend...');
+
+    if (!process.env.RESEND_API_KEY) {
+      throw new Error('A variável de ambiente RESEND_API_KEY não está configurada.');
+    }
+
+    const { default: Https } = await import('https-proxy-agent');
+    const agent = new Https.HttpsProxyAgent(process.env.PROXY_URL || '');
+
+    const requestBody = {
+      from: 'App Infantil <onboarding@resend.dev>', // Domínio verificado padrão do Resend
+      to: [mailOptions.to],
+      subject: mailOptions.subject,
+      html: mailOptions.html
+    };
+
+    const postData = JSON.stringify(requestBody);
+
+    const options = {
+      hostname: 'api.resend.com',
+      port: 443,
+      path: '/emails',
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(postData)
+      },
+      agent: agent
+    };
+
+    return new Promise((resolve, reject) => {
+      const req = https.request(options, (res) => {
+        let data = '';
+        res.on('data', (chunk) => { data += chunk; });
+        res.on('end', () => {
+          try {
+            const response = JSON.parse(data);
+            if (res.statusCode >= 200 && res.statusCode < 300) {
+              console.log('✅ E-mail enviado com sucesso via Resend:', response.id);
+              resolve({ messageId: response.id, method: 'resend' });
+            } else {
+              console.error('❌ Erro da API Resend:', response);
+              reject(new Error(`Erro do Resend: ${response.message || 'Erro desconhecido'}`));
+            }
+          } catch (e) {
+            reject(new Error(`Falha ao processar resposta do Resend: ${e.message}`));
+          }
+        });
+      });
+
+      req.on('error', (e) => {
+        console.error('❌ Erro na requisição para o Resend:', e);
+        reject(new Error(`Erro de rede ao contatar o Resend: ${e.message}`));
+      });
+
+      req.write(postData);
+      req.end();
+    });
   }
 
   // Webhook como último recurso - apenas loga a informação
