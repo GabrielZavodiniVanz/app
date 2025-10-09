@@ -252,6 +252,140 @@ router.post('/reset-password', async (req, res) => {
 });
 
 /**
+ * Endpoint para teste específico do Resend
+ * POST /api/auth/test-resend
+ */
+router.post('/test-resend', async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ 
+        error: 'Bad Request',
+        message: 'Email é obrigatório' 
+      });
+    }
+
+    // Verificar se RESEND_API_KEY está configurada
+    const hasResendKey = !!process.env.RESEND_API_KEY;
+    
+    console.log(`🔍 Debug - RESEND_API_KEY configurado: ${hasResendKey}`);
+    console.log(`🔍 Debug - NODE_ENV: ${process.env.NODE_ENV}`);
+
+    if (!hasResendKey) {
+      return res.status(500).json({
+        success: false,
+        error: 'RESEND_API_KEY not configured',
+        message: 'RESEND_API_KEY não está configurada no Render',
+        debug: {
+          hasResendKey,
+          nodeEnv: process.env.NODE_ENV
+        }
+      });
+    }
+
+    // Testar Resend diretamente
+    const https = require('https');
+    const testEmail = {
+      from: 'App Infantil <onboarding@resend.dev>',
+      to: [email],
+      subject: 'Teste - Resend',
+      html: '<h1>Teste do Resend</h1><p>Se você recebeu este e-mail, o Resend está funcionando!</p>'
+    };
+
+    const postData = JSON.stringify(testEmail);
+    
+    const options = {
+      hostname: 'api.resend.com',
+      port: 443,
+      path: '/emails',
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(postData)
+      }
+    };
+
+    const req2 = https.request(options, (res2) => {
+      let data = '';
+      
+      res2.on('data', (chunk) => {
+        data += chunk;
+      });
+      
+      res2.on('end', () => {
+        try {
+          const response = JSON.parse(data);
+          if (res2.statusCode === 200) {
+            res.status(200).json({
+              success: true,
+              message: 'Resend test email sent successfully',
+              email: email,
+              resendResponse: response,
+              debug: {
+                hasResendKey,
+                nodeEnv: process.env.NODE_ENV,
+                statusCode: res2.statusCode
+              }
+            });
+          } else {
+            res.status(500).json({
+              success: false,
+              error: 'Resend API error',
+              message: response.message || 'Unknown error',
+              resendResponse: response,
+              debug: {
+                hasResendKey,
+                nodeEnv: process.env.NODE_ENV,
+                statusCode: res2.statusCode
+              }
+            });
+          }
+        } catch (error) {
+          res.status(500).json({
+            success: false,
+            error: 'Parse error',
+            message: error.message,
+            rawResponse: data,
+            debug: {
+              hasResendKey,
+              nodeEnv: process.env.NODE_ENV,
+              statusCode: res2.statusCode
+            }
+          });
+        }
+      });
+    });
+
+    req2.on('error', (error) => {
+      res.status(500).json({
+        success: false,
+        error: 'Request error',
+        message: error.message,
+        debug: {
+          hasResendKey,
+          nodeEnv: process.env.NODE_ENV
+        }
+      });
+    });
+
+    req2.write(postData);
+    req2.end();
+
+  } catch (error) {
+    console.error('❌ Erro geral no teste do Resend:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Internal Server Error',
+      message: 'Failed to test Resend',
+      errorMessage: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+/**
  * Endpoint para teste de e-mail (debug)
  * POST /api/auth/test-email
  */
