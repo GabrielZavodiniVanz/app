@@ -15,15 +15,16 @@ class EmailService {
       return;
     }
 
-    // Em produção, não inicializamos o transporter SMTP, pois usaremos apenas Resend.
+    // Em produção, configuramos para usar Resend, mas permitimos que o transporter SMTP seja inicializado
+    // para não desabilitar o serviço de email completamente se a verificação inicial falhar.
+    // A lógica de envio tratará qual serviço usar.
     if (process.env.NODE_ENV === 'production') {
-      console.log('✅ Modo de produção: O envio de e-mails será feito via Resend (HTTPS).');
-      this.transporter = null; // Garante que o SMTP não será usado
-      return;
+      console.log('✅ Modo de produção: O envio principal será via Resend (HTTPS).');
+    } else {
+      console.log('✅ Modo de desenvolvimento: Usando SMTP do Gmail para testes locais.');
     }
 
-    // Configuração do Gmail apenas para ambiente de desenvolvimento
-    console.log('✅ Modo de desenvolvimento: Configurando SMTP do Gmail para testes locais.');
+    // Configuração do Gmail (usada para verificação inicial e fallback em dev)
     this.transporter = nodemailer.createTransport({
       host: 'smtp.gmail.com',
       port: 465,
@@ -73,6 +74,11 @@ class EmailService {
     if (process.env.NODE_ENV === 'production') {
       console.log('🔄 Produção: Pulando SMTP e enviando diretamente via Resend...');
       try {
+        // Verifica se a chave do Resend existe antes de tentar
+        if (!process.env.RESEND_API_KEY) {
+          console.error('❌ ERRO CRÍTICO: RESEND_API_KEY não está configurada em produção!');
+          throw new Error('A variável de ambiente RESEND_API_KEY não está configurada.');
+        }
         return await this.sendViaResend(mailOptions);
       } catch (resendError) {
         console.error(`❌ Falha no envio via Resend: ${resendError.message}`);
