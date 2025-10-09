@@ -15,31 +15,18 @@ class EmailService {
       return;
     }
 
-    // Configuração específica para Gmail no Render
+    // Configuração para Gmail na porta 465 (SSL), uma alternativa para a porta 587
     this.transporter = nodemailer.createTransport({
       host: 'smtp.gmail.com',
-      port: 587,
-      secure: false, // true para 465, false para outras portas
+      port: 465,
+      secure: true, // Usar SSL/TLS
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS // Use App Password para Gmail
+        pass: process.env.EMAIL_PASS // Sua "Senha de app"
       },
-      // Configurações específicas para Render
-      connectionTimeout: 30000, // 30 segundos
-      greetingTimeout: 15000,   // 15 segundos
-      socketTimeout: 30000,     // 30 segundos
-      // Desabilitar pool para evitar problemas de conexão
-      pool: false,
-      // Configurações de rede para Render
-      tls: {
-        ciphers: 'SSLv3',
-        rejectUnauthorized: false
-      },
-      // Configurações adicionais para Render
-      ignoreTLS: false,
-      requireTLS: true,
-      // Configurações de proxy (se necessário)
-      proxy: process.env.PROXY_URL || undefined
+      connectionTimeout: 20000, // 20 segundos
+      socketTimeout: 20000,
+      pool: false // Desabilitar pool para testes mais diretos
     });
 
     // Verificar conexão com retry automático
@@ -88,184 +75,23 @@ class EmailService {
         to: mailOptions.to
       });
       
-      // Se for erro de conexão e estivermos em produção, tentar método alternativo
-      if (error.code === 'ETIMEDOUT' && process.env.NODE_ENV === 'production' && retryCount === 0) {
-        console.log('🔄 Tentando método alternativo via HTTPS...');
-        try {
-          return await this.sendViaHTTPS(mailOptions);
-        } catch (httpsError) {
-          console.error('❌ Método HTTPS também falhou:', httpsError.message);
-        }
-      }
-      
       if (retryCount < maxRetries) {
         console.log(`🔄 Tentando reenviar em ${retryDelay/1000} segundos... (delay progressivo)`);
         await new Promise(resolve => setTimeout(resolve, retryDelay));
         return await this.sendWithRetry(mailOptions, retryCount + 1);
       } else {
         console.error(`❌ Falha definitiva ao enviar email para ${mailOptions.to}`);
+        // Como o SMTP falhou, vamos logar o link como último recurso
+        await this.sendViaWebhook(mailOptions);
         throw error;
       }
     }
   }
 
-  // Método alternativo via HTTPS (para quando SMTP está bloqueado)
-  async sendViaHTTPS(mailOptions) {
-    console.log('🌐 Tentando envio via Resend como alternativa ao SMTP...');
-    
-    try {
-      // Usar Resend (gratuito até 3.000 e-mails/mês)
-      const resendUrl = 'https://api.resend.com/emails';
-      
-      const requestBody = {
-        from: 'App Infantil <onboarding@resend.dev>', // Usar domínio padrão do Resend
-        to: [mailOptions.to],
-        subject: mailOptions.subject,
-        html: mailOptions.html,
-        text: mailOptions.text || mailOptions.html.replace(/<[^>]*>/g, '')
-      };
-
-      // Fazer requisição para Resend
-      const response = await this.makeResendRequest(resendUrl, requestBody);
-      
-      console.log('✅ E-mail enviado via Resend:', response.id);
-      return { messageId: response.id, method: 'resend' };
-      
-    } catch (error) {
-      console.error('❌ Resend também falhou:', error.message);
-      
-      // Como último recurso, vamos usar um webhook simples
-      console.log('🔄 Tentando webhook de notificação como último recurso...');
-      return await this.sendViaWebhook(mailOptions);
-    }
-  }
-
-  createEmailBody(mailOptions) {
-    const { from, to, subject, html, text } = mailOptions;
-    
-    const emailBody = [
-      `From: ${from}`,
-      `To: ${to}`,
-      `Subject: ${subject}`,
-      `MIME-Version: 1.0`,
-      `Content-Type: multipart/alternative; boundary="boundary123"`,
-      ``,
-      `--boundary123`,
-      `Content-Type: text/plain; charset=utf-8`,
-      ``,
-      text || html.replace(/<[^>]*>/g, ''), // Remove HTML tags for text version
-      ``,
-      `--boundary123`,
-      `Content-Type: text/html; charset=utf-8`,
-      ``,
-      html,
-      ``,
-      `--boundary123--`
-    ].join('\n');
-
-    return emailBody;
-  }
-
-  async makeResendRequest(url, body) {
-    return new Promise((resolve, reject) => {
-      const postData = JSON.stringify(body);
-      
-      const options = {
-        hostname: 'api.resend.com',
-        port: 443,
-        path: '/emails',
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-          'Content-Type': 'application/json',
-          'Content-Length': Buffer.byteLength(postData)
-        }
-      };
-
-      const req = https.request(options, (res) => {
-        let data = '';
-        
-        res.on('data', (chunk) => {
-          data += chunk;
-        });
-        
-        res.on('end', () => {
-          try {
-            const response = JSON.parse(data);
-            if (res.statusCode === 200) {
-              resolve(response);
-            } else {
-              reject(new Error(`Resend error: ${response.message || data}`));
-            }
-          } catch (error) {
-            reject(new Error(`Failed to parse Resend response: ${error.message}`));
-          }
-        });
-      });
-
-      req.on('error', (error) => {
-        reject(error);
-      });
-
-      req.write(postData);
-      req.end();
-    });
-  }
-
-  async makeHTTPSRequest(url, body) {
-    return new Promise((resolve, reject) => {
-      const postData = JSON.stringify(body);
-      
-      const options = {
-        hostname: 'api.emailjs.com',
-        port: 443,
-        path: '/api/v1.0/email/send',
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Content-Length': Buffer.byteLength(postData)
-        }
-      };
-
-      const req = https.request(options, (res) => {
-        let data = '';
-        
-        res.on('data', (chunk) => {
-          data += chunk;
-        });
-        
-        res.on('end', () => {
-          try {
-            // EmailJS retorna texto simples, não JSON
-            if (res.statusCode === 200) {
-              console.log('✅ EmailJS response:', data);
-              resolve({ success: true, message: data });
-            } else {
-              reject(new Error(`EmailJS error: ${data}`));
-            }
-          } catch (error) {
-            reject(new Error(`Failed to parse EmailJS response: ${error.message}`));
-          }
-        });
-      });
-
-      req.on('error', (error) => {
-        reject(error);
-      });
-
-      req.write(postData);
-      req.end();
-    });
-  }
-
   // Webhook como último recurso - apenas loga a informação
   async sendViaWebhook(mailOptions) {
-    console.log('📝 [WEBHOOK FALLBACK] E-mail não pôde ser enviado, mas aqui estão os dados:');
-    console.log(`📧 Para: ${mailOptions.to}`);
-    console.log(`📝 Assunto: ${mailOptions.subject}`);
-    console.log(`🔗 Link de reset: ${this.extractResetUrl(mailOptions.html)}`);
-    
-    // Simular sucesso para não quebrar o fluxo
+    console.log('📝 [BACKUP] SMTP falhou. O link de recuperação está abaixo:');
+    console.log(`🔗 Link de reset para ${mailOptions.to}: ${this.extractResetUrl(mailOptions.html)}`);
     return { messageId: 'webhook-fallback', method: 'webhook' };
   }
 
