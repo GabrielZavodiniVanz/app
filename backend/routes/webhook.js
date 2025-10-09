@@ -104,12 +104,7 @@ router.post('/kiwify',
  * POST /api/webhook/test
  */
 router.post('/test', async (req, res) => {
-  // Apenas permitir em ambiente de desenvolvimento
-  if (process.env.NODE_ENV === 'production') {
-    return res.status(403).json({ 
-      message: 'Test endpoint not available in production' 
-    });
-  }
+  // Permitir em produção para testes do webhook
 
   try {
     const { name, email } = req.body;
