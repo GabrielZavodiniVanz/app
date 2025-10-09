@@ -125,7 +125,8 @@ const validateWebhookData = (req, res, next) => {
     event: body.webhook_event_type,
     customerEmail: customer.email,
     customerName: customer.full_name,
-    orderId: body.order_id
+    orderId: body.order_id,
+    productsCount: body.Products ? body.Products.length : (body.products ? body.products.length : 0)
   });
 
   next();

@@ -4,6 +4,7 @@ const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const emailService = require('../services/emailService');
 const passwordService = require('../services/passwordService');
+const accessLevelService = require('../services/accessLevelService');
 const { 
   validateKiwifyWebhook, 
   logWebhookData, 
@@ -21,9 +22,13 @@ router.post('/kiwify',
   async (req, res) => {
     try {
       const body = req.body;
-      const customer = body.Customer;
+      const customer = body.Customer || body.customer;
 
       console.log(`🔄 Processando webhook para cliente: ${customer.email}`);
+
+      // Determinar nível de acesso baseado nos produtos comprados
+      const accessLevel = accessLevelService.determineAccessLevel(body.Products || body.products);
+      console.log(`🎯 Nível de acesso determinado: ${accessLevel}`);
 
       // Verificar se o usuário já existe
       const existingUser = await User.findOne({ 
@@ -32,10 +37,21 @@ router.post('/kiwify',
 
       if (existingUser) {
         console.log(`ℹ️ Usuário já existe: ${customer.email}`);
+        
+        // Atualizar nível de acesso do usuário existente se necessário
+        if (existingUser.accessLevel !== accessLevel) {
+          await User.update(
+            { accessLevel: accessLevel },
+            { where: { id: existingUser.id } }
+          );
+          console.log(`🔄 Nível de acesso atualizado para ${accessLevel}`);
+        }
+        
         return res.status(200).json({ 
           message: 'User already exists',
           userId: existingUser.id,
-          email: customer.email
+          email: customer.email,
+          accessLevel: accessLevel
         });
       }
 
@@ -52,7 +68,8 @@ router.post('/kiwify',
         name: customer.full_name.trim(),
         email: customer.email.toLowerCase(),
         password: hashedPassword,
-        role: 'user'
+        role: 'user',
+        accessLevel: accessLevel
       });
 
       console.log(`✅ Usuário criado com sucesso: ${newUser.id}`);
@@ -75,6 +92,7 @@ router.post('/kiwify',
         message: 'User created successfully',
         userId: newUser.id,
         email: customer.email,
+        accessLevel: accessLevel,
         timestamp: new Date().toISOString()
       });
 
@@ -111,9 +129,13 @@ router.post('/',
   async (req, res) => {
     try {
       const body = req.body;
-      const customer = body.Customer;
+      const customer = body.Customer || body.customer;
 
       console.log(`🔄 Processando webhook para cliente: ${customer.email}`);
+
+      // Determinar nível de acesso baseado nos produtos comprados
+      const accessLevel = accessLevelService.determineAccessLevel(body.Products || body.products);
+      console.log(`🎯 Nível de acesso determinado: ${accessLevel}`);
 
       // Verificar se o usuário já existe
       const existingUser = await User.findOne({ 
@@ -122,10 +144,21 @@ router.post('/',
 
       if (existingUser) {
         console.log(`ℹ️ Usuário já existe: ${customer.email}`);
+        
+        // Atualizar nível de acesso do usuário existente se necessário
+        if (existingUser.accessLevel !== accessLevel) {
+          await User.update(
+            { accessLevel: accessLevel },
+            { where: { id: existingUser.id } }
+          );
+          console.log(`🔄 Nível de acesso atualizado para ${accessLevel}`);
+        }
+        
         return res.status(200).json({ 
           message: 'User already exists',
           userId: existingUser.id,
-          email: customer.email
+          email: customer.email,
+          accessLevel: accessLevel
         });
       }
 
@@ -142,7 +175,8 @@ router.post('/',
         name: customer.full_name,
         email: customer.email.toLowerCase(),
         password: hashedPassword,
-        role: 'user'
+        role: 'user',
+        accessLevel: accessLevel
       });
 
       console.log(`✅ Novo usuário criado via webhook: ${newUser.email}`);
@@ -170,6 +204,7 @@ router.post('/',
         message: 'User created successfully',
         userId: newUser.id,
         email: customer.email,
+        accessLevel: accessLevel,
         timestamp: new Date().toISOString()
       });
 

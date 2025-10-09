@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createVideo } from '../../services/contentService';
+import AccessLevelSelector from '../../components/AccessLevelSelector';
 import toast from 'react-hot-toast';
 import styles from './AdminPages.module.css';
 
@@ -11,7 +12,9 @@ function VideoFormPage() {
   const [videoFile, setVideoFile] = useState(null);
   const [urlVideo, setUrlVideo] = useState('');
   const [imageFile, setImageFile] = useState(null);
+  const [accessLevel, setAccessLevel] = useState('BASICO');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -44,8 +47,23 @@ function VideoFormPage() {
       formData.append('imageFile', imageFile);
     }
 
+    // Adiciona o nível de acesso
+    formData.append('accessLevel', accessLevel);
+
     try {
+      // Simular progresso de upload
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => {
+          if (prev >= 90) return prev;
+          return prev + Math.random() * 10;
+        });
+      }, 500);
+
       await createVideo(formData);
+      
+      clearInterval(progressInterval);
+      setUploadProgress(100);
+      
       toast.success('¡Video agregado con éxito!');
       navigate('/admin/videos');
     } catch (err) {
@@ -53,6 +71,7 @@ function VideoFormPage() {
       console.error(err);
     } finally {
       setIsSubmitting(false);
+      setUploadProgress(0);
     }
   };
 
@@ -103,10 +122,30 @@ function VideoFormPage() {
           <label htmlFor="imageFile">Imagem de Capa (Opcional)</label>
           <input type="file" id="imageFile" accept="image/*" onChange={(e) => setImageFile(e.target.files[0])} />
         </div>
+
+        {/* SELETOR DE NÍVEL DE ACESSO */}
+        <AccessLevelSelector
+          selectedLevel={accessLevel}
+          onChange={setAccessLevel}
+        />
         
         <button type="submit" disabled={isSubmitting} className={styles.submitButton}>
           {isSubmitting ? 'Enviando...' : 'Salvar Vídeo'}
         </button>
+        
+        {isSubmitting && (
+          <div className={styles.progressContainer}>
+            <div className={styles.progressBar}>
+              <div 
+                className={styles.progressFill} 
+                style={{ width: `${uploadProgress}%` }}
+              ></div>
+            </div>
+            <p className={styles.progressText}>
+              Enviando vídeo... {Math.round(uploadProgress)}%
+            </p>
+          </div>
+        )}
       </form>
     </div>
   );

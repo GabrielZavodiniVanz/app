@@ -8,6 +8,7 @@ const authMiddleware = require('../middleware/authMiddleware');
 const adminMiddleware = require('../middleware/adminMiddleware');
 const upload = require('../middleware/uploadMiddleware');
 const cloudinary = require('../config/cloudinaryConfig');
+const accessLevelService = require('../services/accessLevelService');
 
 // ==========================================================
 // FUNÇÕES AUXILIARES
@@ -63,16 +64,21 @@ const removeFromCloudinary = async (url, resourceType = 'image') => {
 // ==========================================================
 
 /**
- * GET /videos - Listar todos os vídeos
+ * GET /videos - Listar vídeos baseado no nível de acesso do usuário
  */
-router.get('/videos', async (req, res) => {
+router.get('/videos', authMiddleware, async (req, res) => {
   try {
+    const userAccessLevel = req.user.accessLevel;
+    console.log(`🎯 Buscando vídeos para nível de acesso: ${userAccessLevel}`);
+
+    // Buscar vídeos com filtragem por nível de acesso
     const videos = await Video.findAll({ 
       order: [['createdAt', 'DESC']],
-      attributes: ['id', 'titulo', 'descripcion', 'urlVideo', 'urlImagen', 'createdAt']
+      attributes: ['id', 'titulo', 'descripcion', 'urlVideo', 'urlImagen', 'createdAt', 'accessLevel'],
+      where: accessLevelService.buildAccessFilter(userAccessLevel)
     });
     
-    console.log(`✅ Listados ${videos.length} vídeos`);
+    console.log(`✅ Listados ${videos.length} vídeos acessíveis para nível ${userAccessLevel}`);
     res.json(videos);
     
   } catch (error) {
@@ -85,16 +91,21 @@ router.get('/videos', async (req, res) => {
 });
 
 /**
- * GET /documentos - Listar todos os documentos
+ * GET /documentos - Listar documentos baseado no nível de acesso do usuário
  */
-router.get('/documentos', async (req, res) => {
+router.get('/documentos', authMiddleware, async (req, res) => {
   try {
+    const userAccessLevel = req.user.accessLevel;
+    console.log(`🎯 Buscando documentos para nível de acesso: ${userAccessLevel}`);
+
+    // Buscar documentos com filtragem por nível de acesso
     const documents = await Document.findAll({ 
       order: [['createdAt', 'DESC']],
-      attributes: ['id', 'titulo', 'descripcion', 'urlDocumento', 'urlImagen', 'createdAt']
+      attributes: ['id', 'titulo', 'descripcion', 'urlDocumento', 'urlImagen', 'createdAt', 'accessLevel'],
+      where: accessLevelService.buildAccessFilter(userAccessLevel)
     });
     
-    console.log(`✅ Listados ${documents.length} documentos`);
+    console.log(`✅ Listados ${documents.length} documentos acessíveis para nível ${userAccessLevel}`);
     res.json(documents);
     
   } catch (error) {
@@ -227,6 +238,37 @@ router.get('/documentos/:id/download', authMiddleware, async (req, res) => {
 });
 
 // ==========================================================
+// ROTAS DE ADMINISTRAÇÃO - NÍVEIS DE ACESSO
+// ==========================================================
+
+/**
+ * GET /access-levels - Obter todos os níveis de acesso disponíveis (Admin)
+ */
+router.get('/access-levels', [authMiddleware, adminMiddleware], async (req, res) => {
+  try {
+    const accessLevels = accessLevelService.getAllAccessLevels();
+    const hierarchy = accessLevelService.getAccessLevelHierarchy();
+    
+    const formattedLevels = accessLevels.map(level => ({
+      value: level,
+      label: level.replace('_', ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase()),
+      hierarchy: hierarchy[level]
+    }));
+
+    res.json({
+      accessLevels: formattedLevels,
+      hierarchy: hierarchy
+    });
+  } catch (error) {
+    console.error("❌ Erro ao buscar níveis de acesso:", error);
+    res.status(500).json({ 
+      message: 'Erro ao buscar níveis de acesso',
+      code: 'FETCH_ACCESS_LEVELS_ERROR'
+    });
+  }
+});
+
+// ==========================================================
 // ROTAS DE ADMINISTRAÇÃO - VÍDEOS
 // ==========================================================
 
@@ -234,9 +276,14 @@ router.get('/documentos/:id/download', authMiddleware, async (req, res) => {
  * POST /videos - Criar novo vídeo (Admin)
  */
 router.post('/videos', [authMiddleware, adminMiddleware, upload.fields([
-  { name: 'videoFile', maxCount: 1 }, 
+  { name: 'videoFile', maxCount: 1 },
   { name: 'imageFile', maxCount: 1 }
 ])], async (req, res) => {
+  // Timeout de 5 minutos para uploads grandes
+  req.setTimeout(300000);
+  
+  console.log(`📹 Criando vídeo: ${req.body.titulo} por ${req.user.email}`);
+  
   try {
     const { titulo, descripcion, urlVideo } = req.body;
     
@@ -274,15 +321,27 @@ router.post('/videos', [authMiddleware, adminMiddleware, upload.fields([
       });
     }
     
+    // Processar nível de acesso
+    const accessLevel = req.body.accessLevel || 'BASICO';
+    const validLevels = accessLevelService.getAllAccessLevels();
+    
+    if (!validLevels.includes(accessLevel)) {
+      return res.status(400).json({
+        message: 'Nível de acesso inválido',
+        code: 'INVALID_ACCESS_LEVEL'
+      });
+    }
+
     // Criar vídeo
     const novoVideo = await Video.create({
       titulo: titulo.trim(),
       descripcion: descripcion ? descripcion.trim() : null,
       urlVideo: videoPath,
-      urlImagen: imagePath
+      urlImagen: imagePath,
+      accessLevel: accessLevel
     });
     
-    console.log(`✅ Vídeo criado: ${titulo} por ${req.user.email}`);
+    console.log(`✅ Vídeo criado: ${titulo} com nível ${accessLevel} por ${req.user.email}`);
     res.status(201).json({
       message: 'Vídeo criado com sucesso',
       video: novoVideo
@@ -357,14 +416,23 @@ router.put('/videos/:id', [authMiddleware, adminMiddleware, upload.fields([
       }
     }
     
+    // Processar nível de acesso se fornecido
+    const accessLevel = req.body.accessLevel;
+    if (accessLevel !== undefined) {
+      const validLevels = accessLevelService.getAllAccessLevels();
+      if (validLevels.includes(accessLevel)) {
+        dataToUpdate.accessLevel = accessLevel;
+      }
+    }
+
     // Atualizar vídeo
     await Video.update(dataToUpdate, { where: { id } });
     const updatedVideo = await Video.findByPk(id);
     
-    console.log(`✅ Vídeo atualizado: ${updatedVideo.titulo} por ${req.user.email}`);
+    console.log(`✅ Vídeo atualizado: ${updatedVideo.titulo} com nível ${updatedVideo.accessLevel} por ${req.user.email}`);
     res.json({ 
       message: 'Vídeo atualizado com sucesso', 
-      video: updatedVideo 
+      video: updatedVideo
     });
     
   } catch (error) {
@@ -433,6 +501,11 @@ router.post('/documentos', [authMiddleware, adminMiddleware, upload.fields([
   { name: 'docFile', maxCount: 1 }, 
   { name: 'imageFile', maxCount: 1 }
 ])], async (req, res) => {
+  // Timeout de 5 minutos para uploads grandes
+  req.setTimeout(300000);
+  
+  console.log(`📄 Criando documento: ${req.body.titulo} por ${req.user.email}`);
+  
   try {
     const { titulo, descripcion, urlDocumento } = req.body;
     
@@ -464,21 +537,33 @@ router.post('/documentos', [authMiddleware, adminMiddleware, upload.fields([
     } else if (urlDocumento && urlDocumento.trim() !== '') {
       docPath = urlDocumento.trim();
     } else {
-      return res.status(400).json({ 
+      return res.status(400).json({
         message: 'É necessário enviar um arquivo de documento ou fornecer uma URL',
         code: 'NO_DOCUMENT_SOURCE'
       });
     }
     
+    // Processar nível de acesso
+    const accessLevel = req.body.accessLevel || 'BASICO';
+    const validLevels = accessLevelService.getAllAccessLevels();
+    
+    if (!validLevels.includes(accessLevel)) {
+      return res.status(400).json({
+        message: 'Nível de acesso inválido',
+        code: 'INVALID_ACCESS_LEVEL'
+      });
+    }
+
     // Criar documento
     const novoDocumento = await Document.create({
       titulo: titulo.trim(),
       descripcion: descripcion ? descripcion.trim() : null,
       urlDocumento: docPath,
-      urlImagen: imagePath
+      urlImagen: imagePath,
+      accessLevel: accessLevel
     });
     
-    console.log(`✅ Documento criado: ${titulo} por ${req.user.email}`);
+    console.log(`✅ Documento criado: ${titulo} com nível ${accessLevel} por ${req.user.email}`);
     res.status(201).json({
       message: 'Documento criado com sucesso',
       document: novoDocumento
@@ -553,14 +638,23 @@ router.put('/documentos/:id', [authMiddleware, adminMiddleware, upload.fields([
       }
     }
     
+    // Processar nível de acesso se fornecido
+    const accessLevel = req.body.accessLevel;
+    if (accessLevel !== undefined) {
+      const validLevels = accessLevelService.getAllAccessLevels();
+      if (validLevels.includes(accessLevel)) {
+        dataToUpdate.accessLevel = accessLevel;
+      }
+    }
+
     // Atualizar documento
     await Document.update(dataToUpdate, { where: { id } });
     const updatedDocument = await Document.findByPk(id);
     
-    console.log(`✅ Documento atualizado: ${updatedDocument.titulo} por ${req.user.email}`);
+    console.log(`✅ Documento atualizado: ${updatedDocument.titulo} com nível ${updatedDocument.accessLevel} por ${req.user.email}`);
     res.json({ 
       message: 'Documento atualizado com sucesso', 
-      document: updatedDocument 
+      document: updatedDocument
     });
     
   } catch (error) {

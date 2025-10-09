@@ -31,6 +31,14 @@ const Video = sequelize.define('Video', {
     validate: {
       isUrl: true
     }
+  },
+  accessLevel: {
+    type: DataTypes.ENUM('nenhum', 'BASICO', 'INTERMEDIARIO', 'AVANCADO', 'ACESSO_COMPLETO'),
+    defaultValue: 'BASICO',
+    allowNull: false,
+    validate: {
+      isIn: [['nenhum', 'BASICO', 'INTERMEDIARIO', 'AVANCADO', 'ACESSO_COMPLETO']]
+    }
   }
 }, {
   tableName: 'videos',

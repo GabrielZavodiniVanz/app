@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createDocument } from '../../services/contentService';
+import AccessLevelSelector from '../../components/AccessLevelSelector';
 import toast from 'react-hot-toast';
 import styles from './AdminPages.module.css';
 
@@ -9,7 +10,9 @@ function DocumentFormPage() {
   const [descripcion, setDescripcion] = useState('');
   const [docFile, setDocFile] = useState(null);
   const [imageFile, setImageFile] = useState(null); // NOVO
+  const [accessLevel, setAccessLevel] = useState('BASICO');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -30,8 +33,23 @@ function DocumentFormPage() {
       formData.append('imageFile', imageFile);
     }
 
+    // Adiciona o nível de acesso
+    formData.append('accessLevel', accessLevel);
+
     try {
+      // Simular progresso de upload
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => {
+          if (prev >= 90) return prev;
+          return prev + Math.random() * 10;
+        });
+      }, 500);
+
       await createDocument(formData);
+      
+      clearInterval(progressInterval);
+      setUploadProgress(100);
+      
       toast.success('¡Documento agregado con éxito!');
       navigate('/admin/documentos');
     } catch (err) {
@@ -39,6 +57,7 @@ function DocumentFormPage() {
       console.error(err);
     } finally {
       setIsSubmitting(false);
+      setUploadProgress(0);
     }
   };
 
@@ -63,9 +82,30 @@ function DocumentFormPage() {
           <label htmlFor="imageFile">Imagem de Capa (Opcional)</label>
           <input type="file" id="imageFile" accept="image/*" onChange={(e) => setImageFile(e.target.files[0])} />
         </div>
+
+        {/* SELETOR DE NÍVEL DE ACESSO */}
+        <AccessLevelSelector
+          selectedLevel={accessLevel}
+          onChange={setAccessLevel}
+        />
+
         <button type="submit" disabled={isSubmitting} className={styles.submitButton}>
           {isSubmitting ? 'Enviando...' : 'Salvar Documento'}
         </button>
+        
+        {isSubmitting && (
+          <div className={styles.progressContainer}>
+            <div className={styles.progressBar}>
+              <div 
+                className={styles.progressFill} 
+                style={{ width: `${uploadProgress}%` }}
+              ></div>
+            </div>
+            <p className={styles.progressText}>
+              Enviando documento... {Math.round(uploadProgress)}%
+            </p>
+          </div>
+        )}
       </form>
     </div>
   );

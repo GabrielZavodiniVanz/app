@@ -126,3 +126,16 @@ export const downloadDocument = async (id) => {
   
   return await response.blob();
 };
+
+// ==========================================================
+// --- FUNÇÕES DE NÍVEIS DE ACESSO ---
+// ==========================================================
+
+/**
+ * Busca todos os níveis de acesso disponíveis. (Rota Protegida por Admin)
+ * @returns {Promise<Object>} Lista de níveis de acesso e hierarquia.
+ */
+export const getAccessLevels = async () => {
+  const response = await apiClient.get('/content/access-levels');
+  return response.data;
+};
