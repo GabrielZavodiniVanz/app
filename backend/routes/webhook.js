@@ -20,8 +20,8 @@ router.post('/kiwify',
   validateWebhookData,
   async (req, res) => {
     try {
-      const { data } = req.body;
-      const { customer } = data;
+      const body = req.body;
+      const customer = body.Customer;
 
       console.log(`🔄 Processando webhook para cliente: ${customer.email}`);
 
@@ -49,7 +49,7 @@ router.post('/kiwify',
 
       // Criar novo usuário
       const newUser = await User.create({
-        name: customer.name.trim(),
+        name: customer.full_name.trim(),
         email: customer.email.toLowerCase(),
         password: hashedPassword,
         role: 'user'
