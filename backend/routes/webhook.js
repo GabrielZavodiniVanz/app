@@ -341,4 +341,107 @@ router.post('/',
   }
 );
 
+/**
+ * Endpoint de teste para simular webhook da Kiwify
+ * POST /api/webhook/test
+ */
+router.post('/test', async (req, res) => {
+  try {
+    const { email, name } = req.body;
+    
+    if (!email || !name) {
+      return res.status(400).json({
+        error: 'Bad Request',
+        message: 'Email e nome são obrigatórios'
+      });
+    }
+
+    console.log(`🧪 Teste de webhook solicitado para: ${email}`);
+
+    // Simular dados do webhook da Kiwify
+    const mockWebhookData = {
+      order_id: `test-${Date.now()}`,
+      order_status: 'paid',
+      webhook_event_type: 'order_approved',
+      Customer: {
+        full_name: name,
+        email: email,
+        mobile: '+5511999999999'
+      }
+    };
+
+    // Processar como se fosse um webhook real
+    const customer = mockWebhookData.Customer;
+    
+    console.log(`🔄 Processando webhook de teste para cliente: ${customer.email}`);
+
+    // Verificar se o usuário já existe
+    const existingUser = await User.findOne({ 
+      where: { email: customer.email.toLowerCase() } 
+    });
+
+    if (existingUser) {
+      console.log(`ℹ️ Usuário já existe: ${customer.email}`);
+      return res.status(200).json({ 
+        message: 'User already exists',
+        userId: existingUser.id,
+        email: customer.email
+      });
+    }
+
+    // Gerar senha segura
+    const generatedPassword = passwordService.generateSecurePassword();
+    console.log(`🔐 Senha gerada para ${customer.email}`);
+
+    // Hash da senha
+    const salt = await bcrypt.genSalt(12);
+    const hashedPassword = await bcrypt.hash(generatedPassword, salt);
+
+    // Criar novo usuário
+    const newUser = await User.create({
+      name: customer.full_name,
+      email: customer.email.toLowerCase(),
+      password: hashedPassword,
+      role: 'user'
+    });
+
+    console.log(`✅ Novo usuário criado via teste: ${newUser.email}`);
+
+    // Preparar dados para o e-mail
+    const loginUrl = process.env.FRONTEND_URL || 'http://localhost:5173/login';
+    const emailData = {
+      name: newUser.name,
+      email: newUser.email,
+      password: generatedPassword,
+      loginUrl: loginUrl
+    };
+
+    // Enviar e-mail de boas-vindas
+    try {
+      await emailService.sendWelcomeEmail(emailData);
+      console.log(`📧 E-mail de teste enviado com sucesso para: ${customer.email}`);
+    } catch (emailError) {
+      console.error(`❌ Erro ao enviar e-mail de teste para ${customer.email}:`, emailError);
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'Test webhook processed successfully',
+      userId: newUser.id,
+      email: customer.email,
+      password: generatedPassword, // Apenas para teste
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('❌ Erro ao processar webhook de teste:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Internal Server Error',
+      message: 'Failed to process test webhook',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 module.exports = router;
