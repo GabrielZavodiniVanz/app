@@ -65,35 +65,35 @@ class EmailService {
     const retryDelay = Math.min(3000 * Math.pow(2, retryCount), 15000); // Exponential backoff, max 15s
 
     try {
+      // Em produção, se já tentamos uma vez, força o fallback em vez de repetir o SMTP
+      if (process.env.NODE_ENV === 'production' && retryCount > 0) {
+        throw new Error('Primeira tentativa de SMTP falhou, mudando para o fallback.');
+      }
       return await this.transporter.sendMail(mailOptions);
     } catch (error) {
-      console.error(`❌ Erro ao enviar email (tentativa ${retryCount + 1}/${maxRetries + 1}):`, error.message);
-      console.error(`🔍 Detalhes do erro de envio:`, {
-        code: error.code,
-        command: error.command,
-        response: error.response,
-        to: mailOptions.to
-      });
+      console.error(`❌ Erro ao enviar email via SMTP (tentativa ${retryCount + 1}):`, error.message);
       
+      // Se for um erro de timeout em produção, muda imediatamente para o Resend
+      if (error.code === 'ETIMEDOUT' && process.env.NODE_ENV === 'production') {
+        console.log('🔄 SMTP falhou com timeout. Mudando para o provedor de fallback (Resend)...');
+        try {
+          return await this.sendViaResend(mailOptions);
+        } catch (resendError) {
+          console.error(`❌ Fallback (Resend) também falhou: ${resendError.message}`);
+          await this.sendViaWebhook(mailOptions); // Log final como backup
+          throw resendError; // Lança o erro do Resend que é mais relevante
+        }
+      }
+      
+      // Se não for um erro de timeout ou não estiver em produção, tenta o SMTP novamente
       if (retryCount < maxRetries) {
-        console.log(`🔄 Tentando reenviar em ${retryDelay/1000} segundos... (delay progressivo)`);
+        console.log(`🔄 Tentando reenviar SMTP em ${retryDelay/1000} segundos...`);
         await new Promise(resolve => setTimeout(resolve, retryDelay));
         return await this.sendWithRetry(mailOptions, retryCount + 1);
       } else {
-        console.error(`❌ Falha definitiva ao enviar email para ${mailOptions.to}`);
-        
-        // Como o SMTP falhou, tentar o método alternativo (Resend)
-        console.log('🔄 Tentando enviar via Resend como alternativa...');
-        try {
-          const resendResult = await this.sendViaResend(mailOptions);
-          // Retornar o resultado do Resend para não quebrar o fluxo
-          return resendResult;
-        } catch (resendError) {
-          // Se o Resend também falhar, logar o link como último recurso
-          await this.sendViaWebhook(mailOptions);
-          // Lançar o erro original do SMTP para manter o log de falha
-          throw error;
-        }
+        console.error(`❌ Falha definitiva ao enviar email para ${mailOptions.to} via SMTP.`);
+        await this.sendViaWebhook(mailOptions); // Log final como backup
+        throw error;
       }
     }
   }
@@ -106,8 +106,9 @@ class EmailService {
       throw new Error('A variável de ambiente RESEND_API_KEY não está configurada.');
     }
 
-    const { default: Https } = await import('https-proxy-agent');
-    const agent = new Https.HttpsProxyAgent(process.env.PROXY_URL || '');
+    // Usando require para compatibilidade com CommonJS
+    const { HttpsProxyAgent } = require('https--proxy-agent');
+    const agent = new HttpsProxyAgent(process.env.PROXY_URL || '');
 
     const requestBody = {
       from: 'App Infantil <onboarding@resend.dev>', // Domínio verificado padrão do Resend
