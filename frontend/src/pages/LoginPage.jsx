@@ -22,6 +22,36 @@ function LoginPage() {
     }
   }, [token, navigate]);
 
+  // Fix para pontos de interrogação no mobile
+  useEffect(() => {
+    const removeValidationElements = () => {
+      // Remover elementos de validação webkit
+      const validationElements = document.querySelectorAll('::-webkit-validation-bubble, ::-webkit-validation-bubble-message, ::-webkit-validation-bubble-icon');
+      validationElements.forEach(el => {
+        if (el && el.parentNode) {
+          el.parentNode.removeChild(el);
+        }
+      });
+      
+      // Ocultar elementos de validação via CSS inline
+      const inputs = document.querySelectorAll('.authContainer input');
+      inputs.forEach(input => {
+        if (input) {
+          input.style.setProperty('-webkit-validation-bubble', 'none', 'important');
+        }
+      });
+    };
+
+    // Executar imediatamente e em intervalos
+    removeValidationElements();
+    const interval = setInterval(removeValidationElements, 100);
+    
+    // Limpar interval após 5 segundos
+    setTimeout(() => clearInterval(interval), 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();

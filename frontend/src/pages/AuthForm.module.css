@@ -9,14 +9,78 @@
   overflow: hidden;
 }
 
-/* Ocultar elementos de validação do navegador apenas no mobile */
+/* Solução mais agressiva para pontos de interrogação no mobile */
 @media (max-width: 768px) {
+  /* Ocultar elementos de validação webkit */
   .authContainer *::-webkit-validation-bubble,
   .authContainer *::-webkit-validation-bubble-message,
   .authContainer *::-webkit-validation-bubble-icon,
   .authContainer *::-webkit-validation-bubble-arrow-clipper,
   .authContainer *::-webkit-validation-bubble-arrow {
     display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    left: -9999px !important;
+    top: -9999px !important;
+  }
+  
+  /* Ocultar elementos de validação em inputs específicos */
+  .authContainer input::-webkit-validation-bubble,
+  .authContainer input::-webkit-validation-bubble-message,
+  .authContainer input::-webkit-validation-bubble-icon {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+  }
+  
+  /* Ocultar qualquer elemento que possa aparecer como ponto de interrogação */
+  .authContainer *::before,
+  .authContainer *::after {
+    content: none !important;
+  }
+  
+  /* Ocultar elementos de validação globalmente no mobile */
+  input::-webkit-validation-bubble,
+  input::-webkit-validation-bubble-message,
+  input::-webkit-validation-bubble-icon,
+  input::-webkit-validation-bubble-arrow-clipper,
+  input::-webkit-validation-bubble-arrow {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+  }
+}
+
+/* Fix específico para Safari iOS */
+@supports (-webkit-touch-callout: none) {
+  .authContainer *::-webkit-validation-bubble,
+  .authContainer *::-webkit-validation-bubble-message,
+  .authContainer *::-webkit-validation-bubble-icon,
+  .authContainer *::-webkit-validation-bubble-arrow-clipper,
+  .authContainer *::-webkit-validation-bubble-arrow {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    position: absolute !important;
+    left: -9999px !important;
+    top: -9999px !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
+  }
+  
+  /* Ocultar elementos de validação em todos os inputs do Safari iOS */
+  input::-webkit-validation-bubble,
+  input::-webkit-validation-bubble-message,
+  input::-webkit-validation-bubble-icon {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    position: absolute !important;
+    left: -9999px !important;
+    top: -9999px !important;
   }
 }
 
