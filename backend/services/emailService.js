@@ -8,10 +8,17 @@ class EmailService {
   }
 
   initializeTransporter() {
-    // Em produção, não inicializar SMTP - usar apenas Resend
+    // Em produção, usar apenas Resend - não precisa de SMTP
     if (process.env.NODE_ENV === 'production') {
       console.log('✅ Modo de produção: Usando apenas Resend (HTTPS). SMTP desabilitado.');
       this.transporter = null;
+      
+      // Verificar se a chave do Resend está configurada
+      if (!process.env.RESEND_API_KEY) {
+        console.warn('⚠️ RESEND_API_KEY não configurada em produção. E-mails não serão enviados.');
+      } else {
+        console.log('✅ RESEND_API_KEY configurada. E-mails serão enviados via Resend.');
+      }
       return;
     }
 
@@ -151,7 +158,7 @@ class EmailService {
             if (res.statusCode >= 200 && res.statusCode < 300) {
               console.log('✅ E-mail enviado com sucesso via Resend:', response.id);
               resolve({ messageId: response.id, method: 'resend' });
-            } else {
+      } else {
               console.error('❌ Erro da API Resend:', response);
               reject(new Error(`Erro do Resend: ${response.message || 'Erro desconhecido'}`));
             }
@@ -185,7 +192,10 @@ class EmailService {
 
   async sendWelcomeEmail(userData) {
     try {
-      if (!this.transporter) {
+      // Em produção, não verificar transporter - usar Resend diretamente
+      if (process.env.NODE_ENV === 'production') {
+        console.log('🔄 Produção: Enviando e-mail de boas-vindas via Resend...');
+      } else if (!this.transporter) {
         console.warn('⚠️ Serviço de email não configurado. Pulando envio de e-mail.');
         return { success: false, message: 'Email service not configured' };
       }
@@ -392,7 +402,10 @@ class EmailService {
    */
   async sendPasswordResetEmail(userData) {
     try {
-      if (!this.transporter) {
+      // Em produção, não verificar transporter - usar Resend diretamente
+      if (process.env.NODE_ENV === 'production') {
+        console.log('🔄 Produção: Enviando e-mail de recuperação via Resend...');
+      } else if (!this.transporter) {
         console.warn('⚠️ Serviço de email não configurado. Pulando envio de e-mail.');
         return { success: false, message: 'Email service not configured' };
       }
