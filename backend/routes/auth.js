@@ -150,19 +150,22 @@ router.post('/forgot-password', async (req, res) => {
       ? `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`
       : `http://localhost:5173/reset-password?token=${resetToken}`;
 
-    // Enviar e-mail
-    try {
-      await emailService.sendPasswordResetEmail({
-        name: user.name,
-        email: user.email,
-        resetUrl: resetUrl
-      });
+    // Enviar e-mail de forma assíncrona (não bloquear a resposta)
+    setImmediate(async () => {
+      try {
+        await emailService.sendPasswordResetEmail({
+          name: user.name,
+          email: user.email,
+          resetUrl: resetUrl
+        });
 
-      console.log(`✅ E-mail de recuperação enviado para: ${email}`);
-    } catch (emailError) {
-      console.error(`❌ Erro ao enviar e-mail para ${email}:`, emailError);
-    }
+        console.log(`✅ E-mail de recuperação enviado para: ${email}`);
+      } catch (emailError) {
+        console.error(`❌ Erro ao enviar e-mail para ${email}:`, emailError);
+      }
+    });
 
+    // Resposta imediata para o usuário
     res.status(200).json({
       success: true,
       message: 'Se o email existir, você receberá instruções para recuperar sua senha'

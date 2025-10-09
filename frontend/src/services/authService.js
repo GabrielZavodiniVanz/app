@@ -29,7 +29,9 @@ export const changePassword = async (data) => {
  * @param {string} email - Email do usuário
  */
 export const forgotPassword = async (email) => {
-  const response = await axios.post(`${API_URL}/forgot-password`, { email });
+  const response = await axios.post(`${API_URL}/forgot-password`, { email }, {
+    timeout: 15000 // 15 segundos de timeout
+  });
   return response.data;
 };
 

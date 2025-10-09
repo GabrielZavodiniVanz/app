@@ -69,14 +69,15 @@ router.post('/kiwify',
         loginUrl: loginUrl
       };
 
-      // Enviar e-mail de boas-vindas
-      try {
-        await emailService.sendWelcomeEmail(emailData);
-        console.log(`📧 E-mail enviado com sucesso para: ${customer.email}`);
-      } catch (emailError) {
-        console.error(`❌ Erro ao enviar e-mail para ${customer.email}:`, emailError);
-        // Não falhar o webhook por causa do e-mail, apenas logar o erro
-      }
+      // Enviar e-mail de boas-vindas de forma assíncrona (não bloquear a resposta)
+      setImmediate(async () => {
+        try {
+          await emailService.sendWelcomeEmail(emailData);
+          console.log(`📧 E-mail enviado com sucesso para: ${customer.email}`);
+        } catch (emailError) {
+          console.error(`❌ Erro ao enviar e-mail para ${customer.email}:`, emailError);
+        }
+      });
 
       // Resposta de sucesso para a Kiwify
       res.status(200).json({

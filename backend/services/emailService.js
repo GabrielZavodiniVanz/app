@@ -24,10 +24,10 @@ class EmailService {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS // Use App Password para Gmail
       },
-      // Configurações para produção - timeouts mais longos
-      connectionTimeout: 60000, // 60 segundos
-      greetingTimeout: 30000,   // 30 segundos
-      socketTimeout: 60000,     // 60 segundos
+      // Configurações para produção - timeouts otimizados
+      connectionTimeout: 30000, // 30 segundos
+      greetingTimeout: 15000,   // 15 segundos
+      socketTimeout: 30000,     // 30 segundos
       // Pool de conexões para melhor performance
       pool: true,
       maxConnections: 5,
@@ -43,8 +43,8 @@ class EmailService {
   }
 
   async verifyConnection(retryCount = 0) {
-    const maxRetries = 3;
-    const retryDelay = 5000; // 5 segundos
+    const maxRetries = 2;
+    const retryDelay = 3000; // 3 segundos
 
     try {
       await this.transporter.verify();
@@ -64,8 +64,8 @@ class EmailService {
   }
 
   async sendWithRetry(mailOptions, retryCount = 0) {
-    const maxRetries = 2;
-    const retryDelay = 3000; // 3 segundos
+    const maxRetries = 1;
+    const retryDelay = 2000; // 2 segundos
 
     try {
       return await this.transporter.sendMail(mailOptions);
