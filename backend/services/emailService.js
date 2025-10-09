@@ -373,28 +373,6 @@ class EmailService {
     }
   }
 
-  async sendTestEmail(to) {
-    try {
-      if (!this.transporter) {
-        console.warn('⚠️ Serviço de email não configurado.');
-        throw new Error('Email service not configured');
-      }
-
-      const mailOptions = {
-        from: process.env.EMAIL_USER,
-        to: to,
-        subject: 'Teste - Configuração de Email',
-        text: 'Este é um e-mail de teste para verificar se a configuração está funcionando.'
-      };
-
-      const result = await this.sendWithRetry(mailOptions);
-      console.log('✅ E-mail de teste enviado:', result.messageId);
-      return { success: true, messageId: result.messageId };
-    } catch (error) {
-      console.error('❌ Erro ao enviar e-mail de teste:', error.message);
-      return { success: false, message: 'Failed to send test email' };
-    }
-  }
 
   /**
    * Enviar e-mail de recuperação de senha
