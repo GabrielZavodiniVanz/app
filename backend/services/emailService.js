@@ -208,138 +208,148 @@ class EmailService {
       const mailOptions = {
         from: process.env.EMAIL_USER,
         to: email,
-        subject: '🎉 Bem-vindo ao Niños de Luz - Suas credenciais de acesso',
-        html: `
-          <!DOCTYPE html>
-          <html lang="pt-BR">
-          <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Bem-vindo ao App Infantil</title>
-            <style>
-              body {
-                font-family: Arial, sans-serif;
-                line-height: 1.6;
-                color: #333;
-                max-width: 600px;
-                margin: 0 auto;
-                padding: 20px;
-                background-color: #f9f9f9;
-              }
-              .container {
-                background-color: white;
-                padding: 30px;
-                border-radius: 10px;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-              }
-              .header {
-                text-align: center;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
-                padding: 20px;
-                border-radius: 8px;
-                margin-bottom: 20px;
-              }
-              .credentials {
-                background-color: #f8f9fa;
-                border: 1px solid #e9ecef;
-                border-radius: 8px;
-                padding: 20px;
-                margin: 20px 0;
-              }
-              .credential-item {
-                margin: 10px 0;
-                padding: 10px;
-                background-color: white;
-                border-radius: 5px;
-                border-left: 4px solid #667eea;
-              }
-              .credential-label {
-                font-weight: bold;
-                color: #495057;
-              }
-              .credential-value {
-                font-family: monospace;
-                background-color: #e9ecef;
-                padding: 5px 10px;
-                border-radius: 3px;
-                margin-top: 5px;
-                display: inline-block;
-              }
-              .button {
-                display: inline-block;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
-                padding: 12px 30px;
-                text-decoration: none;
-                border-radius: 25px;
-                margin: 20px 0;
-                font-weight: bold;
-              }
-              .warning {
-                background-color: #fff3cd;
-                border: 1px solid #ffeaa7;
-                border-radius: 5px;
-                padding: 15px;
-                margin: 20px 0;
-                color: #856404;
-              }
-              .footer {
-                text-align: center;
-                margin-top: 30px;
-                padding-top: 20px;
-                border-top: 1px solid #e9ecef;
-                color: #6c757d;
-                font-size: 14px;
-              }
-            </style>
-          </head>
-          <body>
-            <div class="container">
-              <div class="header">
-                <h1>🎉 ¡Bienvenido al Niños de Luz!</h1>
-                <p>¡Hola ${name}, tu compra ha sido confirmada con éxito!</p>
+        subject: '🎉 ¡Bienvenido(a) al Mundo Mágico de Niños de Luz!',
+        html: `<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="x-apple-disable-message-reformatting">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bienvenida • Niños de Luz</title>
+<!--[if mso]>
+<style>
+* {font-family: Arial, sans-serif !important;}
+</style>
+<![endif]-->
+<link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FAF6EB;
+    --pink:#FF0988;
+    --gold:#F0983C;
+    --vio1:#7A64F2;
+    --vio2:#9A89F7;
+    --mint:#52D1A5;
+    --ink:#2B2B2B;
+    --muted:#6B6B6B;
+    --card:#FFFFFF;
+  }
+  html,body{margin:0;padding:0;background:var(--bg);}
+  .wrapper{width:100%;background:var(--bg);padding:0;}
+  .container{max-width:640px;margin:0 auto;background:var(--card);}
+  .p-24{padding:24px;}
+  .p-32{padding:32px;}
+  .hero{
+    background:linear-gradient(135deg,var(--vio1),var(--vio2));
+    color:#000;text-align:center;border-radius:14px;
+    font-family:'Mochiy Pop One', Arial, sans-serif;
+  }
+  h1{margin:0;font-size:28px;line-height:1.25;}
+  h2{font-family:'Mochiy Pop One', Arial, sans-serif;margin:0 0 8px 0;color:var(--ink);font-size:20px;}
+  p{margin:0 0 12px 0;color:var(--ink);font-family:'Poppins', Arial, sans-serif;font-size:16px;line-height:1.6;}
+  .muted{color:var(--muted);}
+  .card{border:1px solid #EFE7D8;border-radius:12px;background:#FFFCF3;}
+  .btn{
+    display:inline-block;padding:14px 22px;border-radius:999px;
+    font-family:'Mochiy Pop One', Arial, sans-serif;font-size:16px;text-decoration:none;
+  }
+  .btn-primary{background:#EFE7D8;color:#000;}
+  .btn-secondary{background:#EFE7D8;color:#000;}
+  .chip{display:inline-block;background:#FFEED8;color:#A05A00;border-radius:999px;padding:6px 10px;font-family:'Poppins',Arial,sans-serif;font-size:13px;margin-top:6px;}
+  .verse{font-family:'Mochiy Pop One', Arial, sans-serif;color:var(--pink);text-align:center;}
+  .footer{color:#5B6770;font-size:12px;text-align:center;}
+  @media (max-width:480px){
+    .p-32{padding:20px;}
+    h1{font-size:24px;}
+  }
+</style>
+</head>
+<body>
+  <table class="wrapper" role="presentation" cellpadding="0" cellspacing="0" width="100%">
+    <tr>
+      <td align="center">
+        <table class="container" role="presentation" cellpadding="0" cellspacing="0" width="100%">
+          <!-- HERO -->
+          <tr>
+            <td class="p-24">
+              <div class="hero p-24">
+                <h1>🎉 ¡Bienvenido(a) al Mundo Mágico de <br>Niños de Luz!</h1>
+                <p style="margin-top:8px;font-family:'Poppins',Arial,sans-serif;">Hola ${name}, tu compra fue confirmada con éxito ✨</p>
               </div>
+            </td>
+          </tr>
 
-              <p>¡Estamos muy felices de tenerte con nosotros! Ahora tienes acceso completo a nuestro contenido educativo infantil.</p>
+          <!-- INTRO -->
+          <tr>
+            <td class="p-32">
+              <p>Ahora tienes acceso inmediato a nuestro <strong>Web App exclusivo</strong>, con actividades imprimibles, cuentos con valores y materiales llenos de fe y amor. Cada día será una nueva oportunidad para aprender, sonreír y crecer junto a tus hijos 🌿</p>
+            </td>
+          </tr>
 
-              <div class="credentials">
-                <h3>📋 Tus credenciales de acceso:</h3>
-                <div class="credential-item">
-                  <div class="credential-label">Email:</div>
-                  <div class="credential-value">${email}</div>
-                </div>
-                <div class="credential-item">
-                  <div class="credential-label">Contraseña:</div>
-                  <div class="credential-value">${password}</div>
-                </div>
+          <!-- CREDENTIALS -->
+          <tr>
+            <td class="p-32">
+              <div class="card p-24">
+                <h2>🔐 Tus credenciales de acceso</h2>
+                <p>📧 <strong>Correo electrónico:</strong> ${email}</p>
+                <p>🔑 <strong>Contraseña:</strong> ${password}</p>
+                <p class="muted">📎 Guarda estas credenciales en un lugar seguro.</p>
+                <p class="muted">🛠️ Te recomendamos cambiar tu contraseña en tu primer acceso.</p>
+                <p class="muted" style="margin-bottom:0;">⚙️ Esta contraseña fue generada automáticamente por el sistema.</p>
               </div>
+            </td>
+          </tr>
 
-              <div style="text-align: center;">
-                <a href="${loginUrl}" class="button">🚀 Acceder al App</a>
-                <br><br>
-                <a href="${changePasswordUrl}" class="button" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%);">🔐 Cambiar Contraseña</a>
+          <!-- CTA BUTTONS -->
+          <tr>
+            <td align="center" class="p-24">
+              <a class="btn btn-primary" href="${loginUrl}" target="_blank" rel="noopener">🎨 Entrar al Web App</a>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" class="p-24" style="padding-top:0;">
+              <a class="btn btn-secondary" href="${changePasswordUrl}" target="_blank" rel="noopener">🔒 Cambiar Contraseña</a>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" class="p-24" style="padding-top:0;">
+              <div class="chip">Acceso inmediato • Multi-dispositivo</div>
+            </td>
+          </tr>
+
+          <!-- VERSE -->
+          <tr>
+            <td class="p-32">
+              <div class="verse">
+                <p style="margin:0;">"Confía en el Señor con todo tu corazón</p>
+                <p style="margin:0;">y no te apoyes en tu propia prudencia."</p>
+                <p style="margin-top:6px;">— Proverbios 3:5 🙏</p>
               </div>
+            </td>
+          </tr>
 
-              <div class="warning">
-                <strong>⚠️ Importante:</strong>
-                <ul>
-                  <li>Guarda estas credenciales en un lugar seguro</li>
-                  <li>Recomendamos cambiar la contraseña en el primer acceso</li>
-                  <li>Esta contraseña fue generada automáticamente por el sistema</li>
-                </ul>
-              </div>
+          <!-- SUPPORT -->
+          <tr>
+            <td class="p-32">
+              <h2>📬 ¿Necesitas ayuda?</h2>
+              <p>Escríbenos a <strong>contactoninosdeluz@gmail.com</strong>. Estamos felices de acompañarte en esta hermosa aventura de fe y aprendizaje familiar 🌈</p>
+            </td>
+          </tr>
 
-              <p>Si tienes alguna duda o necesitas ayuda, no dudes en ponerte en contacto con nosotros.</p>
+          <!-- FOOTER -->
+          <tr>
+            <td class="p-24">
+              <p class="footer">Este es un correo automático, por favor no respondas.</p>
+              <p class="footer">© 2025 Niños de Luz — Creando un mundo mágico de aprendizaje y diversión para los más pequeños.</p>
+            </td>
+          </tr>
 
-              <div class="footer">
-                <p>Este é um e-mail automático, por favor não responda.</p>
-                <p>© 2024 Niños de Luz - Todos os direitos reservados</p>
-              </div>
-            </div>
-          </body>
-          </html>
-        `,
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`,
         text: `
           Bem-vindo ao Niños de Luz!
           
@@ -394,101 +404,150 @@ class EmailService {
         from: process.env.EMAIL_USER,
         to: email,
         subject: '🔐 Recuperación de Contraseña -  Niños de Luz',
-        html: `
-          <!DOCTYPE html>
-          <html lang="pt-BR">
-          <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Recuperación de Contraseña</title>
-            <style>
-              body {
-                font-family: Arial, sans-serif;
-                line-height: 1.6;
-                color: #333;
-                max-width: 600px;
-                margin: 0 auto;
-                padding: 20px;
-                background-color: #f9f9f9;
-              }
-              .container {
-                background-color: white;
-                padding: 30px;
-                border-radius: 10px;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-              }
-               .header {
-                 text-align: center;
-                 background: linear-gradient(135deg, #1d4ed8 0%, #f59e0b 100%);
-                 color: white;
-                 padding: 20px;
-                 border-radius: 8px;
-                 margin-bottom: 20px;
-               }
-               .button {
-                 display: inline-block;
-                 background: #3b82f6;
-                 color: black;
-                 padding: 12px 30px;
-                 text-decoration: none;
-                 border-radius: 25px;
-                 margin: 20px 0;
-                 font-weight: bold;
-               }
-              .warning {
-                background-color: #fff3cd;
-                border: 1px solid #ffeaa7;
-                border-radius: 5px;
-                padding: 15px;
-                margin: 20px 0;
-                color: #856404;
-              }
-              .footer {
-                text-align: center;
-                margin-top: 30px;
-                padding-top: 20px;
-                border-top: 1px solid #e9ecef;
-                color: #6c757d;
-                font-size: 14px;
-              }
-            </style>
-          </head>
-          <body>
-            <div class="container">
-              <div class="header">
+        html: `<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="x-apple-disable-message-reformatting">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recuperación de Contraseña • Niños de Luz</title>
+<!--[if mso]>
+<style>
+* {font-family: Arial, sans-serif !important;}
+</style>
+<![endif]-->
+<link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FAF6EB;
+    --pink:#FF0988;
+    --gold:#F0983C;
+    --vio1:#7A64F2;
+    --vio2:#9A89F7;
+    --mint:#52D1A5;
+    --ink:#2B2B2B;
+    --muted:#6B6B6B;
+    --card:#FFFFFF;
+  }
+  html,body{margin:0;padding:0;background:var(--bg);}
+  .wrapper{width:100%;background:var(--bg);padding:0;}
+  .container{max-width:640px;margin:0 auto;background:var(--card);}
+  .p-24{padding:24px;}
+  .p-32{padding:32px;}
+  .hero{
+    background:linear-gradient(135deg,var(--vio1),var(--vio2));
+    color:#000;text-align:center;border-radius:14px;
+    font-family:'Mochiy Pop One', Arial, sans-serif;
+  }
+  h1{margin:0;font-size:28px;line-height:1.25;}
+  h2{font-family:'Mochiy Pop One', Arial, sans-serif;margin:0 0 8px 0;color:var(--ink);font-size:20px;}
+  p{margin:0 0 12px 0;color:var(--ink);font-family:'Poppins', Arial, sans-serif;font-size:16px;line-height:1.6;}
+  .muted{color:var(--muted);}
+  .card{border:1px solid #EFE7D8;border-radius:12px;background:#FFFCF3;}
+  .btn{
+    display:inline-block;padding:14px 22px;border-radius:999px;
+    font-family:'Mochiy Pop One', Arial, sans-serif;font-size:16px;text-decoration:none;
+  }
+  .btn-primary{background:#EFE7D8;color:#000;}
+  .chip{display:inline-block;background:#FFEED8;color:#A05A00;border-radius:999px;padding:6px 10px;font-family:'Poppins',Arial,sans-serif;font-size:13px;margin-top:6px;}
+  .verse{font-family:'Mochiy Pop One', Arial, sans-serif;color:var(--pink);text-align:center;}
+  .footer{color:#5B6770;font-size:12px;text-align:center;}
+  @media (max-width:480px){
+    .p-32{padding:20px;}
+    h1{font-size:24px;}
+  }
+</style>
+</head>
+<body>
+  <table class="wrapper" role="presentation" cellpadding="0" cellspacing="0" width="100%">
+    <tr>
+      <td align="center">
+        <table class="container" role="presentation" cellpadding="0" cellspacing="0" width="100%">
+          <!-- HERO -->
+          <tr>
+            <td class="p-24">
+              <div class="hero p-24">
                 <h1>🔐 Recuperación de Contraseña</h1>
-                <p>Hola ${name}, solicitaste la recuperación de contraseña</p>
+                <p style="margin-top:8px;font-family:'Poppins',Arial,sans-serif;">Hola ${name}, solicitaste la recuperación de contraseña</p>
               </div>
+            </td>
+          </tr>
 
-              <p>Recibimos una solicitud para restablecer la contraseña de tu cuenta en Niños de Luz.</p>
+          <!-- INTRO -->
+          <tr>
+            <td class="p-32">
+              <p>Recibimos una solicitud para restablecer la contraseña de tu cuenta en <strong>Niños de Luz</strong>. Haz clic en el botón de abajo para crear una nueva contraseña segura 🔒</p>
+            </td>
+          </tr>
 
-              <div style="text-align: center;">
-                <a href="${resetUrl}" class="button">🔐 Restablecer Contraseña</a>
+          <!-- CTA BUTTON -->
+          <tr>
+            <td align="center" class="p-24">
+              <a class="btn btn-primary" href="${resetUrl}" target="_blank" rel="noopener">🔐 Restablecer Contraseña</a>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" class="p-24" style="padding-top:0;">
+              <div class="chip">Enlace seguro • Expira en 1 hora</div>
+            </td>
+          </tr>
+
+          <!-- WARNING -->
+          <tr>
+            <td class="p-32">
+              <div class="card p-24">
+                <h2>⚠️ Información importante</h2>
+                <p>🔒 Este enlace expira en <strong>1 hora</strong> por seguridad</p>
+                <p>🚫 Si no solicitaste esta recuperación, ignora este email</p>
+                <p>🔐 No compartas este enlace con nadie</p>
+                <p>⏰ Después de usar el enlace, se volverá inválido automáticamente</p>
               </div>
+            </td>
+          </tr>
 
-              <div class="warning">
-                <strong>⚠️ Importante:</strong>
-                <ul>
-                  <li>Este enlace expira en <strong>1 hora</strong></li>
-                  <li>Si no solicitaste esta recuperación, ignora este email</li>
-                  <li>No compartas este enlace con nadie</li>
-                  <li>Después de usar el enlace, se volverá inválido</li>
-                </ul>
-              </div>
-
-              <p>Si el botón no funciona, copia y pega el enlace a continuación en tu navegador:</p>
-              <p style="word-break: break-all; background-color: #f8f9fa; padding: 10px; border-radius: 5px; font-family: monospace;">
+          <!-- LINK BACKUP -->
+          <tr>
+            <td class="p-32">
+              <p class="muted">Si el botón no funciona, copia y pega este enlace en tu navegador:</p>
+              <p style="word-break: break-all; background-color: #f8f9fa; padding: 10px; border-radius: 5px; font-family: monospace; font-size: 12px; color: var(--muted);">
                 ${resetUrl}
               </p>
+            </td>
+          </tr>
 
-              <div class="footer">
-                <p>Este é um e-mail automático, por favor não responda.</p>
-                <p>© 2024 Niños de Luz - Todos os direitos reservados</p>
+          <!-- VERSE -->
+          <tr>
+            <td class="p-32">
+              <div class="verse">
+                <p style="margin:0;">"Confía en el Señor con todo tu corazón</p>
+                <p style="margin:0;">y no te apoyes en tu propia prudencia."</p>
+                <p style="margin-top:6px;">— Proverbios 3:5 🙏</p>
               </div>
-            </div>
-          </body>
-          </html>
-        `,
+            </td>
+          </tr>
+
+          <!-- SUPPORT -->
+          <tr>
+            <td class="p-32">
+              <h2>📬 ¿Necesitas ayuda?</h2>
+              <p>Escríbenos a <strong>contactoninosdeluz@gmail.com</strong>. Estamos felices de acompañarte en esta hermosa aventura de fe y aprendizaje familiar 🌈</p>
+            </td>
+          </tr>
+
+          <!-- FOOTER -->
+          <tr>
+            <td class="p-24">
+              <p class="footer">Este es un correo automático, por favor no respondas.</p>
+              <p class="footer">© 2025 Niños de Luz — Creando un mundo mágico de aprendizaje y diversión para los más pequeños.</p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`,
         text: `
           Recuperación de Contraseña - Niños de Luz
           
