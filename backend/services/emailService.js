@@ -332,7 +332,7 @@ class EmailService {
           <tr>
             <td class="p-32">
               <h2>📬 ¿Necesitas ayuda?</h2>
-              <p>Escríbenos a <strong>contactoninosdeluz@gmail.com</strong>. Estamos felices de acompañarte en esta hermosa aventura de fe y aprendizaje familiar 🌈</p>
+              <p>Escríbenos a <strong>contactoninosdeluz@gmail.com</strong>. Estamos felices de acompañarte en esta hermosa aventura de fe y aprendizaje familiar </p>
             </td>
           </tr>
 
@@ -594,14 +594,14 @@ class EmailService {
       const mailOptions = {
         from: process.env.EMAIL_USER,
         to: email,
-        subject: '🎉 ¡Nuevo Contenido Liberado! - Niños de Luz',
+        subject: '🎨 Mi Libro para Colorear con Fe - ¡Nuevo Contenido Liberado!',
         html: `<!doctype html>
 <html lang="es">
 <head>
 <meta charset="utf-8">
 <meta name="x-apple-disable-message-reformatting">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Nuevo Contenido • Niños de Luz</title>
+<title>Mi Libro para Colorear con Fe • Niños de Luz</title>
 <!--[if mso]>
 <style>
 * {font-family: Arial, sans-serif !important;}
@@ -667,7 +667,7 @@ class EmailService {
           <!-- INTRO -->
           <tr>
             <td class="p-32">
-              <p>¡Excelente decisión! Has adquirido el <strong>${productName}</strong> y ahora tienes acceso inmediato a contenido adicional exclusivo en tu <strong>Web App de Niños de Luz</strong> 🌟</p>
+              <p>¡Excelente decisión! Has adquirido el <strong>Mi Libro para Colorear con Fe</strong> y ahora tienes acceso inmediato a contenido adicional exclusivo en tu <strong>Web App de Niños de Luz</strong> 🌟</p>
             </td>
           </tr>
 
@@ -677,7 +677,7 @@ class EmailService {
               <div class="card p-24">
                 <h2>🎁 Lo que tienes ahora</h2>
                 <p>✨ <strong>Contenido adicional liberado</strong> - Nuevas actividades y materiales</p>
-                <p>📚 <strong>Materiales exclusivos</strong> - Solo para quienes compraron este upsell</p>
+                <p>📚 <strong>Materiales exclusivos</strong> - Solo para quienes compraron el Libro para Colorear</p>
                 <p>🎨 <strong>Actividades premium</strong> - Experiencias de aprendizaje únicas</p>
                 <p class="muted">🔓 El contenido ya está disponible en tu cuenta</p>
               </div>

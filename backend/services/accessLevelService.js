@@ -7,7 +7,7 @@ const PRODUCT_IDS = {
   PRINCIPAL: '89aece00-a51b-11f0-ab58-2f2096ded2ba',
   PRODUTO_1: '2343e890-a538-11f0-98fb-c9aca982ba72', //PACK EXTRA 1 - Tarjetas y Stickers de Rutinas con FE
   PRODUTO_2: '44c34a50-a53e-11f0-a7e3-c3b4bfe5981f', //PACK EXTRA 2  - Versículos con Amor y Color
-  PRODUTO_3: 'd614e9f0-a845-11f0-a8cd-a7de6dd83d71'  //PRODUTO 3 - Upsell
+  PRODUTO_3: 'd614e9f0-a845-11f0-a8cd-a7de6dd83d71'  //Mi Libro para Colorear con Fe -- PRODUTO 3 - Upsell
 };
 
 // Níveis de acesso baseados nos produtos
@@ -31,7 +31,7 @@ const PRODUCT_NAMES = {
   PRODUTO_PRINCIPAL: 'Kit Niños de Luz (Principal)',
   PRODUTO_1: 'Tarjetas y Stickers de Rutinas con FE (Pack 1)',
   PRODUTO_2: 'Versículos con Amor y Color (Pack 2)',
-  PRODUTO_3: 'Produto 3 (Upsell)'
+  PRODUTO_3: 'Mi Libro para Colorear con Fe'
 };
 
 // Categorias de conteúdo (nova estrutura)
@@ -47,7 +47,7 @@ const CATEGORY_NAMES = {
   PRINCIPAL: 'Conteúdo do Produto Principal',
   PRODUTO_1: 'Conteúdo do Produto 1 (Adicional)',
   PRODUTO_2: 'Conteúdo do Produto 2 (Adicional)',
-  PRODUTO_3: 'Conteúdo do Produto 3 (Upsell)'
+  PRODUTO_3: 'Conteúdo do Mi Libro para Colorear con Fe'
 };
 
 /**

@@ -63,7 +63,7 @@ router.post('/kiwify',
             name: existingUser.name,
             email: existingUser.email,
             loginUrl: loginUrl,
-            productName: 'Produto 3 (Upsell)'
+            productName: 'Mi Libro para Colorear con Fe'
           };
 
           // Enviar email de confirmação do upsell (não bloqueante)
@@ -78,7 +78,7 @@ router.post('/kiwify',
             type: 'upsell_completed',
             message: 'Novo conteúdo disponível! Atualizando página...',
             action: 'refresh',
-            productName: 'Produto 3 (Upsell)',
+            productName: 'Mi Libro para Colorear con Fe',
             loginUrl: loginUrl
           };
 
@@ -242,7 +242,7 @@ router.post('/',
             name: existingUser.name,
             email: existingUser.email,
             loginUrl: loginUrl,
-            productName: 'Produto 3 (Upsell)'
+            productName: 'Mi Libro para Colorear con Fe'
           };
 
           // Enviar email de confirmação do upsell (não bloqueante)
@@ -257,7 +257,7 @@ router.post('/',
             type: 'upsell_completed',
             message: 'Novo conteúdo disponível! Atualizando página...',
             action: 'refresh',
-            productName: 'Produto 3 (Upsell)',
+            productName: 'Mi Libro para Colorear con Fe',
             loginUrl: loginUrl
           };
 

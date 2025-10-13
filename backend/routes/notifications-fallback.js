@@ -86,7 +86,7 @@ async function sendUpsellNotificationEmail(user, loginUrl, notification) {
       name: user.name,
       email: user.email,
       loginUrl: loginUrl,
-      productName: notification.productName || 'Produto 3 (Upsell)',
+      productName: notification.productName || 'Mi Libro para Colorear con Fe',
       message: notification.message || '🎉 Novo conteúdo disponível!'
     };
     
