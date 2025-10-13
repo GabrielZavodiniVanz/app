@@ -12,7 +12,7 @@ function VideoFormPage() {
   const [videoFile, setVideoFile] = useState(null);
   const [urlVideo, setUrlVideo] = useState('');
   const [imageFile, setImageFile] = useState(null);
-  const [accessLevel, setAccessLevel] = useState('BASICO');
+  const [categoria_produto, setCategoria_produto] = useState('PRINCIPAL');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const navigate = useNavigate();
@@ -48,7 +48,7 @@ function VideoFormPage() {
     }
 
     // Adiciona o nível de acesso
-    formData.append('accessLevel', accessLevel);
+        formData.append('categoria_produto', categoria_produto);
 
     try {
       // Simular progresso de upload
@@ -124,9 +124,9 @@ function VideoFormPage() {
         </div>
 
         {/* SELETOR DE NÍVEL DE ACESSO */}
-        <AccessLevelSelector
-          selectedLevel={accessLevel}
-          onChange={setAccessLevel}
+        <AccessLevelSelector 
+          selectedLevel={categoria_produto} 
+          onChange={setCategoria_produto}
         />
         
         <button type="submit" disabled={isSubmitting} className={styles.submitButton}>

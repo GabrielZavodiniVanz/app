@@ -5,23 +5,81 @@
 // IDs dos produtos da Kiwify conforme especificação
 const PRODUCT_IDS = {
   PRINCIPAL: '89aece00-a51b-11f0-ab58-2f2096ded2ba',
-  PRODUTO_1: '2343e890-a538-11f0-98fb-c9aca982ba72',
-  PRODUTO_2: '44c34a50-a53e-11f0-a7e3-c3b4bfe5981f'
+  PRODUTO_1: '2343e890-a538-11f0-98fb-c9aca982ba72', //PACK EXTRA 1 - Tarjetas y Stickers de Rutinas con FE
+  PRODUTO_2: '44c34a50-a53e-11f0-a7e3-c3b4bfe5981f' //PACK EXTRA 2  - Versículos con Amor y Color
 };
 
-// Níveis de acesso disponíveis
+// Níveis de acesso baseados nos produtos
 const ACCESS_LEVELS = {
   NENHUM: 'nenhum',
-  BASICO: 'BASICO',
-  INTERMEDIARIO: 'INTERMEDIARIO', 
-  AVANCADO: 'AVANCADO',
-  ACESSO_COMPLETO: 'ACESSO_COMPLETO'
+  PRODUTO_PRINCIPAL: 'PRODUTO_PRINCIPAL',
+  PRODUTO_1: 'PRODUTO_1', 
+  PRODUTO_2: 'PRODUTO_2'
+};
+
+// Mapeamento de produtos para níveis de acesso (CORRIGIDO para accessLevels tradicionais)
+const PRODUCT_ACCESS_MAPPING = {
+  [PRODUCT_IDS.PRINCIPAL]: 'BASICO',           // Kit Niños de Luz → BASICO
+  [PRODUCT_IDS.PRODUTO_1]: 'INTERMEDIARIO',   // Pack Extra 1 → INTERMEDIARIO
+  [PRODUCT_IDS.PRODUTO_2]: 'AVANCADO'         // Pack Extra 2 → AVANCADO
+};
+
+// Nomes amigáveis dos produtos
+const PRODUCT_NAMES = {
+  PRODUTO_PRINCIPAL: 'Kit Niños de Luz (Principal)',
+  PRODUTO_1: 'Tarjetas y Stickers de Rutinas con FE (Pack 1)',
+  PRODUTO_2: 'Versículos con Amor y Color (Pack 2)'
+};
+
+// Categorias de conteúdo (nova estrutura)
+const CONTENT_CATEGORIES = {
+  PRINCIPAL: 'PRINCIPAL',
+  PRODUTO_1: 'PRODUTO_1',
+  PRODUTO_2: 'PRODUTO_2'
+};
+
+// Nomes amigáveis das categorias de conteúdo
+const CATEGORY_NAMES = {
+  PRINCIPAL: 'Conteúdo do Produto Principal',
+  PRODUTO_1: 'Conteúdo do Produto 1 (Adicional)',
+  PRODUTO_2: 'Conteúdo do Produto 2 (Adicional)'
 };
 
 /**
- * Determina o nível de acesso baseado nos produtos comprados
+ * Determina os níveis de acesso baseado nos produtos comprados
  * @param {Array} products - Array de produtos da compra
- * @returns {string} - Nível de acesso determinado
+ * @returns {Array} - Array com os níveis de acesso dos produtos comprados
+ */
+function determineAccessLevels(products) {
+  if (!products || !Array.isArray(products)) {
+    console.log('⚠️ Nenhum produto fornecido, usando nível "nenhum"');
+    return ['nenhum'];
+  }
+
+  // 1. Extrai a lista de IDs dos produtos comprados no webhook
+  const idsDosProdutosComprados = products.map(product => product.product_id || product.id).filter(Boolean);
+  
+  console.log('📦 IDs dos produtos comprados:', idsDosProdutosComprados);
+
+  // 2. Mapeia os IDs para níveis de acesso
+  const niveisDeAcesso = idsDosProdutosComprados
+    .map(productId => PRODUCT_ACCESS_MAPPING[productId])
+    .filter(Boolean); // Remove valores undefined
+
+  // 3. Se não encontrou nenhum produto válido, retorna 'nenhum'
+  if (niveisDeAcesso.length === 0) {
+    console.log('⚠️ Nenhum produto válido encontrado, usando nível "nenhum"');
+    return ['nenhum'];
+  }
+
+  console.log('🎯 Níveis de acesso determinados:', niveisDeAcesso);
+  return niveisDeAcesso;
+}
+
+/**
+ * Função legacy para compatibilidade - determina o accessLevel mais alto
+ * @param {Array} products - Array de produtos da compra
+ * @returns {string} - AccessLevel mais alto baseado nos produtos comprados
  */
 function determineAccessLevel(products) {
   if (!products || !Array.isArray(products)) {
@@ -34,92 +92,176 @@ function determineAccessLevel(products) {
   
   console.log('📦 IDs dos produtos comprados:', idsDosProdutosComprados);
 
-  let nivelDeAcesso = 'nenhum'; // Valor padrão
+  // 2. Mapeia os IDs para accessLevels tradicionais
+  const accessLevels = idsDosProdutosComprados
+    .map(productId => PRODUCT_ACCESS_MAPPING[productId])
+    .filter(Boolean); // Remove valores undefined
 
-  // 2. Verifica as combinações para definir o nível de acesso
-  // Cenário 1: Comprou TUDO (Principal + Produto 1 + Produto 2)
-  if (idsDosProdutosComprados.includes(PRODUCT_IDS.PRINCIPAL) && 
-      idsDosProdutosComprados.includes(PRODUCT_IDS.PRODUTO_1) && 
-      idsDosProdutosComprados.includes(PRODUCT_IDS.PRODUTO_2)) {
-    nivelDeAcesso = 'ACESSO_COMPLETO';
-    console.log('🎯 Acesso COMPLETO: Principal + Produto 1 + Produto 2');
-  }
-  // Cenário 2: Comprou o Principal + Produto 2
-  else if (idsDosProdutosComprados.includes(PRODUCT_IDS.PRINCIPAL) && 
-           idsDosProdutosComprados.includes(PRODUCT_IDS.PRODUTO_2)) {
-    nivelDeAcesso = 'AVANCADO';
-    console.log('🎯 Acesso AVANÇADO: Principal + Produto 2');
-  }
-  // Cenário 3: Comprou o Principal + Produto 1
-  else if (idsDosProdutosComprados.includes(PRODUCT_IDS.PRINCIPAL) && 
-           idsDosProdutosComprados.includes(PRODUCT_IDS.PRODUTO_1)) {
-    nivelDeAcesso = 'INTERMEDIARIO';
-    console.log('🎯 Acesso INTERMEDIÁRIO: Principal + Produto 1');
-  }
-  // Cenário 4: Comprou APENAS o Principal
-  else if (idsDosProdutosComprados.includes(PRODUCT_IDS.PRINCIPAL)) {
-    nivelDeAcesso = 'BASICO';
-    console.log('🎯 Acesso BÁSICO: Apenas Principal');
-  }
-  else {
-    console.log('⚠️ Produto principal não encontrado, usando nível "nenhum"');
+  // 3. Se não encontrou nenhum produto válido, retorna 'nenhum'
+  if (accessLevels.length === 0) {
+    console.log('⚠️ Nenhum produto válido encontrado, usando nível "nenhum"');
+    return 'nenhum';
   }
 
-  // 3. Retorna o nível de acesso para ser usado no cadastro do usuário
-  return nivelDeAcesso;
+  // 4. Verifica se tem todos os produtos (ACESSO_COMPLETO)
+  const hasAllProducts = accessLevels.includes('BASICO') && 
+                        accessLevels.includes('INTERMEDIARIO') && 
+                        accessLevels.includes('AVANCADO');
+  
+  if (hasAllProducts) {
+    console.log('🏆 Usuário tem todos os produtos - ACESSO_COMPLETO');
+    return 'ACESSO_COMPLETO';
+  }
+
+  // 5. Determina o accessLevel mais alto (hierarquia: BASICO < INTERMEDIARIO < AVANCADO)
+  const hierarchy = {
+    'BASICO': 1,
+    'INTERMEDIARIO': 2,
+    'AVANCADO': 3
+  };
+
+  const highestLevel = accessLevels.reduce((highest, current) => {
+    return hierarchy[current] > hierarchy[highest] ? current : highest;
+  }, accessLevels[0]);
+
+  console.log(`🎯 AccessLevels encontrados: ${accessLevels.join(', ')}`);
+  console.log(`🏆 AccessLevel mais alto determinado: ${highestLevel}`);
+  
+  return highestLevel;
 }
 
 /**
- * Obtém todos os níveis de acesso disponíveis
- * @returns {Array} - Array com todos os níveis
+ * Obtém todos os níveis de acesso disponíveis com nomes amigáveis
+ * @returns {Array} - Array com todos os níveis formatados para o frontend
  */
 function getAllAccessLevels() {
-  return Object.values(ACCESS_LEVELS);
+  const result = Object.entries(PRODUCT_NAMES).map(([key, name]) => ({
+    value: key,
+    label: name,
+    hierarchy: getProductHierarchy(key)
+  }));
+  console.log('🔍 getAllAccessLevels() retornando:', result);
+  return result;
 }
 
 /**
- * Obtém a hierarquia de níveis de acesso
+ * Obtém a hierarquia dos produtos (para ordenação)
  * @returns {Object} - Objeto com a hierarquia
  */
-function getAccessLevelHierarchy() {
-  return {
+function getProductHierarchy(accessLevel) {
+  const hierarchy = {
     [ACCESS_LEVELS.NENHUM]: 0,
-    [ACCESS_LEVELS.BASICO]: 1,
-    [ACCESS_LEVELS.INTERMEDIARIO]: 2,
-    [ACCESS_LEVELS.AVANCADO]: 3,
-    [ACCESS_LEVELS.ACESSO_COMPLETO]: 4
+    [ACCESS_LEVELS.PRODUTO_PRINCIPAL]: 1,
+    [ACCESS_LEVELS.PRODUTO_1]: 2,
+    [ACCESS_LEVELS.PRODUTO_2]: 3
+  };
+  return hierarchy[accessLevel] || 0;
+}
+
+/**
+ * Constrói filtro SQL para níveis de acesso baseado nos produtos (LEGACY)
+ * @param {Array} userAccessLevels - Array com os níveis de acesso do usuário
+ * @returns {Object} - Filtro para Sequelize
+ */
+function buildAccessFilter(userAccessLevels) {
+  // Se não há níveis de acesso ou é 'nenhum', só pode ver conteúdo público
+  if (!userAccessLevels || userAccessLevels.length === 0 || userAccessLevels.includes('nenhum')) {
+    return {
+      accessLevel: ['nenhum']
+    };
+  }
+  
+  // Usuário pode ver conteúdo dos produtos que comprou
+  return {
+    accessLevel: userAccessLevels
   };
 }
 
 /**
- * Constrói filtro SQL para níveis de acesso (abordagem simplificada)
+ * NOVA LÓGICA: Determina quais categorias de conteúdo um usuário pode ver
+ * baseado no seu accessLevel
+ * @param {string} userAccessLevel - Nível de acesso do usuário
+ * @returns {Array} - Array com as categorias permitidas
+ */
+function getVisibleCategories(userAccessLevel) {
+  let allowedCategories = [];
+  
+  // LÓGICA CORRETA: Baseada nos accessLevels tradicionais
+  switch (userAccessLevel) {
+    case 'BASICO':
+      // Usuário básico pode ver apenas conteúdo principal
+      allowedCategories = ['PRINCIPAL'];
+      break;
+    case 'INTERMEDIARIO':
+      // Usuário intermediário pode ver conteúdo principal + produto 1
+      allowedCategories = ['PRINCIPAL', 'PRODUTO_1'];
+      break;
+    case 'AVANCADO':
+      // Usuário avançado pode ver conteúdo principal + produto 2
+      allowedCategories = ['PRINCIPAL', 'PRODUTO_2'];
+      break;
+    case 'ACESSO_COMPLETO':
+      // Usuário com acesso completo pode ver todo conteúdo
+      allowedCategories = ['PRINCIPAL', 'PRODUTO_1', 'PRODUTO_2'];
+      break;
+    default:
+      // Usuário sem acesso ou nível inválido não vê nada
+      allowedCategories = [];
+  }
+  
+  console.log(`👤 Usuário com accessLevel '${userAccessLevel}' pode ver categorias:`, allowedCategories);
+  return allowedCategories;
+}
+
+/**
+ * NOVA LÓGICA: Constrói filtro SQL para categorias de conteúdo
  * @param {string} userAccessLevel - Nível de acesso do usuário
  * @returns {Object} - Filtro para Sequelize
  */
-function buildAccessFilter(userAccessLevel) {
-  // Mapear níveis de usuário para níveis de conteúdo que podem ver
-  // Cada nível vê o conteúdo do PRINCIPAL (BASICO) + seu nível específico
-  const accessMapping = {
-    'nenhum': ['nenhum'],
-    'BASICO': ['BASICO'],                           // Básico vê apenas conteúdo básico (PRINCIPAL)
-    'INTERMEDIARIO': ['BASICO', 'INTERMEDIARIO'],   // Intermediário vê PRINCIPAL + INTERMEDIARIO
-    'AVANCADO': ['BASICO', 'AVANCADO'],             // Avançado vê PRINCIPAL + AVANCADO
-    'ACESSO_COMPLETO': ['BASICO', 'INTERMEDIARIO', 'AVANCADO', 'ACESSO_COMPLETO'] // Completo vê tudo
-  };
+function buildCategoryFilter(userAccessLevel) {
+  const allowedCategories = getVisibleCategories(userAccessLevel);
   
-  const allowedLevels = accessMapping[userAccessLevel] || ['nenhum'];
-  
+  if (allowedCategories.length === 0) {
+    // Usuário sem acesso - retorna filtro que não encontra nada
+    return {
+      categoria_produto: ['INVALID_CATEGORY'] // Categoria que não existe
+    };
+  }
   
   return {
-    accessLevel: allowedLevels
+    categoria_produto: allowedCategories
   };
 }
 
+/**
+ * Obtém todas as categorias de conteúdo disponíveis para o admin
+ * @returns {Array} - Array com todas as categorias formatadas
+ */
+function getAllContentCategories() {
+  return Object.entries(CATEGORY_NAMES).map(([key, name]) => ({
+    value: key,
+    label: name
+  }));
+}
+
 module.exports = {
+  // Funções legacy (mantidas para compatibilidade)
   determineAccessLevel,
+  determineAccessLevels,
   getAllAccessLevels,
-  getAccessLevelHierarchy,
+  getProductHierarchy,
   buildAccessFilter,
+  
+  // Novas funções para categorização
+  getVisibleCategories,
+  buildCategoryFilter,
+  getAllContentCategories,
+  
+  // Constantes
   PRODUCT_IDS,
-  ACCESS_LEVELS
+  ACCESS_LEVELS,
+  PRODUCT_NAMES,
+  PRODUCT_ACCESS_MAPPING,
+  CONTENT_CATEGORIES,
+  CATEGORY_NAMES
 };

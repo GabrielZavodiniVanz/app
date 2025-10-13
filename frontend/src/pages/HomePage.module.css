@@ -224,6 +224,507 @@
   display: inline-block;
 }
 
+/* Carrossel */
+.carouselContainer {
+  margin: 2rem 1rem 3rem 1rem;
+  position: relative;
+  z-index: 2;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.2s;
+}
+
+.carouselContainer.loaded {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.carouselWrapper {
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px;
+  width: 100%;
+  min-height: 400px;
+}
+
+.carouselTrack {
+  display: flex;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 200%; /* 2 slides = 200% */
+}
+
+.carouselSlide {
+  width: 50%; /* Cada slide ocupa 50% do track */
+  flex-shrink: 0;
+  position: relative;
+  display: flex;
+  align-items: stretch;
+}
+
+/* Controles do carrossel */
+.carouselControls {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0);
+  border: none;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.5rem;
+  color: var(--primary-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0);
+  transition: all 0.3s ease;
+  z-index: 10;
+  opacity: 0;
+}
+
+.carouselWrapper:hover .carouselControls {
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  opacity: 1;
+}
+
+.carouselControls:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.carouselControls.prev {
+  left: 20px;
+}
+
+.carouselControls.next {
+  right: 20px;
+}
+
+/* Indicadores */
+.carouselIndicators {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+
+.carouselIndicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  border: 2px solid var(--primary-color);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.carouselIndicator.active {
+  background: var(--primary-color);
+  transform: scale(1.2);
+}
+
+.carouselIndicator:hover {
+  background: var(--secondary-color);
+  transform: scale(1.1);
+}
+
+.banner {
+  background: transparent;
+  border-radius: 28px;
+  padding: 2.5rem;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  border: 2px solid rgba(255, 9, 136, 0.15);
+  backdrop-filter: blur(15px);
+  box-shadow: 
+    0 20px 40px rgba(255, 9, 136, 0.1), 
+    0 8px 16px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.banner:hover {
+  transform: translateY(-8px) scale(1.02);
+  border-color: var(--primary-color);
+  box-shadow: 
+    0 30px 60px rgba(255, 9, 136, 0.15), 
+    0 12px 24px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* Banner 1 - Upsell Libro para Colorear */
+/* Usa o estilo padrão do banner definido em .banner */
+
+.banner1Content {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  height: 100%;
+}
+
+.banner1Text {
+  text-align: center;
+}
+
+.banner1Title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+  text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.8), -1px -1px 3px rgba(255, 255, 255, 0.8);
+}
+
+.banner1Subtitle {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+  text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.8), -1px -1px 3px rgba(255, 255, 255, 0.8);
+}
+
+.banner1Description {
+  color: var(--text-color);
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+  text-shadow: 0.5px 0.5px 2px rgba(255, 255, 255, 0.6);
+}
+
+.banner1Features {
+  color: var(--secondary-color);
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+  text-shadow: 0.5px 0.5px 2px rgba(255, 255, 255, 0.6);
+}
+
+.banner1Verse {
+  font-style: italic;
+  color: var(--secondary-color);
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  font-weight: 500;
+  text-shadow: 0.5px 0.5px 2px rgba(255, 255, 255, 0.6);
+}
+
+.banner1Visual {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.8rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.bookCover {
+  width: 70px;
+  height: 90px;
+  background: linear-gradient(135deg, var(--surface-color), var(--background-secondary));
+  border-radius: 8px;
+  border: 3px solid var(--primary-color);
+  box-shadow: 0 8px 16px rgba(255, 9, 136, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.bookCover::before {
+  content: '📖';
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.bookCover::after {
+  content: 'Versículos';
+  font-size: 0.7rem;
+  color: var(--primary-color);
+  font-weight: bold;
+  text-align: center;
+}
+
+.bookOpen {
+  width: 80px;
+  height: 60px;
+  background: linear-gradient(135deg, var(--surface-color), var(--background-secondary));
+  border-radius: 8px;
+  border: 3px solid var(--secondary-color);
+  box-shadow: 0 8px 16px rgba(240, 152, 60, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.bookOpen::before {
+  content: '✏️';
+  font-size: 1.5rem;
+  margin-bottom: 0.3rem;
+}
+
+.bookOpen::after {
+  content: 'Colorear';
+  font-size: 0.6rem;
+  color: var(--secondary-color);
+  font-weight: bold;
+  text-align: center;
+}
+
+.childrenImage {
+  width: 100px;
+  height: 80px;
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-green));
+  border-radius: 12px;
+  border: 3px solid var(--primary-color);
+  box-shadow: 0 8px 16px rgba(255, 9, 136, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.childrenImage::before {
+  content: '👦👧';
+  font-size: 2.5rem;
+  margin-bottom: 0.3rem;
+}
+
+.childrenImage::after {
+  content: 'Biblia + Cruz';
+  font-size: 0.6rem;
+  color: var(--primary-color);
+  font-weight: bold;
+  text-align: center;
+}
+
+.banner1CTA {
+  background: linear-gradient( var(--secondary-color));
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 25px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 12px rgba(255, 9, 136, 0.3);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.banner1CTA:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(255, 9, 136, 0.4);
+  background: linear-gradient(135deg, var(--primary-dark));
+}
+
+/* Banner 2 - App Assinatura */
+.banner2 {
+  background: linear-gradient(135deg, 
+    rgba(164, 215, 246, 0.15) 0%, 
+    rgba(253, 220, 122, 0.15) 50%,
+    rgba(255, 221, 235, 0.15) 100%);
+  border: 2px solid rgba(164, 215, 246, 0.3);
+  box-shadow: 
+    0 20px 40px rgba(164, 215, 246, 0.1), 
+    0 8px 16px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 249, 241, 0.8);
+}
+
+.banner2:hover {
+  border-color: #A4D7F6;
+  box-shadow: 
+    0 30px 60px rgba(164, 215, 246, 0.15), 
+    0 12px 24px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 249, 241, 0.9);
+}
+
+.banner2Content {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  height: 100%;
+}
+
+.banner2Text {
+  text-align: center;
+}
+
+.banner2Badge {
+  background: linear-gradient(#A4D7F6);
+  color: var(--text-dark);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  display: inline-block;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 8px rgba(164, 215, 246, 0.3);
+  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+}
+
+.banner2Title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #A4D7F6;
+  margin-bottom: 0.5rem;
+  text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.8), -1px -1px 3px rgba(255, 255, 255, 0.8);
+}
+
+.banner2Subtitle {
+  font-size: 1.6rem;
+  font-weight: bold;
+  color: #B8E986;
+  margin-bottom: 1rem;
+  text-shadow: 1px 1px 3px rgba(255, 255, 255, 0.8), -1px -1px 3px rgba(255, 255, 255, 0.8);
+}
+
+.banner2Description {
+  color: var(--text-color);
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+  text-shadow: 0.5px 0.5px 2px rgba(255, 255, 255, 0.6);
+}
+
+.banner2Features {
+  color: var(--text-colo);
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+  text-shadow: 0.5px 0.5px 2px rgba(255, 255, 255, 0.6);
+}
+
+.banner2Quote {
+  font-style: italic;
+  color: var(--text-colo);
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  font-weight: 500;
+  text-shadow: 0.5px 0.5px 2px rgba(255, 255, 255, 0.6);
+}
+
+.banner2Visual {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.8rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.tablet {
+  width: 100px;
+  height: 75px;
+  background: linear-gradient(135deg, #FFF9F1, #FFDDEB);
+  border-radius: 12px;
+  border: 3px solid #A4D7F6;
+  box-shadow: 0 8px 16px rgba(164, 215, 246, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.tablet::before {
+  content: '📱';
+  font-size: 2rem;
+  margin-bottom: 0.3rem;
+}
+
+.tablet::after {
+  content: 'Niños de Luz';
+  font-size: 0.6rem;
+  color: #A4D7F6;
+  font-weight: bold;
+  text-align: center;
+}
+
+.iconsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.4rem;
+  width: 80px;
+  flex-shrink: 0;
+}
+
+.iconItem {
+  width: 35px;
+  height: 35px;
+  background: linear-gradient(135deg, #B8E986, #FDDC7A);
+  border-radius: 8px;
+  border: 2px solid #A4D7F6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  box-shadow: 0 4px 8px rgba(164, 215, 246, 0.1);
+}
+
+.childrenAround {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #FFDDEB, #FFF9F1);
+  border-radius: 50%;
+  border: 3px solid #B8E986;
+  box-shadow: 0 8px 16px rgba(184, 233, 134, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.childrenAround::before {
+  content: '👨‍👩‍👧‍👦';
+  font-size: 2.5rem;
+}
+
+.banner2CTA {
+  background: linear-gradient(#B8E986);
+  color: var(--text-dark);
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 25px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 12px rgba(164, 215, 246, 0.3);
+  text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+}
+
+.banner2CTA:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(164, 215, 246, 0.4);
+  background: linear-gradient(#A4D7F6);
+}
+
 /* Estilos para telas maiores */
 @media (min-width: 768px) {
   .hero {
@@ -251,6 +752,92 @@
   .statNumber {
     font-size: 3rem;
   }
+
+  /* Carrossel responsivo para desktop */
+  .carouselContainer {
+    margin: 3rem 2rem 4rem 2rem;
+  }
+
+  .carouselControls {
+    width: 60px;
+    height: 60px;
+    font-size: 1.8rem;
+  }
+
+  .carouselControls.prev {
+    left: 30px;
+  }
+
+  .carouselControls.next {
+    right: 30px;
+  }
+
+  .banner1Content,
+  .banner2Content {
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: center;
+  }
+
+  .banner1Text,
+  .banner2Text {
+    text-align: left;
+  }
+
+  .banner1Title,
+  .banner2Title {
+    font-size: 1.8rem;
+  }
+
+  .banner1Subtitle {
+    font-size: 2.2rem;
+  }
+
+  .banner2Subtitle {
+    font-size: 2rem;
+  }
+
+  .banner1Visual,
+  .banner2Visual {
+    justify-content: flex-end;
+    margin-top: 0;
+    gap: 1rem;
+  }
+
+  .bookCover {
+    width: 90px;
+    height: 110px;
+  }
+
+  .bookOpen {
+    width: 100px;
+    height: 75px;
+  }
+
+  .childrenImage {
+    width: 120px;
+    height: 100px;
+  }
+
+  .tablet {
+    width: 120px;
+    height: 90px;
+  }
+
+  .childrenAround {
+    width: 100px;
+    height: 100px;
+  }
+
+  .iconsGrid {
+    width: 100px;
+  }
+
+  .iconItem {
+    width: 45px;
+    height: 45px;
+    font-size: 1.3rem;
+  }
 }
 
 @media (max-width: 480px) {
@@ -268,5 +855,112 @@
   
   .icon {
     font-size: 3rem;
+  }
+
+  /* Carrossel responsivo para mobile */
+  .carouselContainer {
+    margin: 1.5rem 0.5rem 2rem 0.5rem;
+  }
+
+  .carouselControls {
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+  }
+
+  .carouselControls.prev {
+    left: 10px;
+  }
+
+  .carouselControls.next {
+    right: 10px;
+  }
+
+  .carouselIndicators {
+    margin-top: 1rem;
+  }
+
+  .carouselIndicator {
+    width: 10px;
+    height: 10px;
+  }
+
+  .banner {
+    padding: 1.5rem;
+  }
+
+  .banner1Title,
+  .banner2Title {
+    font-size: 1.3rem;
+  }
+
+  .banner1Subtitle {
+    font-size: 1.5rem;
+  }
+
+  .banner2Subtitle {
+    font-size: 1.4rem;
+  }
+
+  .banner1Description,
+  .banner2Description {
+    font-size: 0.9rem;
+  }
+
+  .banner1Features,
+  .banner2Features {
+    font-size: 0.85rem;
+  }
+
+  .banner1Verse,
+  .banner2Quote {
+    font-size: 0.8rem;
+  }
+
+  .banner1Visual,
+  .banner2Visual {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .bookCover {
+    width: 70px;
+    height: 90px;
+  }
+
+  .bookOpen {
+    width: 90px;
+    height: 65px;
+  }
+
+  .childrenImage {
+    width: 100px;
+    height: 85px;
+  }
+
+  .tablet {
+    width: 100px;
+    height: 75px;
+  }
+
+  .childrenAround {
+    width: 80px;
+    height: 80px;
+  }
+
+  .iconsGrid {
+    width: 80px;
+  }
+
+  .iconItem {
+    width: 35px;
+    height: 35px;
+    font-size: 1rem;
+  }
+
+  .banner1CTA,
+  .banner2CTA {
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
   }
 }

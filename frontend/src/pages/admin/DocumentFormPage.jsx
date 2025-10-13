@@ -10,7 +10,7 @@ function DocumentFormPage() {
   const [descripcion, setDescripcion] = useState('');
   const [docFile, setDocFile] = useState(null);
   const [imageFile, setImageFile] = useState(null); // NOVO
-  const [accessLevel, setAccessLevel] = useState('BASICO');
+  const [categoria_produto, setCategoria_produto] = useState('PRINCIPAL');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const navigate = useNavigate();
@@ -34,7 +34,7 @@ function DocumentFormPage() {
     }
 
     // Adiciona o nível de acesso
-    formData.append('accessLevel', accessLevel);
+        formData.append('categoria_produto', categoria_produto);
 
     try {
       // Simular progresso de upload
@@ -84,9 +84,9 @@ function DocumentFormPage() {
         </div>
 
         {/* SELETOR DE NÍVEL DE ACESSO */}
-        <AccessLevelSelector
-          selectedLevel={accessLevel}
-          onChange={setAccessLevel}
+        <AccessLevelSelector 
+          selectedLevel={categoria_produto} 
+          onChange={setCategoria_produto}
         />
 
         <button type="submit" disabled={isSubmitting} className={styles.submitButton}>

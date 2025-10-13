@@ -71,11 +71,11 @@ router.get('/videos', authMiddleware, async (req, res) => {
     const userAccessLevel = req.user.accessLevel;
     console.log(`🎯 Buscando vídeos para nível de acesso: ${userAccessLevel}`);
 
-    // Buscar vídeos com filtragem por nível de acesso
+    // NOVA LÓGICA: Buscar vídeos com filtragem por categoria baseada no accessLevel
     const videos = await Video.findAll({ 
       order: [['createdAt', 'DESC']],
-      attributes: ['id', 'titulo', 'descripcion', 'urlVideo', 'urlImagen', 'createdAt', 'accessLevel'],
-      where: accessLevelService.buildAccessFilter(userAccessLevel)
+      attributes: ['id', 'titulo', 'descripcion', 'urlVideo', 'urlImagen', 'createdAt', 'categoria_produto'],
+      where: accessLevelService.buildCategoryFilter(userAccessLevel)
     });
     
     console.log(`✅ Listados ${videos.length} vídeos acessíveis para nível ${userAccessLevel}`);
@@ -98,11 +98,11 @@ router.get('/documentos', authMiddleware, async (req, res) => {
     const userAccessLevel = req.user.accessLevel;
     console.log(`🎯 Buscando documentos para nível de acesso: ${userAccessLevel}`);
 
-    // Buscar documentos com filtragem por nível de acesso
+    // NOVA LÓGICA: Buscar documentos com filtragem por categoria baseada no accessLevel
     const documents = await Document.findAll({ 
       order: [['createdAt', 'DESC']],
-      attributes: ['id', 'titulo', 'descripcion', 'urlDocumento', 'urlImagen', 'createdAt', 'accessLevel'],
-      where: accessLevelService.buildAccessFilter(userAccessLevel)
+      attributes: ['id', 'titulo', 'descripcion', 'urlDocumento', 'urlImagen', 'createdAt', 'categoria_produto'],
+      where: accessLevelService.buildCategoryFilter(userAccessLevel)
     });
     
     console.log(`✅ Listados ${documents.length} documentos acessíveis para nível ${userAccessLevel}`);
@@ -246,24 +246,47 @@ router.get('/documentos/:id/download', authMiddleware, async (req, res) => {
  */
 router.get('/access-levels', [authMiddleware, adminMiddleware], async (req, res) => {
   try {
+    console.log('🔄 Endpoint /access-levels chamado');
+    console.log('🔍 Chamando accessLevelService.getAllAccessLevels()...');
     const accessLevels = accessLevelService.getAllAccessLevels();
-    const hierarchy = accessLevelService.getAccessLevelHierarchy();
+    console.log('📋 Níveis de acesso retornados pelo serviço:', accessLevels);
     
-    const formattedLevels = accessLevels.map(level => ({
-      value: level,
-      label: level.replace('_', ' ').toLowerCase().replace(/\b\w/g, l => l.toUpperCase()),
-      hierarchy: hierarchy[level]
-    }));
-
-    res.json({
-      accessLevels: formattedLevels,
-      hierarchy: hierarchy
-    });
+    const response = {
+      accessLevels: accessLevels
+    };
+    console.log('📤 Resposta final que será enviada:', response);
+    
+    res.json(response);
   } catch (error) {
     console.error("❌ Erro ao buscar níveis de acesso:", error);
     res.status(500).json({ 
       message: 'Erro ao buscar níveis de acesso',
       code: 'FETCH_ACCESS_LEVELS_ERROR'
+    });
+  }
+});
+
+/**
+ * GET /content-categories - Obter categorias de conteúdo disponíveis (Admin) - NOVO
+ */
+router.get('/content-categories', [authMiddleware, adminMiddleware], async (req, res) => {
+  try {
+    console.log('🔄 Endpoint /content-categories chamado');
+    console.log('🔍 Chamando accessLevelService.getAllContentCategories()...');
+    const categories = accessLevelService.getAllContentCategories();
+    console.log('📋 Categorias de conteúdo retornadas pelo serviço:', categories);
+    
+    const response = {
+      categories: categories
+    };
+    console.log('📤 Resposta final que será enviada:', response);
+    
+    res.json(response);
+  } catch (error) {
+    console.error("❌ Erro ao buscar categorias de conteúdo:", error);
+    res.status(500).json({ 
+      message: 'Erro ao buscar categorias de conteúdo',
+      code: 'FETCH_CONTENT_CATEGORIES_ERROR'
     });
   }
 });
@@ -321,14 +344,15 @@ router.post('/videos', [authMiddleware, adminMiddleware, upload.fields([
       });
     }
     
-    // Processar nível de acesso
-    const accessLevel = req.body.accessLevel || 'BASICO';
-    const validLevels = accessLevelService.getAllAccessLevels();
+    // Processar categoria do produto
+    const categoria_produto = req.body.categoria_produto || 'PRINCIPAL';
+    const validCategories = accessLevelService.getAllContentCategories();
+    const validCategoryValues = validCategories.map(cat => cat.value);
     
-    if (!validLevels.includes(accessLevel)) {
+    if (!validCategoryValues.includes(categoria_produto)) {
       return res.status(400).json({
-        message: 'Nível de acesso inválido',
-        code: 'INVALID_ACCESS_LEVEL'
+        message: 'Categoria de produto inválida',
+        code: 'INVALID_PRODUCT_CATEGORY'
       });
     }
 
@@ -338,10 +362,10 @@ router.post('/videos', [authMiddleware, adminMiddleware, upload.fields([
       descripcion: descripcion ? descripcion.trim() : null,
       urlVideo: videoPath,
       urlImagen: imagePath,
-      accessLevel: accessLevel
+      categoria_produto: categoria_produto
     });
     
-    console.log(`✅ Vídeo criado: ${titulo} com nível ${accessLevel} por ${req.user.email}`);
+    console.log(`✅ Vídeo criado: ${titulo} com categoria ${categoria_produto} por ${req.user.email}`);
     res.status(201).json({
       message: 'Vídeo criado com sucesso',
       video: novoVideo
@@ -543,14 +567,15 @@ router.post('/documentos', [authMiddleware, adminMiddleware, upload.fields([
       });
     }
     
-    // Processar nível de acesso
-    const accessLevel = req.body.accessLevel || 'BASICO';
-    const validLevels = accessLevelService.getAllAccessLevels();
+    // Processar categoria do produto
+    const categoria_produto = req.body.categoria_produto || 'PRINCIPAL';
+    const validCategories = accessLevelService.getAllContentCategories();
+    const validCategoryValues = validCategories.map(cat => cat.value);
     
-    if (!validLevels.includes(accessLevel)) {
+    if (!validCategoryValues.includes(categoria_produto)) {
       return res.status(400).json({
-        message: 'Nível de acesso inválido',
-        code: 'INVALID_ACCESS_LEVEL'
+        message: 'Categoria de produto inválida',
+        code: 'INVALID_PRODUCT_CATEGORY'
       });
     }
 
@@ -560,10 +585,10 @@ router.post('/documentos', [authMiddleware, adminMiddleware, upload.fields([
       descripcion: descripcion ? descripcion.trim() : null,
       urlDocumento: docPath,
       urlImagen: imagePath,
-      accessLevel: accessLevel
+      categoria_produto: categoria_produto
     });
     
-    console.log(`✅ Documento criado: ${titulo} com nível ${accessLevel} por ${req.user.email}`);
+    console.log(`✅ Documento criado: ${titulo} com categoria ${categoria_produto} por ${req.user.email}`);
     res.status(201).json({
       message: 'Documento criado com sucesso',
       document: novoDocumento

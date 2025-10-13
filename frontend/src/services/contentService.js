@@ -139,3 +139,12 @@ export const getAccessLevels = async () => {
   const response = await apiClient.get('/content/access-levels');
   return response.data;
 };
+
+/**
+ * Busca todas as categorias de conteúdo disponíveis. (Rota Protegida por Admin)
+ * @returns {Promise<Object>} Lista de categorias de conteúdo.
+ */
+export const getContentCategories = async () => {
+  const response = await apiClient.get('/content/content-categories');
+  return response.data;
+};

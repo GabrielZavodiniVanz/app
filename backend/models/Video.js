@@ -32,12 +32,12 @@ const Video = sequelize.define('Video', {
       isUrl: true
     }
   },
-  accessLevel: {
-    type: DataTypes.ENUM('nenhum', 'BASICO', 'INTERMEDIARIO', 'AVANCADO', 'ACESSO_COMPLETO'),
-    defaultValue: 'BASICO',
+  categoria_produto: {
+    type: DataTypes.ENUM('PRINCIPAL', 'PRODUTO_1', 'PRODUTO_2'),
+    defaultValue: 'PRINCIPAL',
     allowNull: false,
     validate: {
-      isIn: [['nenhum', 'BASICO', 'INTERMEDIARIO', 'AVANCADO', 'ACESSO_COMPLETO']]
+      isIn: [['PRINCIPAL', 'PRODUTO_1', 'PRODUTO_2']]
     }
   }
 }, {

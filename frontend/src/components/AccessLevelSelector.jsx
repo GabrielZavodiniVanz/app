@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { getAccessLevels } from '../services/contentService';
+import { getContentCategories } from '../services/contentService';
 import styles from './AccessLevelSelector.module.css';
 
-function AccessLevelSelector({ selectedLevel = 'BASICO', onChange, disabled = false }) {
+function AccessLevelSelector({ selectedLevel = 'PRINCIPAL', onChange, disabled = false }) {
   const [accessLevels, setAccessLevels] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -12,16 +12,20 @@ function AccessLevelSelector({ selectedLevel = 'BASICO', onChange, disabled = fa
 
   const loadAccessLevels = async () => {
     try {
-      const response = await getAccessLevels();
-      setAccessLevels(response.accessLevels || []);
+      console.log('🔄 Carregando categorias de conteúdo...');
+      const response = await getContentCategories();
+      console.log('📡 Resposta da API:', response);
+      console.log('📋 Categorias de conteúdo recebidas:', response.categories);
+      setAccessLevels(response.categories || []);
     } catch (error) {
-      console.error('Erro ao carregar níveis de acesso:', error);
-      // Fallback com níveis padrão
+      console.error('❌ Erro ao carregar categorias de conteúdo:', error);
+      console.log('🔄 Usando fallback...');
+      // Fallback com categorias padrão
+      console.log('🔄 Usando fallback com novas categorias');
       setAccessLevels([
-        { value: 'BASICO', label: 'Básico', hierarchy: 1 },
-        { value: 'INTERMEDIARIO', label: 'Intermediário', hierarchy: 2 },
-        { value: 'AVANCADO', label: 'Avançado', hierarchy: 3 },
-        { value: 'ACESSO_COMPLETO', label: 'Acesso Completo', hierarchy: 4 }
+        { value: 'PRINCIPAL', label: 'Conteúdo do Produto Principal' },
+        { value: 'PRODUTO_1', label: 'Conteúdo do Produto 1 (Adicional)' },
+        { value: 'PRODUTO_2', label: 'Conteúdo do Produto 2 (Adicional)' }
       ]);
     } finally {
       setLoading(false);
@@ -36,8 +40,8 @@ function AccessLevelSelector({ selectedLevel = 'BASICO', onChange, disabled = fa
   if (loading) {
     return (
       <div className={styles.container}>
-        <label className={styles.label}>Níveis de Acesso</label>
-        <div className={styles.loading}>Carregando níveis de acesso...</div>
+        <label className={styles.label}>Categoria do Conteúdo</label>
+        <div className={styles.loading}>Carregando categorias...</div>
       </div>
     );
   }
@@ -45,41 +49,36 @@ function AccessLevelSelector({ selectedLevel = 'BASICO', onChange, disabled = fa
   return (
     <div className={styles.container}>
       <label className={styles.label}>
-        Níveis de Acesso
+        Categoria do Conteúdo
         <span className={styles.helpText}>
-          Selecione quais níveis de acesso poderão visualizar este conteúdo
+          Selecione a qual produto este conteúdo pertence
         </span>
       </label>
       
       <div className={styles.selector}>
         <div className={styles.levelsContainer}>
-          {accessLevels
-            .sort((a, b) => a.hierarchy - b.hierarchy)
-            .map(level => (
-              <label key={level.value} className={styles.levelLabel}>
-                <input
-                  type="radio"
-                  name="accessLevel"
-                  value={level.value}
-                  checked={selectedLevel === level.value}
-                  onChange={() => handleLevelChange(level.value)}
-                  disabled={disabled}
-                  className={styles.radio}
-                />
-                <span className={styles.levelText}>
-                  {level.label}
-                  <span className={styles.hierarchy}>
-                    (Nível {level.hierarchy})
-                  </span>
-                </span>
-              </label>
-            ))}
+          {accessLevels.map(level => (
+            <label key={level.value} className={styles.levelLabel}>
+              <input
+                type="radio"
+                name="categoria_produto"
+                value={level.value}
+                checked={selectedLevel === level.value}
+                onChange={() => handleLevelChange(level.value)}
+                disabled={disabled}
+                className={styles.radio}
+              />
+              <span className={styles.levelText}>
+                {level.label}
+              </span>
+            </label>
+          ))}
         </div>
       </div>
 
       <div className={styles.selectedInfo}>
-        ✅ Nível selecionado: {
-          accessLevels.find(l => l.value === selectedLevel)?.label || 'Básico'
+        ✅ Categoria selecionada: {
+          accessLevels.find(l => l.value === selectedLevel)?.label || 'Conteúdo do Produto Principal'
         }
       </div>
     </div>
