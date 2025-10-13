@@ -50,6 +50,12 @@ const User = sequelize.define('User', {
   resetPasswordExpires: {
     type: DataTypes.DATE,
     allowNull: true
+  },
+  comprou_produto_3: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+    allowNull: false,
+    comment: 'Indica se o usuário comprou o Produto 3 (upsell)'
   }
 }, {
   tableName: 'users',

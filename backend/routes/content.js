@@ -69,16 +69,22 @@ const removeFromCloudinary = async (url, resourceType = 'image') => {
 router.get('/videos', authMiddleware, async (req, res) => {
   try {
     const userAccessLevel = req.user.accessLevel;
-    console.log(`🎯 Buscando vídeos para nível de acesso: ${userAccessLevel}`);
+    const userComprouProduto3 = req.user.comprou_produto_3;
+    console.log(`🎯 Buscando vídeos para usuário: ${req.user.email}`);
+    console.log(`🎯 AccessLevel: ${userAccessLevel}, Comprou Produto 3: ${userComprouProduto3} (tipo: ${typeof userComprouProduto3})`);
 
-    // NOVA LÓGICA: Buscar vídeos com filtragem por categoria baseada no accessLevel
+    // NOVA LÓGICA: Buscar vídeos com filtragem por categoria baseada no accessLevel e upsell
+    const categoryFilter = accessLevelService.buildCategoryFilter(userAccessLevel, userComprouProduto3);
+    console.log(`🔍 Filtro de categoria: ${JSON.stringify(categoryFilter)}`);
+    
     const videos = await Video.findAll({ 
       order: [['createdAt', 'DESC']],
       attributes: ['id', 'titulo', 'descripcion', 'urlVideo', 'urlImagen', 'createdAt', 'categoria_produto'],
-      where: accessLevelService.buildCategoryFilter(userAccessLevel)
+      where: categoryFilter
     });
     
     console.log(`✅ Listados ${videos.length} vídeos acessíveis para nível ${userAccessLevel}`);
+    console.log(`📋 Vídeos retornados:`, videos.map(v => `${v.titulo} (${v.categoria_produto})`));
     res.json(videos);
     
   } catch (error) {
@@ -96,16 +102,22 @@ router.get('/videos', authMiddleware, async (req, res) => {
 router.get('/documentos', authMiddleware, async (req, res) => {
   try {
     const userAccessLevel = req.user.accessLevel;
-    console.log(`🎯 Buscando documentos para nível de acesso: ${userAccessLevel}`);
+    const userComprouProduto3 = req.user.comprou_produto_3;
+    console.log(`🎯 Buscando documentos para usuário: ${req.user.email}`);
+    console.log(`🎯 AccessLevel: ${userAccessLevel}, Comprou Produto 3: ${userComprouProduto3} (tipo: ${typeof userComprouProduto3})`);
 
-    // NOVA LÓGICA: Buscar documentos com filtragem por categoria baseada no accessLevel
+    // NOVA LÓGICA: Buscar documentos com filtragem por categoria baseada no accessLevel e upsell
+    const categoryFilter = accessLevelService.buildCategoryFilter(userAccessLevel, userComprouProduto3);
+    console.log(`🔍 Filtro de categoria: ${JSON.stringify(categoryFilter)}`);
+    
     const documents = await Document.findAll({ 
       order: [['createdAt', 'DESC']],
       attributes: ['id', 'titulo', 'descripcion', 'urlDocumento', 'urlImagen', 'createdAt', 'categoria_produto'],
-      where: accessLevelService.buildCategoryFilter(userAccessLevel)
+      where: categoryFilter
     });
     
     console.log(`✅ Listados ${documents.length} documentos acessíveis para nível ${userAccessLevel}`);
+    console.log(`📋 Documentos retornados:`, documents.map(d => `${d.titulo} (${d.categoria_produto})`));
     res.json(documents);
     
   } catch (error) {

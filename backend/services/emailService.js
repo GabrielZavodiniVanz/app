@@ -574,6 +574,194 @@ class EmailService {
       return { success: false, message: 'Failed to send password reset email' };
     }
   }
+
+  /**
+   * Enviar e-mail de confirmação de upsell
+   * @param {object} userData - Dados do usuário { name, email, loginUrl, productName }
+   */
+  async sendUpsellConfirmationEmail(userData) {
+    try {
+      // Em produção, não verificar transporter - usar Resend diretamente
+      if (process.env.NODE_ENV === 'production') {
+        console.log('🔄 Produção: Enviando e-mail de confirmação de upsell via Resend...');
+      } else if (!this.transporter) {
+        console.warn('⚠️ Serviço de email não configurado. Pulando envio de e-mail.');
+        return { success: false, message: 'Email service not configured' };
+      }
+
+      const { name, email, loginUrl, productName } = userData;
+
+      const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: '🎉 ¡Nuevo Contenido Liberado! - Niños de Luz',
+        html: `<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="x-apple-disable-message-reformatting">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nuevo Contenido • Niños de Luz</title>
+<!--[if mso]>
+<style>
+* {font-family: Arial, sans-serif !important;}
+</style>
+<![endif]-->
+<link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#FAF6EB;
+    --pink:#FF0988;
+    --gold:#F0983C;
+    --vio1:#7A64F2;
+    --vio2:#9A89F7;
+    --mint:#52D1A5;
+    --ink:#2B2B2B;
+    --muted:#6B6B6B;
+    --card:#FFFFFF;
+  }
+  html,body{margin:0;padding:0;background:var(--bg);}
+  .wrapper{width:100%;background:var(--bg);padding:0;}
+  .container{max-width:640px;margin:0 auto;background:var(--card);}
+  .p-24{padding:24px;}
+  .p-32{padding:32px;}
+  .hero{
+    background:linear-gradient(135deg,var(--mint),var(--vio2));
+    color:#000;text-align:center;border-radius:14px;
+    font-family:'Mochiy Pop One', Arial, sans-serif;
+  }
+  h1{margin:0;font-size:28px;line-height:1.25;}
+  h2{font-family:'Mochiy Pop One', Arial, sans-serif;margin:0 0 8px 0;color:var(--ink);font-size:20px;}
+  p{margin:0 0 12px 0;color:var(--ink);font-family:'Poppins', Arial, sans-serif;font-size:16px;line-height:1.6;}
+  .muted{color:var(--muted);}
+  .card{border:1px solid #EFE7D8;border-radius:12px;background:#FFFCF3;}
+  .btn{
+    display:inline-block;padding:14px 22px;border-radius:999px;
+    font-family:'Mochiy Pop One', Arial, sans-serif;font-size:16px;text-decoration:none;
+  }
+  .btn-primary{background:#EFE7D8;color:#000;}
+  .chip{display:inline-block;background:#E8F5E8;color:#2D5A2D;border-radius:999px;padding:6px 10px;font-family:'Poppins',Arial,sans-serif;font-size:13px;margin-top:6px;}
+  .verse{font-family:'Mochiy Pop One', Arial, sans-serif;color:var(--pink);text-align:center;}
+  .footer{color:#5B6770;font-size:12px;text-align:center;}
+  @media (max-width:480px){
+    .p-32{padding:20px;}
+    h1{font-size:24px;}
+  }
+</style>
+</head>
+<body>
+  <table class="wrapper" role="presentation" cellpadding="0" cellspacing="0" width="100%">
+    <tr>
+      <td align="center">
+        <table class="container" role="presentation" cellpadding="0" cellspacing="0" width="100%">
+          <!-- HERO -->
+          <tr>
+            <td class="p-24">
+              <div class="hero p-24">
+                <h1>🎉 ¡Nuevo Contenido Liberado!</h1>
+                <p style="margin-top:8px;font-family:'Poppins',Arial,sans-serif;">Hola ${name}, tu compra adicional fue confirmada ✨</p>
+              </div>
+            </td>
+          </tr>
+
+          <!-- INTRO -->
+          <tr>
+            <td class="p-32">
+              <p>¡Excelente decisión! Has adquirido el <strong>${productName}</strong> y ahora tienes acceso inmediato a contenido adicional exclusivo en tu <strong>Web App de Niños de Luz</strong> 🌟</p>
+            </td>
+          </tr>
+
+          <!-- CONTENT -->
+          <tr>
+            <td class="p-32">
+              <div class="card p-24">
+                <h2>🎁 Lo que tienes ahora</h2>
+                <p>✨ <strong>Contenido adicional liberado</strong> - Nuevas actividades y materiales</p>
+                <p>📚 <strong>Materiales exclusivos</strong> - Solo para quienes compraron este upsell</p>
+                <p>🎨 <strong>Actividades premium</strong> - Experiencias de aprendizaje únicas</p>
+                <p class="muted">🔓 El contenido ya está disponible en tu cuenta</p>
+              </div>
+            </td>
+          </tr>
+
+          <!-- CTA BUTTON -->
+          <tr>
+            <td align="center" class="p-24">
+              <a class="btn btn-primary" href="${loginUrl}" target="_blank" rel="noopener">🎨 Ver Nuevo Contenido</a>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" class="p-24" style="padding-top:0;">
+              <a class="btn btn-secondary" href="${loginUrl}?refresh=true&upsell=success" target="_blank" rel="noopener">🔄 Actualizar Página Automáticamente</a>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" class="p-24" style="padding-top:0;">
+              <div class="chip">Acceso inmediato • Contenido premium</div>
+            </td>
+          </tr>
+
+          <!-- VERSE -->
+          <tr>
+            <td class="p-32">
+              <div class="verse">
+                <p style="margin:0;">"Dios nos ha dado todo lo que necesitamos</p>
+                <p style="margin:0;">para vivir una vida piadosa."</p>
+                <p style="margin-top:6px;">— 2 Pedro 1:3 🙏</p>
+              </div>
+            </td>
+          </tr>
+
+          <!-- SUPPORT -->
+          <tr>
+            <td class="p-32">
+              <h2>📬 ¿Necesitas ayuda?</h2>
+              <p>Escríbenos a <strong>contactoninosdeluz@gmail.com</strong>. Estamos felices de acompañarte en esta hermosa aventura de fe y aprendizaje familiar 🌈</p>
+            </td>
+          </tr>
+
+          <!-- FOOTER -->
+          <tr>
+            <td class="p-24">
+              <p class="footer">Este es un correo automático, por favor no respondas.</p>
+              <p class="footer">© 2025 Niños de Luz — Creando un mundo mágico de aprendizaje y diversión para los más pequeños.</p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`,
+        text: `
+          Nuevo Contenido Liberado - Niños de Luz
+          
+          Hola ${name},
+          
+          ¡Excelente decisión! Has adquirido el ${productName} y ahora tienes acceso inmediato a contenido adicional exclusivo.
+          
+          Lo que tienes ahora:
+          - Contenido adicional liberado
+          - Materiales exclusivos
+          - Actividades premium
+          
+          Accede a tu cuenta: ${loginUrl}
+          
+          El contenido ya está disponible en tu cuenta.
+          
+          © 2025 Niños de Luz
+        `
+      };
+
+      const result = await this.sendWithRetry(mailOptions);
+      console.log('✅ E-mail de confirmação de upsell enviado:', result.messageId);
+      return { success: true, messageId: result.messageId };
+    } catch (error) {
+      console.error('❌ Erro ao enviar e-mail de confirmação de upsell:', error.message);
+      return { success: false, message: 'Failed to send upsell confirmation email' };
+    }
+  }
 }
 
 module.exports = new EmailService();

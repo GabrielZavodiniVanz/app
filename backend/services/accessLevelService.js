@@ -6,7 +6,8 @@
 const PRODUCT_IDS = {
   PRINCIPAL: '89aece00-a51b-11f0-ab58-2f2096ded2ba',
   PRODUTO_1: '2343e890-a538-11f0-98fb-c9aca982ba72', //PACK EXTRA 1 - Tarjetas y Stickers de Rutinas con FE
-  PRODUTO_2: '44c34a50-a53e-11f0-a7e3-c3b4bfe5981f' //PACK EXTRA 2  - Versículos con Amor y Color
+  PRODUTO_2: '44c34a50-a53e-11f0-a7e3-c3b4bfe5981f', //PACK EXTRA 2  - Versículos con Amor y Color
+  PRODUTO_3: 'd614e9f0-a845-11f0-a8cd-a7de6dd83d71'  //PRODUTO 3 - Upsell
 };
 
 // Níveis de acesso baseados nos produtos
@@ -14,7 +15,8 @@ const ACCESS_LEVELS = {
   NENHUM: 'nenhum',
   PRODUTO_PRINCIPAL: 'PRODUTO_PRINCIPAL',
   PRODUTO_1: 'PRODUTO_1', 
-  PRODUTO_2: 'PRODUTO_2'
+  PRODUTO_2: 'PRODUTO_2',
+  PRODUTO_3: 'PRODUTO_3'
 };
 
 // Mapeamento de produtos para níveis de acesso (CORRIGIDO para accessLevels tradicionais)
@@ -28,21 +30,24 @@ const PRODUCT_ACCESS_MAPPING = {
 const PRODUCT_NAMES = {
   PRODUTO_PRINCIPAL: 'Kit Niños de Luz (Principal)',
   PRODUTO_1: 'Tarjetas y Stickers de Rutinas con FE (Pack 1)',
-  PRODUTO_2: 'Versículos con Amor y Color (Pack 2)'
+  PRODUTO_2: 'Versículos con Amor y Color (Pack 2)',
+  PRODUTO_3: 'Produto 3 (Upsell)'
 };
 
 // Categorias de conteúdo (nova estrutura)
 const CONTENT_CATEGORIES = {
   PRINCIPAL: 'PRINCIPAL',
   PRODUTO_1: 'PRODUTO_1',
-  PRODUTO_2: 'PRODUTO_2'
+  PRODUTO_2: 'PRODUTO_2',
+  PRODUTO_3: 'PRODUTO_3'
 };
 
 // Nomes amigáveis das categorias de conteúdo
 const CATEGORY_NAMES = {
   PRINCIPAL: 'Conteúdo do Produto Principal',
   PRODUTO_1: 'Conteúdo do Produto 1 (Adicional)',
-  PRODUTO_2: 'Conteúdo do Produto 2 (Adicional)'
+  PRODUTO_2: 'Conteúdo do Produto 2 (Adicional)',
+  PRODUTO_3: 'Conteúdo do Produto 3 (Upsell)'
 };
 
 /**
@@ -179,11 +184,12 @@ function buildAccessFilter(userAccessLevels) {
 
 /**
  * NOVA LÓGICA: Determina quais categorias de conteúdo um usuário pode ver
- * baseado no seu accessLevel
+ * baseado no seu accessLevel e se comprou o PRODUTO_3
  * @param {string} userAccessLevel - Nível de acesso do usuário
+ * @param {boolean} comprouProduto3 - Se o usuário comprou o produto 3 (upsell)
  * @returns {Array} - Array com as categorias permitidas
  */
-function getVisibleCategories(userAccessLevel) {
+function getVisibleCategories(userAccessLevel, comprouProduto3 = false) {
   let allowedCategories = [];
   
   // LÓGICA CORRETA: Baseada nos accessLevels tradicionais
@@ -204,22 +210,32 @@ function getVisibleCategories(userAccessLevel) {
       // Usuário com acesso completo pode ver todo conteúdo
       allowedCategories = ['PRINCIPAL', 'PRODUTO_1', 'PRODUTO_2'];
       break;
+    case 'admin':
+      // Admin vê todas as categorias, incluindo PRODUTO_3
+      allowedCategories = ['PRINCIPAL', 'PRODUTO_1', 'PRODUTO_2', 'PRODUTO_3'];
+      break;
     default:
       // Usuário sem acesso ou nível inválido não vê nada
       allowedCategories = [];
   }
   
-  console.log(`👤 Usuário com accessLevel '${userAccessLevel}' pode ver categorias:`, allowedCategories);
+  // Adiciona PRODUTO_3 se o usuário comprou o upsell
+  if (comprouProduto3 && !allowedCategories.includes('PRODUTO_3')) {
+    allowedCategories.push('PRODUTO_3');
+  }
+  
+  console.log(`👤 Usuário com accessLevel '${userAccessLevel}' e comprouProduto3: ${comprouProduto3} pode ver categorias:`, allowedCategories);
   return allowedCategories;
 }
 
 /**
  * NOVA LÓGICA: Constrói filtro SQL para categorias de conteúdo
  * @param {string} userAccessLevel - Nível de acesso do usuário
+ * @param {boolean} comprouProduto3 - Se o usuário comprou o produto 3 (upsell)
  * @returns {Object} - Filtro para Sequelize
  */
-function buildCategoryFilter(userAccessLevel) {
-  const allowedCategories = getVisibleCategories(userAccessLevel);
+function buildCategoryFilter(userAccessLevel, comprouProduto3 = false) {
+  const allowedCategories = getVisibleCategories(userAccessLevel, comprouProduto3);
   
   if (allowedCategories.length === 0) {
     // Usuário sem acesso - retorna filtro que não encontra nada

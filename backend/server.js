@@ -43,6 +43,7 @@ app.use((req, res, next) => {
 const contentRoutes = require('./routes/content');
 const authRoutes = require('./routes/auth');
 const webhookRoutes = require('./routes/webhook');
+const { router: fallbackRoutes } = require('./routes/notifications-fallback');
 
 // Rota de health check
 app.get('/health', (req, res) => {
@@ -57,6 +58,7 @@ app.get('/health', (req, res) => {
 app.use('/api/content', contentRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/webhook', webhookRoutes);
+app.use('/api/notifications', fallbackRoutes);
 
 // Middleware de tratamento de rotas não encontradas
 app.use((req, res, next) => {

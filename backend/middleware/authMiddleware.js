@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
+const User = require('../models/User');
 
-const authMiddleware = (req, res, next) => {
+const authMiddleware = async (req, res, next) => {
   try {
     // 1. Pega o token do cabeçalho da requisição
     const authHeader = req.headers.authorization;
@@ -34,10 +35,29 @@ const authMiddleware = (req, res, next) => {
       });
     }
 
-    // 6. Adiciona as informações do usuário decodificadas ao objeto 'req'
-    req.user = decoded;
+    // 6. Buscar dados atualizados do usuário no banco (incluindo comprou_produto_3)
+    const user = await User.findByPk(decoded.id, {
+      attributes: ['id', 'name', 'email', 'role', 'accessLevel', 'comprou_produto_3']
+    });
 
-    // 7. Deixa a requisição continuar para a próxima etapa
+    if (!user) {
+      return res.status(401).json({ 
+        message: 'Usuário não encontrado.',
+        code: 'USER_NOT_FOUND'
+      });
+    }
+
+    // 7. Adiciona as informações atualizadas do usuário ao objeto 'req'
+    req.user = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      accessLevel: user.accessLevel,
+      comprou_produto_3: user.comprou_produto_3
+    };
+
+    // 8. Deixa a requisição continuar para a próxima etapa
     next();
 
   } catch (error) {

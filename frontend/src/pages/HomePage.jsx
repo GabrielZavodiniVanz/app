@@ -95,7 +95,10 @@ function HomePage() {
                     <div className={styles.banner1Verse}>
                       📖 "Educa al niño en su camino, y aun cuando fuere viejo no se apartará de él." – Proverbios 22:6
                     </div>
-                    <button className={styles.banner1CTA}>
+                    <button 
+                      className={styles.banner1CTA}
+                      onClick={() => window.open('https://pay.kiwify.com/4V0ZI49', '_blank')}
+                    >
                       ¡Quiero mi libro para colorear!
                     </button>
                   </div>
