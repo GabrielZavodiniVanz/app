@@ -1,8 +1,8 @@
-/* Estilos base para o Navbar (Mobile First) */
+/* Estilos base para o Navbar (Mobile First) - Kit Niños de Luz */
 .navbar {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(248, 250, 252, 0.95) 100%);
+  background: linear-gradient(135deg, rgba(255, 249, 241, 0.95) 0%, rgba(250, 246, 235, 0.95) 100%);
   backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+  border-bottom: 1px solid rgba(255, 9, 136, 0.2);
   padding: 1rem 1.5rem;
   display: flex;
   justify-content: space-between;
@@ -10,7 +10,7 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 8px 32px rgba(59, 130, 246, 0.1), 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 8px 32px rgba(255, 9, 136, 0.1), 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .brand {
@@ -23,24 +23,24 @@
   transition: all 0.3s ease;
   padding: 0.75rem 1rem;
   border-radius: 16px;
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(245, 158, 11, 0.1) 100%);
-  border: 1px solid rgba(59, 130, 246, 0.2);
+  background: linear-gradient(135deg, rgba(255, 9, 136, 0.1) 0%, rgba(240, 152, 60, 0.1) 100%);
+  border: 1px solid rgba(255, 9, 136, 0.2);
   position: relative;
   overflow: hidden;
 }
 
 .brand:hover {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(245, 158, 11, 0.15) 100%);
+  background: linear-gradient(135deg, rgba(255, 9, 136, 0.15) 0%, rgba(240, 152, 60, 0.15) 100%);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.2);
-  border-color: rgba(59, 130, 246, 0.3);
+  box-shadow: 0 6px 20px rgba(255, 9, 136, 0.2);
+  border-color: rgba(255, 9, 136, 0.3);
 }
 
 .brandIcon {
   color: var(--secondary-color);
   font-size: 1.8rem;
   animation: sparkle 2s ease-in-out infinite;
-  filter: drop-shadow(0 2px 4px rgba(245, 158, 11, 0.3));
+  filter: drop-shadow(0 2px 4px rgba(240, 152, 60, 0.3));
 }
 
 @keyframes sparkle {
@@ -66,12 +66,12 @@
   padding: 0.75rem;
   border-radius: 12px;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 15px rgba(255, 9, 136, 0.3);
 }
 
 .hamburger:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+  box-shadow: 0 6px 20px rgba(255, 9, 136, 0.4);
 }
 
 .links {
@@ -174,7 +174,7 @@
 }
 
 .link:hover {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(245, 158, 11, 0.1) 100%);
+  background: linear-gradient(135deg, rgba(255, 9, 136, 0.1) 0%, rgba(240, 152, 60, 0.1) 100%);
   color: var(--primary-color);
   transform: translateY(-2px);
 }
@@ -182,7 +182,7 @@
 .activeLink {
   background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
   color: white;
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 15px rgba(255, 9, 136, 0.3);
 }
 
 .linkIcon {
