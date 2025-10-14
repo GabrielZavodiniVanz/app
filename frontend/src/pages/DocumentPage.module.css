@@ -36,11 +36,11 @@
 .pageTitle {
   font-family: var(--font-heading);
   font-size: 2.5rem;
-  color: var(--primary-color);
+  color: var(--secondary-color);
   margin: 0 0 0.5rem 0;
   position: relative;
   z-index: 2;
-  background: linear-gradient(135deg, var(--secondary-color) 0%, #ef4444 100%);
+  background: linear-gradient(135deg, var(--secondary-color) 0%, #ea580c 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -216,4 +216,94 @@
   .viewToggle {
     align-self: center;
   }
+}
+
+/* Layout em Acordeão */
+.accordionContainer {
+  width: 100%;
+}
+
+.accordionItem {
+  background: var(--surface-color);
+  border-radius: 16px;
+  margin-bottom: 1rem;
+  border: 2px solid var(--background-secondary);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.accordionItem:hover {
+  border-color: var(--secondary-color);
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.1);
+}
+
+.accordionHeader {
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 1.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.3s ease;
+}
+
+.accordionHeader:hover {
+  background: rgba(249, 115, 22, 0.05);
+}
+
+.accordionHeader.expanded {
+  background: rgba(249, 115, 22, 0.1);
+  border-bottom: 1px solid var(--background-secondary);
+}
+
+.accordionTitle {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.accordionIcon {
+  font-size: 1.2rem;
+  color: var(--secondary-color);
+}
+
+.accordionName {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--secondary-color);
+}
+
+.accordionCount {
+  background: var(--secondary-color);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-left: 0.5rem;
+}
+
+.accordionContent {
+  padding: 0 1.5rem 1.5rem 1.5rem;
+  animation: slideDown 0.3s ease-in-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    max-height: 1000px;
+    transform: translateY(0);
+  }
+}
+
+/* Títulos específicos para documentos */
+.accordionContent :global(.title) {
+  color: var(--secondary-color) !important;
 }

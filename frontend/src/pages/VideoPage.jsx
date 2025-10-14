@@ -1,12 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { getVideos } from '../services/contentService';
 import useData from '../hooks/useData';
+import useGroupedContent from '../hooks/useGroupedContent';
 
 import VideoCard from '../components/VideoCard.jsx';
 import VideoModal from '../components/VideoModal.jsx';
 import SkeletonLoader from '../components/SkeletonLoader.jsx';
 import EmptyState from '../components/EmptyState.jsx';
-import { FaSearch, FaFilter, FaTh, FaList, FaSortAmountDown } from 'react-icons/fa';
+import { FaSearch, FaFilter, FaTh, FaList, FaSortAmountDown, FaBars, FaFolder, FaChevronDown, FaChevronRight } from 'react-icons/fa';
 import styles from '../App.module.css';
 import pageStyles from './VideoPage.module.css';
 
@@ -16,6 +17,7 @@ function VideoPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('newest');
   const [viewMode, setViewMode] = useState('grid');
+  const [layout, setLayout] = useState('accordion'); // apenas accordion
 
   // Filtrar e ordenar vídeos
   const filteredAndSortedVideos = useMemo(() => {
@@ -44,6 +46,65 @@ function VideoPage() {
     return filtered;
   }, [videos, searchTerm, sortBy]);
 
+  // Agrupar vídeos por categoria
+  const { groupedContent, sortedCategories } = useGroupedContent(filteredAndSortedVideos, []);
+
+  // Componente de layout em acordeão
+
+  const AccordionLayout = ({ groupedContent, sortedCategories, viewMode, onPlayClick }) => {
+    const [expandedCategories, setExpandedCategories] = useState(new Set());
+    
+    const toggleCategory = (index) => {
+      const newExpanded = new Set(expandedCategories);
+      if (newExpanded.has(index)) {
+        newExpanded.delete(index);
+      } else {
+        newExpanded.add(index);
+      }
+      setExpandedCategories(newExpanded);
+    };
+    
+    return (
+      <div className={pageStyles.accordionContainer}>
+        {sortedCategories.map((categoryKey, index) => {
+          const category = groupedContent[categoryKey];
+          const isExpanded = expandedCategories.has(index);
+          
+          return (
+            <div key={categoryKey} className={pageStyles.accordionItem}>
+              <button
+                className={`${pageStyles.accordionHeader} ${isExpanded ? pageStyles.expanded : ''}`}
+                onClick={() => toggleCategory(index)}
+              >
+                <div className={pageStyles.accordionTitle}>
+                  <FaFolder className={pageStyles.accordionIcon} />
+                  <span className={pageStyles.accordionName}>{category.name}</span>
+                  <span className={pageStyles.accordionCount}>({category.videos.length})</span>
+                </div>
+                {isExpanded ? <FaChevronDown /> : <FaChevronRight />}
+              </button>
+              
+              {isExpanded && (
+                <div className={pageStyles.accordionContent}>
+                  <div className={viewMode === 'grid' ? styles.grid : pageStyles.listView}>
+                    {category.videos.map(video => (
+                      <VideoCard 
+                        key={video.id} 
+                        video={video} 
+                        onPlayClick={() => onPlayClick(video.urlVideo)}
+                        viewMode={viewMode}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
   const renderContent = () => {
     if (loading) return <SkeletonLoader type="card" count={6} />;
     if (error) return <p style={{ textAlign: 'center', color: '#b91c1c' }}>{error}</p>;
@@ -53,16 +114,20 @@ function VideoPage() {
         <EmptyState message="¡No hay videos disponibles!" />;
     }
     
+    // Sempre mostrar agrupamento, mesmo com uma categoria
+    if (sortedCategories.length === 0) {
+      return <EmptyState message="¡No hay videos disponibles!" />;
+    }
+    
+    // Sempre mostrar agrupamento em acordeão
     return (
-      <div className={viewMode === 'grid' ? styles.grid : pageStyles.listView}>
-        {filteredAndSortedVideos.map(video => (
-          <VideoCard 
-            key={video.id} 
-            video={video} 
-            onPlayClick={() => setSelectedVideo(video.urlVideo)}
-            viewMode={viewMode}
-          />
-        ))}
+      <div className={pageStyles.groupedContainer}>
+        <AccordionLayout 
+          groupedContent={groupedContent} 
+          sortedCategories={sortedCategories}
+          viewMode={viewMode}
+          onPlayClick={(url) => setSelectedVideo(url)}
+        />
       </div>
     );
   };
@@ -103,6 +168,7 @@ function VideoPage() {
               <option value="alphabetical">A-Z</option>
             </select>
           </div>
+
 
           <div className={pageStyles.viewToggle}>
             <button
