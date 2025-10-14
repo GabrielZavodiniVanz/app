@@ -8,12 +8,30 @@ const WelcomePopup = ({ isVisible, onClose, userName }) => {
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [videoError, setVideoError] = useState(false);
 
-  // URL do vídeo - priorizar Cloudinary, fallback para local
+  // URL do vídeo - focar no YouTube
   const getVideoUrl = () => {
-    if (videoConfig.url && videoConfig.url !== '') {
-      return videoConfig.url;
+    if (videoConfig.youtubeEmbedUrl) {
+      return videoConfig.youtubeEmbedUrl;
     }
-    return '/videos/welcome-video.mp4'; // Fallback para local
+    
+    if (videoConfig.youtubeId) {
+      return `https://www.youtube.com/embed/${videoConfig.youtubeId}`;
+    }
+    
+    // Fallback para Cloudinary se YouTube não funcionar
+    if (videoConfig.cloudinaryUrl) {
+      return videoConfig.cloudinaryUrl;
+    }
+    
+    return '/videos/welcome-video.mp4';
+  };
+
+  const isYouTube = () => {
+    return videoConfig.youtubeId || videoConfig.youtubeEmbedUrl;
+  };
+
+  const isCloudinary = () => {
+    return videoConfig.cloudinaryUrl;
   };
 
 
@@ -21,12 +39,14 @@ const WelcomePopup = ({ isVisible, onClose, userName }) => {
     if (isVisible) {
       document.body.style.overflow = 'hidden';
       
-      // Tentar reproduzir o vídeo automaticamente quando o popup aparecer
-      const video = document.querySelector(`.${styles.welcomeVideo}`);
-      if (video && videoLoaded) {
-        video.play().catch(error => {
-          console.log('Auto-play bloqueado pelo navegador:', error);
-        });
+      // Para vídeos HTML5, tentar reproduzir automaticamente
+      if (!isYouTube() && videoLoaded) {
+        const video = document.querySelector(`.${styles.welcomeVideo}`);
+        if (video && typeof video.play === 'function') {
+          video.play().catch(error => {
+            console.log('Auto-play bloqueado pelo navegador:', error);
+          });
+        }
       }
     } else {
       document.body.style.overflow = 'unset';
@@ -42,12 +62,14 @@ const WelcomePopup = ({ isVisible, onClose, userName }) => {
     setVideoLoaded(true);
     setVideoError(false);
     
-    // Auto-play do vídeo quando carregar
-    const video = document.querySelector(`.${styles.welcomeVideo}`);
-    if (video) {
-      video.play().catch(error => {
-        console.log('Auto-play bloqueado pelo navegador:', error);
-      });
+    // Para vídeos HTML5, tentar auto-play quando carregar
+    if (!isYouTube()) {
+      const video = document.querySelector(`.${styles.welcomeVideo}`);
+      if (video && typeof video.play === 'function') {
+        video.play().catch(error => {
+          console.log('Auto-play bloqueado pelo navegador:', error);
+        });
+      }
     }
   };
 
@@ -98,6 +120,62 @@ const WelcomePopup = ({ isVisible, onClose, userName }) => {
                 <p className={styles.errorSubtext}>
                   El video de bienvenida no está disponible en este momento.
                 </p>
+                {isYouTube() && (
+                  <a 
+                    href={`https://www.youtube.com/watch?v=${videoConfig.youtubeId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: '#ff6b35', textDecoration: 'underline' }}
+                  >
+                    Ver en YouTube
+                  </a>
+                )}
+              </div>
+            ) : isYouTube() ? (
+              <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+                <iframe
+                  className={`${styles.welcomeVideo} ${styles.youtubeVideo}`}
+                  src={`https://www.youtube.com/embed/${videoConfig.youtubeId}?rel=0&modestbranding=1&showinfo=0&controls=1&autoplay=0&mute=0`}
+                  title="Video de bienvenida"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  onLoad={() => {
+                    setVideoLoaded(true);
+                  }}
+                  onError={() => {
+                    setVideoError(true);
+                  }}
+                  style={{ 
+                    width: '100%', 
+                    height: '100%',
+                    border: 'none',
+                    borderRadius: '10px'
+                  }}
+                />
+                {/* Link alternativo caso o iframe falhe */}
+                <div style={{ 
+                  position: 'absolute', 
+                  bottom: '10px', 
+                  right: '10px',
+                  zIndex: 10
+                }}>
+                  <a 
+                    href={`https://www.youtube.com/watch?v=${videoConfig.youtubeId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ 
+                      color: '#fff', 
+                      textDecoration: 'none',
+                      fontSize: '12px',
+                      backgroundColor: 'rgba(0,0,0,0.7)',
+                      padding: '5px 10px',
+                      borderRadius: '5px'
+                    }}
+                  >
+                    Abrir no YouTube
+                  </a>
+                </div>
               </div>
             ) : (
               <video

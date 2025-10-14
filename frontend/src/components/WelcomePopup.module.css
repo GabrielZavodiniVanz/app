@@ -190,6 +190,13 @@
   opacity: 1;
 }
 
+/* YouTube iframe */
+.youtubeVideo {
+  border: none;
+  border-radius: 10px;
+  opacity: 1 !important;
+}
+
 /* Controles do vídeo */
 .videoControls {
   position: absolute;
