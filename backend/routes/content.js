@@ -455,6 +455,20 @@ router.put('/videos/:id', [authMiddleware, adminMiddleware, uploadWithCloudinary
       }
     }
     
+    // Processar remoção de imagem se solicitado
+    if (req.body.removeImage === 'true') {
+      // Remover imagem antiga do Cloudinary
+      await removeFromCloudinary(video.urlImagen, 'image');
+      dataToUpdate.urlImagen = null;
+    }
+    
+    // Processar remoção de vídeo se solicitado
+    if (req.body.removeVideo === 'true') {
+      // Remover vídeo antigo do Cloudinary
+      await removeFromCloudinary(video.urlVideo, 'video');
+      dataToUpdate.urlVideo = null;
+    }
+    
     // Processar nível de acesso se fornecido
     const accessLevel = req.body.accessLevel;
     if (accessLevel !== undefined) {
@@ -679,6 +693,20 @@ router.put('/documentos/:id', [authMiddleware, adminMiddleware, uploadWithCloudi
         await removeFromCloudinary(document.urlImagen, 'image');
         dataToUpdate.urlImagen = req.files.imageFile[0].path;
       }
+    }
+    
+    // Processar remoção de imagem se solicitado
+    if (req.body.removeImage === 'true') {
+      // Remover imagem antiga do Cloudinary
+      await removeFromCloudinary(document.urlImagen, 'image');
+      dataToUpdate.urlImagen = null;
+    }
+    
+    // Processar remoção de documento se solicitado
+    if (req.body.removeDocument === 'true') {
+      // Remover documento antigo do Cloudinary
+      await removeFromCloudinary(document.urlDocumento, 'raw');
+      dataToUpdate.urlDocumento = null;
     }
     
     // Processar nível de acesso se fornecido
