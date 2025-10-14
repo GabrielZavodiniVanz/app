@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getVideos, updateVideo } from '../../services/contentService';
+import { getVideos, updateVideo, deleteVideo } from '../../services/contentService';
+import FileManager from '../../components/FileManager';
 import toast from 'react-hot-toast';
 import styles from './AdminPages.module.css';
 
@@ -16,6 +17,7 @@ function EditVideoPage() {
   const [imageFile, setImageFile] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [currentVideo, setCurrentVideo] = useState(null);
 
   useEffect(() => {
     const loadVideo = async () => {
@@ -32,6 +34,7 @@ function EditVideoPage() {
         setTitulo(video.titulo || '');
         setDescripcion(video.descripcion || '');
         setUrlVideo(video.urlVideo || '');
+        setCurrentVideo(video);
         
         // Determinar se é upload ou link baseado na URL
         if (video.urlVideo && (video.urlVideo.includes('youtube.com') || video.urlVideo.includes('youtu.be'))) {
@@ -52,9 +55,57 @@ function EditVideoPage() {
     loadVideo();
   }, [id, navigate]);
 
+  const handleDeleteVideo = async () => {
+    try {
+      // Atualizar o vídeo removendo apenas o arquivo
+      const formData = new FormData();
+      formData.append('titulo', titulo);
+      formData.append('descripcion', descripcion);
+      formData.append('urlVideo', urlVideo);
+      formData.append('removeVideo', 'true');
+      
+      await updateVideo(id, formData);
+      
+      // Atualizar o estado local
+      setCurrentVideo(prev => ({ ...prev, urlVideo: null }));
+      toast.success('Arquivo de vídeo removido com sucesso!');
+    } catch (error) {
+      console.error('Erro ao remover vídeo:', error);
+      toast.error('Erro ao remover vídeo');
+    }
+  };
+
+  const handleDeleteImage = async () => {
+    try {
+      // Atualizar o vídeo removendo a imagem
+      const formData = new FormData();
+      formData.append('titulo', titulo);
+      formData.append('descripcion', descripcion);
+      formData.append('urlVideo', urlVideo);
+      formData.append('removeImage', 'true');
+      
+      await updateVideo(id, formData);
+      
+      // Atualizar o estado local
+      setCurrentVideo(prev => ({ ...prev, urlImagen: null }));
+      toast.success('Imagem removida com sucesso!');
+    } catch (error) {
+      console.error('Erro ao remover imagem:', error);
+      toast.error('Erro ao remover imagem');
+    }
+  };
+
+  const handlePreviewVideo = () => {
+    if (currentVideo?.urlVideo) {
+      window.open(currentVideo.urlVideo, '_blank');
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+
+    console.log('🔄 Iniciando atualização do vídeo:', { videoFile, imageFile, urlVideo });
 
     const formData = new FormData();
     formData.append('titulo', titulo);
@@ -63,16 +114,19 @@ function EditVideoPage() {
     // Adiciona a fonte do vídeo (arquivo ou link)
     if (videoSourceType === 'upload') {
       if (videoFile) {
+        console.log('🎥 Adicionando novo vídeo:', videoFile.name);
         formData.append('videoFile', videoFile);
       }
     } else {
       if (urlVideo) {
+        console.log('🔗 Adicionando URL do vídeo:', urlVideo);
         formData.append('urlVideo', urlVideo);
       }
     }
     
     // Adiciona a imagem de capa (se existir)
     if (imageFile) {
+      console.log('🖼️ Adicionando nova imagem:', imageFile.name);
       formData.append('imageFile', imageFile);
     }
 
@@ -148,18 +202,20 @@ function EditVideoPage() {
           </div>
         </div>
 
-        {/* INPUT CONDICIONAL PARA FONTE DO VÍDEO */}
+        {/* Gerenciador de Vídeo */}
         {videoSourceType === 'upload' ? (
-          <div className={styles.formGroup}>
-            <label htmlFor="videoFile">Arquivo de Vídeo (mp4, mov, etc.)</label>
-            <input 
-              type="file" 
-              id="videoFile" 
-              accept="video/*" 
-              onChange={(e) => setVideoFile(e.target.files[0])} 
-            />
-            <small>Deixe em branco para manter o arquivo atual</small>
-          </div>
+          <FileManager
+            currentFileUrl={currentVideo?.urlVideo}
+            currentFileName={currentVideo?.titulo || 'Vídeo atual'}
+            fileType="video"
+            accept="video/*"
+            onFileChange={(file) => setVideoFile(file)}
+            onDelete={handleDeleteVideo}
+            onDownload={handlePreviewVideo}
+            showPreview={true}
+            label="Arquivo de Vídeo (mp4, mov, etc.)"
+            placeholder="Escolher vídeo"
+          />
         ) : (
           <div className={styles.formGroup}>
             <label htmlFor="urlVideo">URL do YouTube</label>
@@ -173,17 +229,18 @@ function EditVideoPage() {
           </div>
         )}
 
-        {/* INPUT PARA IMAGEM DE CAPA */}
-        <div className={styles.formGroup}>
-          <label htmlFor="imageFile">Imagem de Capa (Opcional)</label>
-          <input 
-            type="file" 
-            id="imageFile" 
-            accept="image/*" 
-            onChange={(e) => setImageFile(e.target.files[0])} 
-          />
-          <small>Deixe em branco para manter a imagem atual</small>
-        </div>
+        {/* Gerenciador de Imagem de Capa */}
+        <FileManager
+          currentFileUrl={currentVideo?.urlImagen}
+          currentFileName="Imagem de capa"
+          fileType="image"
+          accept="image/*"
+          onFileChange={(file) => setImageFile(file)}
+          onDelete={handleDeleteImage}
+          showPreview={true}
+          label="Imagem de Capa (Opcional)"
+          placeholder="Escolher imagem"
+        />
         
         <div className={styles.formActions}>
           <button 

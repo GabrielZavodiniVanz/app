@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getDocuments, updateDocument } from '../../services/contentService';
+import { getDocuments, updateDocument, deleteDocument } from '../../services/contentService';
+import FileManager from '../../components/FileManager';
 import toast from 'react-hot-toast';
 import styles from './AdminPages.module.css';
 
@@ -14,6 +15,7 @@ function EditDocumentPage() {
   const [imageFile, setImageFile] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [currentDocument, setCurrentDocument] = useState(null);
 
   useEffect(() => {
     const loadDocument = async () => {
@@ -29,6 +31,7 @@ function EditDocumentPage() {
 
         setTitulo(document.titulo || '');
         setDescripcion(document.descripcion || '');
+        setCurrentDocument(document);
         
       } catch (error) {
         console.error('Erro ao carregar documento:', error);
@@ -42,9 +45,80 @@ function EditDocumentPage() {
     loadDocument();
   }, [id, navigate]);
 
+  const handleDeleteDocument = async () => {
+    try {
+      // Atualizar o documento removendo apenas o arquivo
+      const formData = new FormData();
+      formData.append('titulo', titulo);
+      formData.append('descripcion', descripcion);
+      formData.append('removeDocument', 'true');
+      
+      await updateDocument(id, formData);
+      
+      // Atualizar o estado local
+      setCurrentDocument(prev => ({ ...prev, urlDocumento: null }));
+      toast.success('Arquivo removido com sucesso!');
+    } catch (error) {
+      console.error('Erro ao remover arquivo:', error);
+      toast.error('Erro ao remover arquivo');
+    }
+  };
+
+  const handleDeleteImage = async () => {
+    try {
+      // Atualizar o documento removendo a imagem
+      const formData = new FormData();
+      formData.append('titulo', titulo);
+      formData.append('descripcion', descripcion);
+      formData.append('removeImage', 'true');
+      
+      await updateDocument(id, formData);
+      
+      // Atualizar o estado local
+      setCurrentDocument(prev => ({ ...prev, urlImagen: null }));
+      toast.success('Imagem removida com sucesso!');
+    } catch (error) {
+      console.error('Erro ao remover imagem:', error);
+      toast.error('Erro ao remover imagem');
+    }
+  };
+
+  const handleDownloadDocument = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/content/documentos/${id}/download`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao baixar documento');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${titulo}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      toast.success('Download iniciado!');
+    } catch (error) {
+      console.error('Erro no download:', error);
+      toast.error('Erro ao baixar documento');
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+
+    console.log('🔄 Iniciando atualização do documento:', { docFile, imageFile });
 
     const formData = new FormData();
     formData.append('titulo', titulo);
@@ -52,11 +126,13 @@ function EditDocumentPage() {
 
     // Adiciona o arquivo do documento (se um novo foi selecionado)
     if (docFile) {
+      console.log('📄 Adicionando novo documento:', docFile.name);
       formData.append('docFile', docFile);
     }
 
     // Adiciona a imagem de capa (se uma nova foi selecionada)
     if (imageFile) {
+      console.log('🖼️ Adicionando nova imagem:', imageFile.name);
       formData.append('imageFile', imageFile);
     }
 
@@ -103,26 +179,33 @@ function EditDocumentPage() {
             rows="4" 
           />
         </div>
-        <div className={styles.formGroup}>
-          <label htmlFor="docFile">Arquivo (PDF, etc.)</label>
-          <input 
-            type="file" 
-            id="docFile" 
-            accept="application/pdf,image/*" 
-            onChange={(e) => setDocFile(e.target.files[0])} 
-          />
-          <small>Deixe em branco para manter o arquivo atual</small>
-        </div>
-        <div className={styles.formGroup}>
-          <label htmlFor="imageFile">Imagem de Capa (Opcional)</label>
-          <input 
-            type="file" 
-            id="imageFile" 
-            accept="image/*" 
-            onChange={(e) => setImageFile(e.target.files[0])} 
-          />
-          <small>Deixe em branco para manter a imagem atual</small>
-        </div>
+
+        {/* Gerenciador de Arquivo do Documento */}
+        <FileManager
+          currentFileUrl={currentDocument?.urlDocumento}
+          currentFileName={`${currentDocument?.titulo || 'documento'}.pdf`}
+          fileType="document"
+          accept="application/pdf,image/*"
+          onFileChange={(file) => setDocFile(file)}
+          onDelete={handleDeleteDocument}
+          onDownload={handleDownloadDocument}
+          showPreview={false}
+          label="Arquivo (PDF, etc.)"
+          placeholder="Escolher arquivo"
+        />
+
+        {/* Gerenciador de Imagem de Capa */}
+        <FileManager
+          currentFileUrl={currentDocument?.urlImagen}
+          currentFileName="Imagem de capa"
+          fileType="image"
+          accept="image/*"
+          onFileChange={(file) => setImageFile(file)}
+          onDelete={handleDeleteImage}
+          showPreview={true}
+          label="Imagem de Capa (Opcional)"
+          placeholder="Escolher imagem"
+        />
         
         <div className={styles.formActions}>
           <button 
