@@ -29,7 +29,15 @@ const Video = sequelize.define('Video', {
     type: DataTypes.STRING(500),
     allowNull: true,
     validate: {
-      isUrl: true
+      isValidUrl(value) {
+        if (value && value.trim() !== '') {
+          try {
+            new URL(value);
+          } catch (e) {
+            throw new Error('URL da imagem inválida');
+          }
+        }
+      }
     }
   },
   categoria_produto: {

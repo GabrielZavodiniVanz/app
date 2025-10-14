@@ -30,7 +30,7 @@ const storage = new CloudinaryStorage({
       fetch_format: resource_type === 'image' ? 'auto' : undefined,
       flags: resource_type === 'image' ? 'progressive' : undefined
     };
-  },
+  }
 });
 
 const upload = multer({ 
@@ -51,4 +51,47 @@ const upload = multer({
   }
 });
 
-module.exports = upload;
+// Middleware personalizado para garantir que as URLs do Cloudinary sejam retornadas corretamente
+const uploadWithCloudinaryUrl = (fields) => {
+  return (req, res, next) => {
+    upload.fields(fields)(req, res, (err) => {
+      if (err) {
+        console.error('❌ Erro no upload:', err);
+        return res.status(400).json({ 
+          message: 'Erro no upload de arquivos',
+          error: err.message 
+        });
+      }
+
+      // Processar arquivos e garantir que as URLs do Cloudinary sejam usadas
+      if (req.files) {
+        console.log(`📁 Arquivos recebidos: ${Object.keys(req.files).length} campos`);
+        for (const fieldName in req.files) {
+          req.files[fieldName].forEach(file => {
+            console.log(`📄 Arquivo ${fieldName}:`, {
+              originalname: file.originalname,
+              mimetype: file.mimetype,
+              size: file.size,
+              path: file.path,
+              isCloudinaryUrl: file.path && file.path.includes('cloudinary.com')
+            });
+            
+            // Se o path não é uma URL do Cloudinary, tentar obter a URL correta
+            if (file.path && !file.path.includes('cloudinary.com')) {
+              console.log(`⚠️ Arquivo ${fieldName} não tem URL do Cloudinary: ${file.path}`);
+              console.log(`🔧 Verifique se as credenciais do Cloudinary estão configuradas no .env`);
+            } else if (file.path) {
+              console.log(`✅ Arquivo ${fieldName} tem URL do Cloudinary: ${file.path}`);
+            }
+          });
+        }
+      } else {
+        console.log(`📁 Nenhum arquivo foi enviado`);
+      }
+
+      next();
+    });
+  };
+};
+
+module.exports = { upload, uploadWithCloudinaryUrl };

@@ -6,7 +6,7 @@ const Video = require('../models/Video');
 const Document = require('../models/Document');
 const authMiddleware = require('../middleware/authMiddleware');
 const adminMiddleware = require('../middleware/adminMiddleware');
-const upload = require('../middleware/uploadMiddleware');
+const { upload, uploadWithCloudinaryUrl } = require('../middleware/uploadMiddleware');
 const cloudinary = require('../config/cloudinaryConfig');
 const accessLevelService = require('../services/accessLevelService');
 
@@ -310,7 +310,7 @@ router.get('/content-categories', [authMiddleware, adminMiddleware], async (req,
 /**
  * POST /videos - Criar novo vídeo (Admin)
  */
-router.post('/videos', [authMiddleware, adminMiddleware, upload.fields([
+router.post('/videos', [authMiddleware, adminMiddleware, uploadWithCloudinaryUrl([
   { name: 'videoFile', maxCount: 1 },
   { name: 'imageFile', maxCount: 1 }
 ])], async (req, res) => {
@@ -343,6 +343,9 @@ router.post('/videos', [authMiddleware, adminMiddleware, upload.fields([
     // Processar arquivos enviados
     if (req.files && req.files.imageFile) {
       imagePath = req.files.imageFile[0].path;
+      console.log(`📸 Imagem de capa recebida para vídeo: ${imagePath}`);
+    } else {
+      console.log(`⚠️ Nenhuma imagem de capa enviada para o vídeo`);
     }
     
     if (req.files && req.files.videoFile) {
@@ -395,7 +398,7 @@ router.post('/videos', [authMiddleware, adminMiddleware, upload.fields([
 /**
  * PUT /videos/:id - Atualizar vídeo (Admin)
  */
-router.put('/videos/:id', [authMiddleware, adminMiddleware, upload.fields([
+router.put('/videos/:id', [authMiddleware, adminMiddleware, uploadWithCloudinaryUrl([
   { name: 'videoFile', maxCount: 1 }, 
   { name: 'imageFile', maxCount: 1 }
 ])], async (req, res) => {
@@ -533,7 +536,7 @@ router.delete('/videos/:id', [authMiddleware, adminMiddleware], async (req, res)
 /**
  * POST /documentos - Criar novo documento (Admin)
  */
-router.post('/documentos', [authMiddleware, adminMiddleware, upload.fields([
+router.post('/documentos', [authMiddleware, adminMiddleware, uploadWithCloudinaryUrl([
   { name: 'docFile', maxCount: 1 }, 
   { name: 'imageFile', maxCount: 1 }
 ])], async (req, res) => {
@@ -566,6 +569,9 @@ router.post('/documentos', [authMiddleware, adminMiddleware, upload.fields([
     // Processar arquivos enviados
     if (req.files && req.files.imageFile) {
       imagePath = req.files.imageFile[0].path;
+      console.log(`📸 Imagem de capa recebida para documento: ${imagePath}`);
+    } else {
+      console.log(`⚠️ Nenhuma imagem de capa enviada para o documento`);
     }
     
     if (req.files && req.files.docFile) {
@@ -618,7 +624,7 @@ router.post('/documentos', [authMiddleware, adminMiddleware, upload.fields([
 /**
  * PUT /documentos/:id - Atualizar documento (Admin)
  */
-router.put('/documentos/:id', [authMiddleware, adminMiddleware, upload.fields([
+router.put('/documentos/:id', [authMiddleware, adminMiddleware, uploadWithCloudinaryUrl([
   { name: 'docFile', maxCount: 1 }, 
   { name: 'imageFile', maxCount: 1 }
 ])], async (req, res) => {

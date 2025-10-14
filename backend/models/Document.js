@@ -31,7 +31,15 @@ const Document = sequelize.define('Document', {
     allowNull: true,
     comment: 'URL para a imagem de capa do documento',
     validate: {
-      isUrl: true
+      isValidUrl(value) {
+        if (value && value.trim() !== '') {
+          try {
+            new URL(value);
+          } catch (e) {
+            throw new Error('URL da imagem inválida');
+          }
+        }
+      }
     }
   },
   categoria_produto: {
