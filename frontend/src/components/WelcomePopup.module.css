@@ -144,6 +144,39 @@
   100% { transform: rotate(360deg); }
 }
 
+/* Estado de erro do vídeo */
+.videoError {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  color: white;
+  z-index: 5;
+  padding: 30px;
+  background: rgba(255, 0, 0, 0.1);
+  border-radius: 10px;
+  border: 2px dashed rgba(255, 255, 255, 0.3);
+}
+
+.errorIcon {
+  font-size: 3rem;
+  margin-bottom: 15px;
+  opacity: 0.7;
+}
+
+.videoError p {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.errorSubtext {
+  font-size: 0.9rem !important;
+  opacity: 0.8;
+  margin-top: 8px !important;
+}
+
 /* Vídeo */
 .welcomeVideo {
   width: 100%;

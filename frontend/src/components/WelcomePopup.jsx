@@ -1,10 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import styles from './WelcomePopup.module.css';
+import videoConfig from '../data/videoConfig.json';
 
 const WelcomePopup = ({ isVisible, onClose, userName }) => {
   const [isMuted, setIsMuted] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
+  const [videoError, setVideoError] = useState(false);
+
+  // URL do vídeo - priorizar Cloudinary, fallback para local
+  const getVideoUrl = () => {
+    if (videoConfig.url && videoConfig.url !== '') {
+      return videoConfig.url;
+    }
+    return '/videos/welcome-video.mp4'; // Fallback para local
+  };
 
 
   useEffect(() => {
@@ -30,6 +40,7 @@ const WelcomePopup = ({ isVisible, onClose, userName }) => {
 
   const handleVideoLoad = () => {
     setVideoLoaded(true);
+    setVideoError(false);
     
     // Auto-play do vídeo quando carregar
     const video = document.querySelector(`.${styles.welcomeVideo}`);
@@ -38,6 +49,12 @@ const WelcomePopup = ({ isVisible, onClose, userName }) => {
         console.log('Auto-play bloqueado pelo navegador:', error);
       });
     }
+  };
+
+  const handleVideoError = () => {
+    console.error('Erro ao carregar vídeo:', getVideoUrl());
+    setVideoError(true);
+    setVideoLoaded(false);
   };
 
 
@@ -67,22 +84,33 @@ const WelcomePopup = ({ isVisible, onClose, userName }) => {
           </div>
 
           <div className={styles.videoContainer}>
-            {!videoLoaded && (
+            {!videoLoaded && !videoError && (
               <div className={styles.videoLoader}>
                 <div className={styles.spinner}></div>
                 <p>Cargando video...</p>
               </div>
             )}
             
-            <video
-              className={`${styles.welcomeVideo} ${videoLoaded ? styles.loaded : ''}`}
-              controls
-              muted={isMuted}
-              onLoadedData={handleVideoLoad}
-            >
-              <source src="/videos/welcome-video.mp4" type="video/mp4" />
-              Tu navegador no soporta la reproducción de videos.
-            </video>
+            {videoError ? (
+              <div className={styles.videoError}>
+                <div className={styles.errorIcon}>📹</div>
+                <p>Video no disponible temporalmente</p>
+                <p className={styles.errorSubtext}>
+                  El video de bienvenida no está disponible en este momento.
+                </p>
+              </div>
+            ) : (
+              <video
+                className={`${styles.welcomeVideo} ${videoLoaded ? styles.loaded : ''}`}
+                controls
+                muted={isMuted}
+                onLoadedData={handleVideoLoad}
+                onError={handleVideoError}
+              >
+                <source src={getVideoUrl()} type="video/mp4" />
+                Tu navegador no soporta la reproducción de videos.
+              </video>
+            )}
 
           </div>
 
