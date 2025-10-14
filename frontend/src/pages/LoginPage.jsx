@@ -80,8 +80,8 @@ function LoginPage() {
     }
     
     try {
-      const receivedToken = await loginUser({ email, password });
-      login(receivedToken);
+      const { token, user } = await loginUser({ email, password });
+      login(token, user);
       navigate('/', { replace: true });
     } catch (err) {
       setError(err.response?.data?.message || 'Error al iniciar sesión.');

@@ -56,6 +56,12 @@ const User = sequelize.define('User', {
     defaultValue: false,
     allowNull: false,
     comment: 'Indica se o usuário comprou o Produto 3 (upsell)'
+  },
+  firstLogin: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true,
+    allowNull: false,
+    comment: 'Indica se é o primeiro login do usuário'
   }
 }, {
   tableName: 'users',

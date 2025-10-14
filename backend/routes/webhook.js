@@ -154,7 +154,7 @@ router.post('/kiwify',
         : 'https://www.ninosdeluz.site/login';
 
       const emailData = {
-        name: customer.name,
+        name: customer.full_name,
         email: customer.email,
         password: generatedPassword,
         loginUrl: loginUrl

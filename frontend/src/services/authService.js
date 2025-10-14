@@ -7,12 +7,15 @@ const API_URL = `${import.meta.env.VITE_API_URL?.replace(/\/$/, '')}/api/auth`;
 /**
  * Loga um usuário existente.
  * @param {object} credentials - Credenciais do usuário { email, password }
- * @returns {Promise<string>} O token JWT.
+ * @returns {Promise<object>} O token JWT e dados do usuário.
  */
 export const loginUser = async (credentials) => {
   const response = await axios.post(`${API_URL}/login`, credentials);
-  // Retorna apenas o token para ser usado no AuthContext
-  return response.data.token;
+  // Retorna o token e dados do usuário para ser usado no AuthContext
+  return {
+    token: response.data.token,
+    user: response.data.user
+  };
 };
 
 /**

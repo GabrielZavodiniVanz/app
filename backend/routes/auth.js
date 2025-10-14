@@ -87,6 +87,16 @@ router.post('/login', validateUserLogin, async (req, res) => {
     );
 
     console.log(`✅ Login realizado: ${sanitizedEmail}`);
+    
+    // Verificar se é primeiro login ANTES de atualizar
+    const isFirstLogin = user.firstLogin;
+    
+    // Se for primeiro login, marcar como false para próximas vezes
+    if (isFirstLogin) {
+      await user.update({ firstLogin: false });
+      console.log(`🎉 Primeiro login detectado para: ${sanitizedEmail}`);
+    }
+    
     res.json({ 
       message: 'Login realizado com sucesso!', 
       token,
@@ -95,7 +105,8 @@ router.post('/login', validateUserLogin, async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        accessLevel: user.accessLevel
+        accessLevel: user.accessLevel,
+        firstLogin: isFirstLogin
       }
     });
 
