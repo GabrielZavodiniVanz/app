@@ -1,10 +1,10 @@
 .footer {
   width: 100%;
-  background: linear-gradient(135deg, #FFDDEB 0%, #FFE5F1 100%);
+  background: linear-gradient(135deg, #A4D7F6 0%, #B8E6FF 100%);
   color: var(--text-dark);
   margin-top: auto;
   flex-shrink: 0;
-  border-top: 1px solid #FFDDEB;
+  border-top: 1px solid #A4D7F6;
 }
 
 .footerContainer {
@@ -44,7 +44,7 @@
   font-size: 1.4rem;
   font-weight: 700;
   margin: 0;
-  color: var(--primary-color);
+  color: #6b7280;
 }
 
 .description {
@@ -60,7 +60,7 @@
   font-size: 1.1rem;
   font-weight: 600;
   margin-bottom: 1rem;
-  color: var(--primary-color);
+  color: #6b7280;
 }
 
 .quickLinks ul {
@@ -91,7 +91,7 @@
 }
 
 .quickLinks a:hover {
-  color: var(--primary-color);
+  color: #4A4A4A;
   padding-left: 0.25rem;
 }
 
