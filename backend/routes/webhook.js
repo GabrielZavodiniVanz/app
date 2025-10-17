@@ -47,14 +47,65 @@ function determineUpgradedAccessLevel(currentAccessLevel, newProductAccessLevel)
   // ACESSO_COMPLETO = tem BASICO + INTERMEDIARIO + AVANCADO
   // Isso acontece quando o usuário já tem INTERMEDIARIO e compra AVANCADO
   // OU quando já tem AVANCADO e compra INTERMEDIARIO
+  // OU quando já tem BASICO e compra AVANCADO (assumindo que já tem INTERMEDIARIO)
   if ((currentAccessLevel === 'INTERMEDIARIO' && newProductAccessLevel === 'AVANCADO') ||
-      (currentAccessLevel === 'AVANCADO' && newProductAccessLevel === 'INTERMEDIARIO')) {
+      (currentAccessLevel === 'AVANCADO' && newProductAccessLevel === 'INTERMEDIARIO') ||
+      (currentAccessLevel === 'BASICO' && newProductAccessLevel === 'AVANCADO')) {
     return 'ACESSO_COMPLETO';
   }
 
   // Retornar o nível mais alto
   const levelNames = Object.keys(hierarchy);
   return levelNames.find(level => hierarchy[level] === highestLevel) || currentAccessLevel;
+}
+
+/**
+ * Determina o accessLevel baseado em todos os produtos comprados pelo usuário
+ * @param {Array} allUserProducts - Array com todos os produtos que o usuário já comprou
+ * @returns {string} - AccessLevel final baseado em todos os produtos
+ */
+function determineAccessLevelFromAllProducts(allUserProducts) {
+  if (!allUserProducts || allUserProducts.length === 0) {
+    return 'nenhum';
+  }
+
+  // Mapear produtos para níveis de acesso
+  const productAccessMapping = {
+    '89aece00-a51b-11f0-ab58-2f2096ded2ba': 'BASICO',           // Kit Niños de Luz
+    '2343e890-a538-11f0-98fb-c9aca982ba72': 'INTERMEDIARIO',   // Pack Extra 1
+    '44c34a50-a53e-11f0-a7e3-c3b4bfe5981f': 'AVANCADO'         // Pack Extra 2
+  };
+
+  // Extrair níveis de acesso dos produtos
+  const accessLevels = allUserProducts
+    .map(productId => productAccessMapping[productId])
+    .filter(Boolean);
+
+  console.log(`🎯 AccessLevels encontrados nos produtos: ${accessLevels.join(', ')}`);
+
+  // Se tem todos os 3 produtos principais, é ACESSO_COMPLETO
+  const hasBasico = accessLevels.includes('BASICO');
+  const hasIntermediario = accessLevels.includes('INTERMEDIARIO');
+  const hasAvancado = accessLevels.includes('AVANCADO');
+
+  if (hasBasico && hasIntermediario && hasAvancado) {
+    console.log('🏆 Usuário tem todos os produtos principais - ACESSO_COMPLETO');
+    return 'ACESSO_COMPLETO';
+  }
+
+  // Caso contrário, retornar o nível mais alto
+  const hierarchy = {
+    'BASICO': 1,
+    'INTERMEDIARIO': 2,
+    'AVANCADO': 3
+  };
+
+  const highestLevel = accessLevels.reduce((highest, current) => {
+    return hierarchy[current] > hierarchy[highest] ? current : highest;
+  }, accessLevels[0]);
+
+  console.log(`🏆 AccessLevel mais alto determinado: ${highestLevel}`);
+  return highestLevel;
 }
 
 /**
