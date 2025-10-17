@@ -32,8 +32,21 @@ router.post('/kiwify',
         where: { email: customer.email.toLowerCase() } 
       });
 
-      // Extrair produtos comprados
-      const products = body.Products || body.products || [];
+      // Extrair produtos comprados - Kiwify envia Product (singular) ou Products (plural)
+      let products = [];
+      if (body.Products && Array.isArray(body.Products)) {
+        // Array de produtos (plural)
+        products = body.Products;
+      } else if (body.products && Array.isArray(body.products)) {
+        // Array de produtos (plural) - lowercase
+        products = body.products;
+      } else if (body.Product && typeof body.Product === 'object') {
+        // Produto único (singular) - converter para array
+        products = [body.Product];
+      } else if (body.product && typeof body.product === 'object') {
+        // Produto único (singular) - lowercase
+        products = [body.product];
+      }
       console.log(`📦 Produtos comprados:`, products);
 
       if (existingUser) {
@@ -137,14 +150,53 @@ router.post('/kiwify',
       const hashedPassword = await bcrypt.hash(generatedPassword, salt);
 
       // Criar novo usuário (comprou_produto_3 será false por padrão)
-      const newUser = await User.create({
-        name: customer.full_name.trim(),
-        email: customer.email.toLowerCase(),
-        password: hashedPassword,
-        role: 'user',
-        accessLevel: accessLevel,
-        comprou_produto_3: false // Novo usuário sempre começa com false
-      });
+      let newUser;
+      try {
+        newUser = await User.create({
+          name: customer.full_name.trim(),
+          email: customer.email.toLowerCase(),
+          password: hashedPassword,
+          role: 'user',
+          accessLevel: accessLevel,
+          comprou_produto_3: false // Novo usuário sempre começa com false
+        });
+      } catch (createError) {
+        // Se o usuário já existe (erro de duplicação), buscar o usuário existente
+        if (createError.name === 'SequelizeUniqueConstraintError' && createError.errors?.[0]?.path === 'email') {
+          console.log(`⚠️ Usuário já existe durante criação, buscando usuário existente: ${customer.email}`);
+          
+          const existingUser = await User.findOne({ 
+            where: { email: customer.email.toLowerCase() } 
+          });
+          
+          if (existingUser) {
+            console.log(`✅ Usuário existente encontrado: ${existingUser.id}`);
+            
+            // Determinar nível de acesso baseado nos produtos comprados
+            const newAccessLevel = accessLevelService.determineAccessLevel(products);
+            console.log(`🎯 Novo nível de acesso determinado: ${newAccessLevel}`);
+            
+            // Atualizar nível de acesso do usuário existente se necessário
+            if (existingUser.accessLevel !== newAccessLevel) {
+              await User.update(
+                { accessLevel: newAccessLevel },
+                { where: { id: existingUser.id } }
+              );
+              console.log(`🔄 Nível de acesso atualizado para ${newAccessLevel}`);
+            }
+            
+            return res.status(200).json({ 
+              message: 'User access updated (duplicate creation handled)',
+              userId: existingUser.id,
+              email: customer.email,
+              accessLevel: newAccessLevel
+            });
+          }
+        }
+        
+        // Se não é erro de duplicação ou usuário não encontrado, relançar o erro
+        throw createError;
+      }
 
       console.log(`✅ Usuário criado com sucesso: ${newUser.id}`);
 
@@ -211,8 +263,21 @@ router.post('/',
         where: { email: customer.email.toLowerCase() } 
       });
 
-      // Extrair produtos comprados
-      const products = body.Products || body.products || [];
+      // Extrair produtos comprados - Kiwify envia Product (singular) ou Products (plural)
+      let products = [];
+      if (body.Products && Array.isArray(body.Products)) {
+        // Array de produtos (plural)
+        products = body.Products;
+      } else if (body.products && Array.isArray(body.products)) {
+        // Array de produtos (plural) - lowercase
+        products = body.products;
+      } else if (body.Product && typeof body.Product === 'object') {
+        // Produto único (singular) - converter para array
+        products = [body.Product];
+      } else if (body.product && typeof body.product === 'object') {
+        // Produto único (singular) - lowercase
+        products = [body.product];
+      }
       console.log(`📦 Produtos comprados:`, products);
 
       if (existingUser) {
@@ -316,14 +381,53 @@ router.post('/',
       const hashedPassword = await bcrypt.hash(generatedPassword, salt);
 
       // Criar novo usuário (comprou_produto_3 será false por padrão)
-      const newUser = await User.create({
-        name: customer.full_name,
-        email: customer.email.toLowerCase(),
-        password: hashedPassword,
-        role: 'user',
-        accessLevel: accessLevel,
-        comprou_produto_3: false // Novo usuário sempre começa com false
-      });
+      let newUser;
+      try {
+        newUser = await User.create({
+          name: customer.full_name.trim(),
+          email: customer.email.toLowerCase(),
+          password: hashedPassword,
+          role: 'user',
+          accessLevel: accessLevel,
+          comprou_produto_3: false // Novo usuário sempre começa com false
+        });
+      } catch (createError) {
+        // Se o usuário já existe (erro de duplicação), buscar o usuário existente
+        if (createError.name === 'SequelizeUniqueConstraintError' && createError.errors?.[0]?.path === 'email') {
+          console.log(`⚠️ Usuário já existe durante criação, buscando usuário existente: ${customer.email}`);
+          
+          const existingUser = await User.findOne({ 
+            where: { email: customer.email.toLowerCase() } 
+          });
+          
+          if (existingUser) {
+            console.log(`✅ Usuário existente encontrado: ${existingUser.id}`);
+            
+            // Determinar nível de acesso baseado nos produtos comprados
+            const newAccessLevel = accessLevelService.determineAccessLevel(products);
+            console.log(`🎯 Novo nível de acesso determinado: ${newAccessLevel}`);
+            
+            // Atualizar nível de acesso do usuário existente se necessário
+            if (existingUser.accessLevel !== newAccessLevel) {
+              await User.update(
+                { accessLevel: newAccessLevel },
+                { where: { id: existingUser.id } }
+              );
+              console.log(`🔄 Nível de acesso atualizado para ${newAccessLevel}`);
+            }
+            
+            return res.status(200).json({ 
+              message: 'User access updated (duplicate creation handled)',
+              userId: existingUser.id,
+              email: customer.email,
+              accessLevel: newAccessLevel
+            });
+          }
+        }
+        
+        // Se não é erro de duplicação ou usuário não encontrado, relançar o erro
+        throw createError;
+      }
 
       console.log(`✅ Novo usuário criado via webhook: ${newUser.email}`);
 

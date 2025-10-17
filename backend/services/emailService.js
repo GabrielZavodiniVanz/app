@@ -128,10 +128,16 @@ class EmailService {
     // Usando apenas o módulo HTTPS nativo do Node.js (sem dependências externas)
 
     const requestBody = {
-      from: 'Niños de Luz <noreply@ninosdeluz.site>', // Usando seu domínio verificado
+      from: 'Niños de Luz <contato@ninosdeluz.site>', // Mudança: evitar "noreply" para melhorar deliverability
       to: [mailOptions.to],
       subject: mailOptions.subject,
-      html: mailOptions.html
+      html: mailOptions.html,
+      reply_to: 'contactoninosdeluz@gmail.com', // Adicionar reply-to para permitir resposta
+      headers: {
+        'X-Mailer': 'Niños de Luz Web App',
+        'X-Priority': '3',
+        'Importance': 'normal'
+      }
     };
 
     const postData = JSON.stringify(requestBody);
@@ -208,7 +214,7 @@ class EmailService {
       const mailOptions = {
         from: process.env.EMAIL_USER,
         to: email,
-        subject: '🎉 ¡Bienvenido(a) al Mundo Mágico de Niños de Luz!',
+        subject: '¡Bienvenido(a) al Mundo Mágico de Niños de Luz!',
         html: `<!doctype html>
 <html lang="es">
 <head>
@@ -339,8 +345,11 @@ class EmailService {
           <!-- FOOTER -->
           <tr>
             <td class="p-24">
-              <p class="footer">Este es un correo automático, por favor no respondas.</p>
+              <p class="footer">Este es un correo automático. Si tienes alguna pregunta, responde a este email.</p>
               <p class="footer">© 2025 Niños de Luz — Creando un mundo mágico de aprendizaje y diversión para los más pequeños.</p>
+              <p class="footer" style="margin-top: 12px;">
+                <a href="mailto:contactoninosdeluz@gmail.com?subject=Unsubscribe&body=Por favor, desuscribirme de los emails de Niños de Luz" style="color: #5B6770; text-decoration: underline;">Desuscribirse</a>
+              </p>
             </td>
           </tr>
 
@@ -403,7 +412,7 @@ class EmailService {
       const mailOptions = {
         from: process.env.EMAIL_USER,
         to: email,
-        subject: '🔐 Recuperación de Contraseña -  Niños de Luz',
+        subject: 'Recuperación de Contraseña - Niños de Luz',
         html: `<!doctype html>
 <html lang="es">
 <head>
@@ -537,8 +546,11 @@ class EmailService {
           <!-- FOOTER -->
           <tr>
             <td class="p-24">
-              <p class="footer">Este es un correo automático, por favor no respondas.</p>
+              <p class="footer">Este es un correo automático. Si tienes alguna pregunta, responde a este email.</p>
               <p class="footer">© 2025 Niños de Luz — Creando un mundo mágico de aprendizaje y diversión para los más pequeños.</p>
+              <p class="footer" style="margin-top: 12px;">
+                <a href="mailto:contactoninosdeluz@gmail.com?subject=Unsubscribe&body=Por favor, desuscribirme de los emails de Niños de Luz" style="color: #5B6770; text-decoration: underline;">Desuscribirse</a>
+              </p>
             </td>
           </tr>
 
@@ -594,7 +606,7 @@ class EmailService {
       const mailOptions = {
         from: process.env.EMAIL_USER,
         to: email,
-        subject: '🎨 Mi Libro para Colorear con Fe - ¡Nuevo Contenido Liberado!',
+        subject: 'Mi Libro para Colorear con Fe - Nuevo Contenido Disponible',
         html: `<!doctype html>
 <html lang="es">
 <head>
@@ -723,8 +735,11 @@ class EmailService {
           <!-- FOOTER -->
           <tr>
             <td class="p-24">
-              <p class="footer">Este es un correo automático, por favor no respondas.</p>
+              <p class="footer">Este es un correo automático. Si tienes alguna pregunta, responde a este email.</p>
               <p class="footer">© 2025 Niños de Luz — Creando un mundo mágico de aprendizaje y diversión para los más pequeños.</p>
+              <p class="footer" style="margin-top: 12px;">
+                <a href="mailto:contactoninosdeluz@gmail.com?subject=Unsubscribe&body=Por favor, desuscribirme de los emails de Niños de Luz" style="color: #5B6770; text-decoration: underline;">Desuscribirse</a>
+              </p>
             </td>
           </tr>
 
