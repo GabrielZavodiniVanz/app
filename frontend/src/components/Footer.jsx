@@ -34,11 +34,11 @@ function Footer() {
             <ul>
               <li>
                 <FaHome className={styles.linkIcon} />
-                <Link to="/">Inicio</Link>
+                <Link to="/">Início</Link>
               </li>
               <li>
                 <FaPlayCircle className={styles.linkIcon} />
-                <Link to="/videos">Videos Educativos</Link>
+                <Link to="/videos">Vídeos Educativos</Link>
               </li>
               <li>
                 <FaFileAlt className={styles.linkIcon} />

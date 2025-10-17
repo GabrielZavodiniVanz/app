@@ -128,7 +128,7 @@ class EmailService {
     // Usando apenas o módulo HTTPS nativo do Node.js (sem dependências externas)
 
     const requestBody = {
-      from: 'contato@ninosdeluz.site', // Email simples sem nome
+      from: 'Niños de Luz <contacto@ninosdeluz.site>', // Email com nome personalizado
       to: [mailOptions.to],
       subject: mailOptions.subject,
       html: mailOptions.html,
