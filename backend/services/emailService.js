@@ -128,15 +128,21 @@ class EmailService {
     // Usando apenas o módulo HTTPS nativo do Node.js (sem dependências externas)
 
     const requestBody = {
-      from: 'Niños de Luz <noreply@ninosdeluz.site>', // Email de envio usando seu domínio
+      from: 'contato@ninosdeluz.site', // Email simples sem nome
       to: [mailOptions.to],
       subject: mailOptions.subject,
       html: mailOptions.html,
+      text: mailOptions.text || '¡Hola! Tu acceso a Niños de Luz está listo. Visita nuestro sitio web para más información.',
       reply_to: 'contactoninosdeluz@gmail.com', // Seu email pessoal para respostas
       headers: {
         'X-Mailer': 'Niños de Luz Web App',
         'X-Priority': '3',
-        'Importance': 'normal'
+        'Importance': 'normal',
+        'List-Unsubscribe': '<https://ninosdeluz.site/unsubscribe?email=' + mailOptions.to + '>',
+        'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+        'X-Entity-Ref-ID': 'ninosdeluz-' + Date.now(),
+        'Return-Path': 'contato@ninosdeluz.site',
+        'Message-ID': '<' + Date.now() + '.' + Math.random().toString(36).substr(2, 9) + '@ninosdeluz.site>'
       }
     };
 
@@ -214,7 +220,7 @@ class EmailService {
       const mailOptions = {
         from: process.env.EMAIL_USER,
         to: email,
-        subject: '¡Bienvenido(a) al Mundo Mágico de Niños de Luz!',
+        subject: `Hola ${name}, aquí tienes tus datos de acceso`,
         html: `<!doctype html>
 <html lang="es">
 <head>
@@ -348,7 +354,7 @@ class EmailService {
               <p class="footer">Este es un correo automático. Si tienes alguna pregunta, responde a este email.</p>
               <p class="footer">© 2025 Niños de Luz — Creando un mundo mágico de aprendizaje y diversión para los más pequeños.</p>
               <p class="footer" style="margin-top: 12px;">
-                <a href="mailto:contactoninosdeluz@gmail.com?subject=Unsubscribe&body=Por favor, desuscribirme de los emails de Niños de Luz. Email: ${mailOptions.to}" style="color: #5B6770; text-decoration: underline;">Desuscribirse</a>
+                <a href="https://ninosdeluz.site/unsubscribe?email=${email}" style="color: #5B6770; text-decoration: underline;">Desuscribirse</a>
               </p>
             </td>
           </tr>
@@ -549,7 +555,7 @@ class EmailService {
               <p class="footer">Este es un correo automático. Si tienes alguna pregunta, responde a este email.</p>
               <p class="footer">© 2025 Niños de Luz — Creando un mundo mágico de aprendizaje y diversión para los más pequeños.</p>
               <p class="footer" style="margin-top: 12px;">
-                <a href="mailto:contactoninosdeluz@gmail.com?subject=Unsubscribe&body=Por favor, desuscribirme de los emails de Niños de Luz. Email: ${mailOptions.to}" style="color: #5B6770; text-decoration: underline;">Desuscribirse</a>
+                <a href="https://ninosdeluz.site/unsubscribe?email=${email}" style="color: #5B6770; text-decoration: underline;">Desuscribirse</a>
               </p>
             </td>
           </tr>
@@ -738,7 +744,7 @@ class EmailService {
               <p class="footer">Este es un correo automático. Si tienes alguna pregunta, responde a este email.</p>
               <p class="footer">© 2025 Niños de Luz — Creando un mundo mágico de aprendizaje y diversión para los más pequeños.</p>
               <p class="footer" style="margin-top: 12px;">
-                <a href="mailto:contactoninosdeluz@gmail.com?subject=Unsubscribe&body=Por favor, desuscribirme de los emails de Niños de Luz. Email: ${mailOptions.to}" style="color: #5B6770; text-decoration: underline;">Desuscribirse</a>
+                <a href="https://ninosdeluz.site/unsubscribe?email=${email}" style="color: #5B6770; text-decoration: underline;">Desuscribirse</a>
               </p>
             </td>
           </tr>
