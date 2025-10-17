@@ -13,6 +13,51 @@ const {
 } = require('../middleware/kiwifyWebhookMiddleware');
 
 /**
+ * Determina o accessLevel atualizado baseado no accessLevel atual e no novo produto
+ * @param {string} currentAccessLevel - AccessLevel atual do usuário
+ * @param {string} newProductAccessLevel - AccessLevel do produto sendo comprado
+ * @returns {string} - Novo accessLevel
+ */
+function determineUpgradedAccessLevel(currentAccessLevel, newProductAccessLevel) {
+  // Hierarquia dos accessLevels
+  const hierarchy = {
+    'nenhum': 0,
+    'BASICO': 1,
+    'INTERMEDIARIO': 2,
+    'AVANCADO': 3,
+    'ACESSO_COMPLETO': 4
+  };
+
+  // Se o usuário não tem acesso, usar o nível do produto
+  if (currentAccessLevel === 'nenhum') {
+    return newProductAccessLevel;
+  }
+
+  // Se o produto não tem acesso válido, manter o atual
+  if (newProductAccessLevel === 'nenhum') {
+    return currentAccessLevel;
+  }
+
+  // Determinar o nível mais alto entre atual e produto
+  const currentLevel = hierarchy[currentAccessLevel] || 0;
+  const productLevel = hierarchy[newProductAccessLevel] || 0;
+  const highestLevel = Math.max(currentLevel, productLevel);
+
+  // Verificar se deve ser ACESSO_COMPLETO
+  // ACESSO_COMPLETO = tem BASICO + INTERMEDIARIO + AVANCADO
+  // Isso acontece quando o usuário já tem INTERMEDIARIO e compra AVANCADO
+  // OU quando já tem AVANCADO e compra INTERMEDIARIO
+  if ((currentAccessLevel === 'INTERMEDIARIO' && newProductAccessLevel === 'AVANCADO') ||
+      (currentAccessLevel === 'AVANCADO' && newProductAccessLevel === 'INTERMEDIARIO')) {
+    return 'ACESSO_COMPLETO';
+  }
+
+  // Retornar o nível mais alto
+  const levelNames = Object.keys(hierarchy);
+  return levelNames.find(level => hierarchy[level] === highestLevel) || currentAccessLevel;
+}
+
+/**
  * Endpoint principal para receber webhooks da Kiwify
  * POST /api/webhook/kiwify
  */
@@ -22,123 +67,106 @@ router.post('/kiwify',
   validateWebhookData,
   async (req, res) => {
     try {
+      console.log('🎉 Webhook da Kiwify recebido e validado com sucesso!');
+      
       const body = req.body;
-      const customer = body.Customer || body.customer;
-
-      console.log(`🔄 Processando webhook para cliente: ${customer.email}`);
-
-      // Verificar se o usuário já existe
-      const existingUser = await User.findOne({ 
-        where: { email: customer.email.toLowerCase() } 
-      });
-
+      const customer = body.Customer;
+      const products = body.Product || body.Products || body.products || body.product;
+      
       // Extrair produtos comprados - Kiwify envia Product (singular) ou Products (plural)
-      let products = [];
+      let productsArray = [];
       if (body.Products && Array.isArray(body.Products)) {
         // Array de produtos (plural)
-        products = body.Products;
+        productsArray = body.Products;
       } else if (body.products && Array.isArray(body.products)) {
         // Array de produtos (plural) - lowercase
-        products = body.products;
+        productsArray = body.products;
       } else if (body.Product && typeof body.Product === 'object') {
         // Produto único (singular) - converter para array
-        products = [body.Product];
+        productsArray = [body.Product];
       } else if (body.product && typeof body.product === 'object') {
         // Produto único (singular) - lowercase
-        products = [body.product];
+        productsArray = [body.product];
       }
-      console.log(`📦 Produtos comprados:`, products);
+      console.log(`📦 Produtos comprados:`, productsArray);
 
-      if (existingUser) {
-        console.log(`ℹ️ Usuário já existe: ${customer.email} - Verificando se é upsell...`);
+      // Verificar se é um evento de upsell (Produto 3)
+      const isUpsell = productsArray.some(product => 
+        product.product_id === 'd614e9f0-a845-11f0-a8cd-a7de6dd83d71'
+      );
+
+      if (isUpsell) {
+        console.log('🎁 Upsell detectado - Produto 3');
         
-        // Verificar se algum dos produtos comprados é o PRODUTO_3 (upsell)
-        const hasProduto3 = products.some(product => {
-          const productId = product.product_id || product.id;
-          return productId === accessLevelService.PRODUCT_IDS.PRODUTO_3;
+        // Buscar usuário existente
+        const existingUser = await User.findOne({
+          where: { email: customer.email.toLowerCase() }
         });
 
-        if (hasProduto3) {
-          console.log(`🎉 UPSELL detectado! Usuário ${customer.email} comprou PRODUTO_3`);
-          
-          // Atualizar flag de compra do produto 3
+        if (existingUser) {
+          // Atualizar flag de upsell
           await User.update(
             { comprou_produto_3: true },
             { where: { id: existingUser.id } }
           );
           
+          console.log(`✅ Upsell ativado para usuário: ${existingUser.id}`);
+
           // Enviar email de confirmação do upsell
-          const loginUrl = process.env.FRONTEND_URL 
-            ? `${process.env.FRONTEND_URL}/login`
-            : 'https://www.ninosdeluz.site/login';
-
-          const upsellEmailData = {
-            name: existingUser.name,
-            email: existingUser.email,
-            loginUrl: loginUrl,
-            productName: 'Mi Libro para Colorear con Fe'
-          };
-
-          // Enviar email de confirmação do upsell (não bloqueante)
-          emailService.sendUpsellConfirmationEmail(upsellEmailData).then(() => {
+          try {
+            await emailService.sendUpsellConfirmationEmail(customer.email, customer.full_name);
             console.log(`📧 Email de confirmação do upsell enviado para: ${customer.email}`);
-          }).catch((emailError) => {
-            console.error(`❌ Erro ao enviar email de upsell para ${customer.email}:`, emailError);
-          });
+          } catch (emailError) {
+            console.error('❌ Erro ao enviar email de upsell:', emailError);
+          }
 
-          // Enviar notificação via email
-          const notificationData = {
-            type: 'upsell_completed',
-            message: 'Novo conteúdo disponível! Atualizando página...',
-            action: 'refresh',
-            productName: 'Mi Libro para Colorear con Fe',
-            loginUrl: loginUrl
-          };
-
-          // Usar sistema de fallback que funciona tanto em dev quanto em produção
-          sendNotificationWithFallback(existingUser.id, notificationData).then((sent) => {
-            if (sent) {
-              console.log(`✅ Notificação enviada com sucesso para usuário ${existingUser.id}`);
-            } else {
-              console.log(`❌ Falha ao enviar notificação para usuário ${existingUser.id}`);
-            }
-          }).catch((error) => {
-            console.error(`❌ Erro ao enviar notificação:`, error);
-          });
-
-          return res.status(200).json({ 
+          return res.status(200).json({
             message: 'Upsell processed successfully',
             userId: existingUser.id,
             email: customer.email,
             upsell: 'PRODUTO_3'
           });
         } else {
-          console.log(`ℹ️ Compra normal detectada para usuário existente`);
-          
-          // Determinar nível de acesso baseado nos produtos comprados (lógica normal)
-          const accessLevel = accessLevelService.determineAccessLevel(products);
-          console.log(`🎯 Nível de acesso determinado: ${accessLevel}`);
-          
-          // Atualizar nível de acesso do usuário existente se necessário
-          if (existingUser.accessLevel !== accessLevel) {
-            await User.update(
-              { accessLevel: accessLevel },
-              { where: { id: existingUser.id } }
-            );
-            console.log(`🔄 Nível de acesso atualizado para ${accessLevel}`);
-          }
-          
-          return res.status(200).json({ 
-            message: 'User access updated',
-            userId: existingUser.id,
-            email: customer.email,
-            accessLevel: accessLevel
-          });
+          console.log('⚠️ Usuário não encontrado para upsell, criando novo usuário');
         }
       }
 
+      // Verificar se o usuário já existe
+      const existingUser = await User.findOne({
+        where: { email: customer.email.toLowerCase() }
+      });
+
+      if (existingUser) {
+        console.log(`✅ Usuário existente encontrado: ${existingUser.id}`);
+        console.log(`📊 AccessLevel atual: ${existingUser.accessLevel}`);
+        
+        // Determinar novo nível de acesso baseado no produto atual + accessLevel existente
+        const currentAccessLevel = accessLevelService.determineAccessLevel(productsArray);
+        console.log(`🎯 Nível de acesso do produto atual: ${currentAccessLevel}`);
+        
+        // Lógica para determinar o accessLevel final baseado no atual + produto novo
+        const newAccessLevel = determineUpgradedAccessLevel(existingUser.accessLevel, currentAccessLevel);
+        console.log(`🎯 Novo nível de acesso determinado: ${newAccessLevel}`);
+        
+        // Atualizar nível de acesso do usuário existente se necessário
+        if (existingUser.accessLevel !== newAccessLevel) {
+          await User.update(
+            { accessLevel: newAccessLevel },
+            { where: { id: existingUser.id } }
+          );
+          console.log(`🔄 Nível de acesso atualizado para ${newAccessLevel}`);
+        }
+
+        return res.status(200).json({
+          message: 'User access updated',
+          userId: existingUser.id,
+          email: customer.email,
+          accessLevel: newAccessLevel
+        });
+      }
+
       // NOVO USUÁRIO - Determinar nível de acesso baseado nos produtos comprados
-      const accessLevel = accessLevelService.determineAccessLevel(products);
+      const accessLevel = accessLevelService.determineAccessLevel(productsArray);
       console.log(`🎯 Nível de acesso determinado para novo usuário: ${accessLevel}`);
 
       // Gerar senha segura
@@ -171,9 +199,14 @@ router.post('/kiwify',
           
           if (existingUser) {
             console.log(`✅ Usuário existente encontrado: ${existingUser.id}`);
+            console.log(`📊 AccessLevel atual: ${existingUser.accessLevel}`);
             
-            // Determinar nível de acesso baseado nos produtos comprados
-            const newAccessLevel = accessLevelService.determineAccessLevel(products);
+            // Determinar novo nível de acesso baseado no produto atual + accessLevel existente
+            const currentAccessLevel = accessLevelService.determineAccessLevel(productsArray);
+            console.log(`🎯 Nível de acesso do produto atual: ${currentAccessLevel}`);
+            
+            // Lógica para determinar o accessLevel final baseado no atual + produto novo
+            const newAccessLevel = determineUpgradedAccessLevel(existingUser.accessLevel, currentAccessLevel);
             console.log(`🎯 Novo nível de acesso determinado: ${newAccessLevel}`);
             
             // Atualizar nível de acesso do usuário existente se necessário
@@ -222,17 +255,34 @@ router.post('/kiwify',
         timestamp: new Date().toISOString()
       });
 
-      // Enviar e-mail após enviar a resposta (não bloquear)
-      emailService.sendWelcomeEmail(emailData).then(() => {
-        console.log(`📧 E-mail enviado com sucesso para: ${customer.email}`);
-      }).catch((emailError) => {
-        console.error(`❌ Erro ao enviar e-mail para ${customer.email}:`, emailError);
+      // Enviar e-mail de boas-vindas (assíncrono)
+      emailService.sendWelcomeEmail(emailData)
+        .then(() => {
+          console.log(`📧 E-mail de boas-vindas enviado para: ${customer.email}`);
+        })
+        .catch(error => {
+          console.error('❌ Erro ao enviar e-mail de boas-vindas:', error);
+        });
+
+      // Enviar notificação (assíncrono)
+      sendNotificationWithFallback(
+        `Novo usuário criado: ${customer.full_name} (${customer.email})`,
+        `Access Level: ${accessLevel}`
+      ).catch(error => {
+        console.error('❌ Erro ao enviar notificação:', error);
       });
 
     } catch (error) {
       console.error('❌ Erro ao processar webhook da Kiwify:', error);
       
-      // Resposta de erro para a Kiwify
+      // Enviar notificação de erro (assíncrono)
+      sendNotificationWithFallback(
+        'Erro no webhook da Kiwify',
+        `Erro: ${error.message}`
+      ).catch(notifError => {
+        console.error('❌ Erro ao enviar notificação de erro:', notifError);
+      });
+
       res.status(500).json({
         success: false,
         error: 'Internal Server Error',
@@ -244,7 +294,7 @@ router.post('/kiwify',
 );
 
 /**
- * Endpoint alternativo para webhook da Kiwify (aceita /api/webhook)
+ * Endpoint alternativo para webhooks da Kiwify (compatibilidade)
  * POST /api/webhook
  */
 router.post('/', 
@@ -253,123 +303,106 @@ router.post('/',
   validateWebhookData,
   async (req, res) => {
     try {
+      console.log('🎉 Webhook alternativo da Kiwify recebido e validado com sucesso!');
+      
       const body = req.body;
-      const customer = body.Customer || body.customer;
-
-      console.log(`🔄 Processando webhook para cliente: ${customer.email}`);
-
-      // Verificar se o usuário já existe
-      const existingUser = await User.findOne({ 
-        where: { email: customer.email.toLowerCase() } 
-      });
-
+      const customer = body.Customer;
+      const products = body.Product || body.Products || body.products || body.product;
+      
       // Extrair produtos comprados - Kiwify envia Product (singular) ou Products (plural)
-      let products = [];
+      let productsArray = [];
       if (body.Products && Array.isArray(body.Products)) {
         // Array de produtos (plural)
-        products = body.Products;
+        productsArray = body.Products;
       } else if (body.products && Array.isArray(body.products)) {
         // Array de produtos (plural) - lowercase
-        products = body.products;
+        productsArray = body.products;
       } else if (body.Product && typeof body.Product === 'object') {
         // Produto único (singular) - converter para array
-        products = [body.Product];
+        productsArray = [body.Product];
       } else if (body.product && typeof body.product === 'object') {
         // Produto único (singular) - lowercase
-        products = [body.product];
+        productsArray = [body.product];
       }
-      console.log(`📦 Produtos comprados:`, products);
+      console.log(`📦 Produtos comprados:`, productsArray);
 
-      if (existingUser) {
-        console.log(`ℹ️ Usuário já existe: ${customer.email} - Verificando se é upsell...`);
+      // Verificar se é um evento de upsell (Produto 3)
+      const isUpsell = productsArray.some(product => 
+        product.product_id === 'd614e9f0-a845-11f0-a8cd-a7de6dd83d71'
+      );
+
+      if (isUpsell) {
+        console.log('🎁 Upsell detectado - Produto 3');
         
-        // Verificar se algum dos produtos comprados é o PRODUTO_3 (upsell)
-        const hasProduto3 = products.some(product => {
-          const productId = product.product_id || product.id;
-          return productId === accessLevelService.PRODUCT_IDS.PRODUTO_3;
+        // Buscar usuário existente
+        const existingUser = await User.findOne({
+          where: { email: customer.email.toLowerCase() }
         });
 
-        if (hasProduto3) {
-          console.log(`🎉 UPSELL detectado! Usuário ${customer.email} comprou PRODUTO_3`);
-          
-          // Atualizar flag de compra do produto 3
+        if (existingUser) {
+          // Atualizar flag de upsell
           await User.update(
             { comprou_produto_3: true },
             { where: { id: existingUser.id } }
           );
           
+          console.log(`✅ Upsell ativado para usuário: ${existingUser.id}`);
+
           // Enviar email de confirmação do upsell
-          const loginUrl = process.env.FRONTEND_URL 
-            ? `${process.env.FRONTEND_URL}/login`
-            : 'https://www.ninosdeluz.site/login';
-
-          const upsellEmailData = {
-            name: existingUser.name,
-            email: existingUser.email,
-            loginUrl: loginUrl,
-            productName: 'Mi Libro para Colorear con Fe'
-          };
-
-          // Enviar email de confirmação do upsell (não bloqueante)
-          emailService.sendUpsellConfirmationEmail(upsellEmailData).then(() => {
+          try {
+            await emailService.sendUpsellConfirmationEmail(customer.email, customer.full_name);
             console.log(`📧 Email de confirmação do upsell enviado para: ${customer.email}`);
-          }).catch((emailError) => {
-            console.error(`❌ Erro ao enviar email de upsell para ${customer.email}:`, emailError);
-          });
+          } catch (emailError) {
+            console.error('❌ Erro ao enviar email de upsell:', emailError);
+          }
 
-          // Enviar notificação via email
-          const notificationData = {
-            type: 'upsell_completed',
-            message: 'Novo conteúdo disponível! Atualizando página...',
-            action: 'refresh',
-            productName: 'Mi Libro para Colorear con Fe',
-            loginUrl: loginUrl
-          };
-
-          // Usar sistema de fallback que funciona tanto em dev quanto em produção
-          sendNotificationWithFallback(existingUser.id, notificationData).then((sent) => {
-            if (sent) {
-              console.log(`✅ Notificação enviada com sucesso para usuário ${existingUser.id}`);
-            } else {
-              console.log(`❌ Falha ao enviar notificação para usuário ${existingUser.id}`);
-            }
-          }).catch((error) => {
-            console.error(`❌ Erro ao enviar notificação:`, error);
-          });
-
-          return res.status(200).json({ 
+          return res.status(200).json({
             message: 'Upsell processed successfully',
             userId: existingUser.id,
             email: customer.email,
             upsell: 'PRODUTO_3'
           });
         } else {
-          console.log(`ℹ️ Compra normal detectada para usuário existente`);
-          
-          // Determinar nível de acesso baseado nos produtos comprados (lógica normal)
-          const accessLevel = accessLevelService.determineAccessLevel(products);
-          console.log(`🎯 Nível de acesso determinado: ${accessLevel}`);
-          
-          // Atualizar nível de acesso do usuário existente se necessário
-          if (existingUser.accessLevel !== accessLevel) {
-            await User.update(
-              { accessLevel: accessLevel },
-              { where: { id: existingUser.id } }
-            );
-            console.log(`🔄 Nível de acesso atualizado para ${accessLevel}`);
-          }
-          
-          return res.status(200).json({ 
-            message: 'User access updated',
-            userId: existingUser.id,
-            email: customer.email,
-            accessLevel: accessLevel
-          });
+          console.log('⚠️ Usuário não encontrado para upsell, criando novo usuário');
         }
       }
 
+      // Verificar se o usuário já existe
+      const existingUser = await User.findOne({
+        where: { email: customer.email.toLowerCase() }
+      });
+
+      if (existingUser) {
+        console.log(`✅ Usuário existente encontrado: ${existingUser.id}`);
+        console.log(`📊 AccessLevel atual: ${existingUser.accessLevel}`);
+        
+        // Determinar novo nível de acesso baseado no produto atual + accessLevel existente
+        const currentAccessLevel = accessLevelService.determineAccessLevel(productsArray);
+        console.log(`🎯 Nível de acesso do produto atual: ${currentAccessLevel}`);
+        
+        // Lógica para determinar o accessLevel final baseado no atual + produto novo
+        const newAccessLevel = determineUpgradedAccessLevel(existingUser.accessLevel, currentAccessLevel);
+        console.log(`🎯 Novo nível de acesso determinado: ${newAccessLevel}`);
+        
+        // Atualizar nível de acesso do usuário existente se necessário
+        if (existingUser.accessLevel !== newAccessLevel) {
+          await User.update(
+            { accessLevel: newAccessLevel },
+            { where: { id: existingUser.id } }
+          );
+          console.log(`🔄 Nível de acesso atualizado para ${newAccessLevel}`);
+        }
+
+        return res.status(200).json({
+          message: 'User access updated',
+          userId: existingUser.id,
+          email: customer.email,
+          accessLevel: newAccessLevel
+        });
+      }
+
       // NOVO USUÁRIO - Determinar nível de acesso baseado nos produtos comprados
-      const accessLevel = accessLevelService.determineAccessLevel(products);
+      const accessLevel = accessLevelService.determineAccessLevel(productsArray);
       console.log(`🎯 Nível de acesso determinado para novo usuário: ${accessLevel}`);
 
       // Gerar senha segura
@@ -402,9 +435,14 @@ router.post('/',
           
           if (existingUser) {
             console.log(`✅ Usuário existente encontrado: ${existingUser.id}`);
+            console.log(`📊 AccessLevel atual: ${existingUser.accessLevel}`);
             
-            // Determinar nível de acesso baseado nos produtos comprados
-            const newAccessLevel = accessLevelService.determineAccessLevel(products);
+            // Determinar novo nível de acesso baseado no produto atual + accessLevel existente
+            const currentAccessLevel = accessLevelService.determineAccessLevel(productsArray);
+            console.log(`🎯 Nível de acesso do produto atual: ${currentAccessLevel}`);
+            
+            // Lógica para determinar o accessLevel final baseado no atual + produto novo
+            const newAccessLevel = determineUpgradedAccessLevel(existingUser.accessLevel, currentAccessLevel);
             console.log(`🎯 Novo nível de acesso determinado: ${newAccessLevel}`);
             
             // Atualizar nível de acesso do usuário existente se necessário
@@ -429,24 +467,19 @@ router.post('/',
         throw createError;
       }
 
-      console.log(`✅ Novo usuário criado via webhook: ${newUser.email}`);
+      console.log(`✅ Usuário criado com sucesso: ${newUser.id}`);
 
       // Preparar dados para o e-mail
-      const loginUrl = process.env.FRONTEND_URL || 'https://www.ninosdeluz.site/login';
+      const loginUrl = process.env.FRONTEND_URL 
+        ? `${process.env.FRONTEND_URL}/login`
+        : 'https://www.ninosdeluz.site/login';
+
       const emailData = {
-        name: newUser.name,
-        email: newUser.email,
+        name: customer.full_name,
+        email: customer.email,
         password: generatedPassword,
         loginUrl: loginUrl
       };
-
-      // Enviar e-mail de boas-vindas
-      try {
-        await emailService.sendWelcomeEmail(emailData);
-        console.log(`📧 E-mail enviado com sucesso para: ${customer.email}`);
-      } catch (emailError) {
-        console.error(`❌ Erro ao enviar e-mail para ${customer.email}:`, emailError);
-      }
 
       // Resposta de sucesso para a Kiwify
       res.status(200).json({
@@ -458,10 +491,34 @@ router.post('/',
         timestamp: new Date().toISOString()
       });
 
+      // Enviar e-mail de boas-vindas (assíncrono)
+      emailService.sendWelcomeEmail(emailData)
+        .then(() => {
+          console.log(`📧 E-mail de boas-vindas enviado para: ${customer.email}`);
+        })
+        .catch(error => {
+          console.error('❌ Erro ao enviar e-mail de boas-vindas:', error);
+        });
+
+      // Enviar notificação (assíncrono)
+      sendNotificationWithFallback(
+        `Novo usuário criado: ${customer.full_name} (${customer.email})`,
+        `Access Level: ${accessLevel}`
+      ).catch(error => {
+        console.error('❌ Erro ao enviar notificação:', error);
+      });
+
     } catch (error) {
       console.error('❌ Erro ao processar webhook da Kiwify:', error);
       
-      // Resposta de erro para a Kiwify
+      // Enviar notificação de erro (assíncrono)
+      sendNotificationWithFallback(
+        'Erro no webhook da Kiwify',
+        `Erro: ${error.message}`
+      ).catch(notifError => {
+        console.error('❌ Erro ao enviar notificação de erro:', notifError);
+      });
+
       res.status(500).json({
         success: false,
         error: 'Internal Server Error',
