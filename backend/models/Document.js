@@ -43,11 +43,11 @@ const Document = sequelize.define('Document', {
     }
   },
   categoria_produto: {
-    type: DataTypes.ENUM('PRINCIPAL', 'PRODUTO_1', 'PRODUTO_2', 'PRODUTO_3'),
+    type: DataTypes.ENUM('PRINCIPAL', 'PRINCIPAL_VERTICAL', 'PRODUTO_1', 'PRODUTO_2', 'PRODUTO_3'),
     defaultValue: 'PRINCIPAL',
     allowNull: false,
     validate: {
-      isIn: [['PRINCIPAL', 'PRODUTO_1', 'PRODUTO_2', 'PRODUTO_3']]
+      isIn: [['PRINCIPAL', 'PRINCIPAL_VERTICAL', 'PRODUTO_1', 'PRODUTO_2', 'PRODUTO_3']]
     }
   }
 }, {

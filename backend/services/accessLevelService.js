@@ -37,6 +37,7 @@ const PRODUCT_NAMES = {
 // Categorias de conteúdo (nova estrutura)
 const CONTENT_CATEGORIES = {
   PRINCIPAL: 'PRINCIPAL',
+  PRINCIPAL_VERTICAL: 'PRINCIPAL_VERTICAL',
   PRODUTO_1: 'PRODUTO_1',
   PRODUTO_2: 'PRODUTO_2',
   PRODUTO_3: 'PRODUTO_3'
@@ -45,6 +46,7 @@ const CONTENT_CATEGORIES = {
 // Nomes amigáveis das categorias de conteúdo
 const CATEGORY_NAMES = {
   PRINCIPAL: 'Conteúdo do Produto Principal',
+  PRINCIPAL_VERTICAL: 'KIT NIÑOS DE LUZ - RUTINAS CON AMOR Y FE (Horizontal)',
   PRODUTO_1: 'Conteúdo do Produto 1 (Adicional)',
   PRODUTO_2: 'Conteúdo do Produto 2 (Adicional)',
   PRODUTO_3: 'Conteúdo do Mi Libro para Colorear con Fe'
@@ -191,28 +193,29 @@ function buildAccessFilter(userAccessLevels) {
  */
 function getVisibleCategories(userAccessLevel, comprouProduto3 = false) {
   let allowedCategories = [];
+  const principalCategories = ['PRINCIPAL', 'PRINCIPAL_VERTICAL'];
   
   // LÓGICA CORRETA: Baseada nos accessLevels tradicionais
   switch (userAccessLevel) {
     case 'BASICO':
       // Usuário básico pode ver apenas conteúdo principal
-      allowedCategories = ['PRINCIPAL'];
+      allowedCategories = [...principalCategories];
       break;
     case 'INTERMEDIARIO':
       // Usuário intermediário pode ver conteúdo principal + produto 1
-      allowedCategories = ['PRINCIPAL', 'PRODUTO_1'];
+      allowedCategories = [...principalCategories, 'PRODUTO_1'];
       break;
     case 'AVANCADO':
       // Usuário avançado pode ver conteúdo principal + produto 2
-      allowedCategories = ['PRINCIPAL', 'PRODUTO_2'];
+      allowedCategories = [...principalCategories, 'PRODUTO_2'];
       break;
     case 'ACESSO_COMPLETO':
       // Usuário com acesso completo pode ver todo conteúdo
-      allowedCategories = ['PRINCIPAL', 'PRODUTO_1', 'PRODUTO_2'];
+      allowedCategories = [...principalCategories, 'PRODUTO_1', 'PRODUTO_2'];
       break;
     case 'admin':
       // Admin vê todas as categorias, incluindo PRODUTO_3
-      allowedCategories = ['PRINCIPAL', 'PRODUTO_1', 'PRODUTO_2', 'PRODUTO_3'];
+      allowedCategories = [...principalCategories, 'PRODUTO_1', 'PRODUTO_2', 'PRODUTO_3'];
       break;
     default:
       // Usuário sem acesso ou nível inválido não vê nada

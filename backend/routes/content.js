@@ -63,6 +63,13 @@ const removeFromCloudinary = async (url, resourceType = 'image') => {
 // ROTAS PÚBLICAS
 // ==========================================================
 
+const ensureVerticalCategoryValue = (categoryValues = []) => {
+  if (!categoryValues.includes('PRINCIPAL_VERTICAL')) {
+    return [...categoryValues, 'PRINCIPAL_VERTICAL'];
+  }
+  return categoryValues;
+};
+
 /**
  * GET /videos - Listar vídeos baseado no nível de acesso do usuário
  */
@@ -362,7 +369,7 @@ router.post('/videos', [authMiddleware, adminMiddleware, uploadWithCloudinaryUrl
     // Processar categoria do produto
     const categoria_produto = req.body.categoria_produto || 'PRINCIPAL';
     const validCategories = accessLevelService.getAllContentCategories();
-    const validCategoryValues = validCategories.map(cat => cat.value);
+    const validCategoryValues = ensureVerticalCategoryValue(validCategories.map(cat => cat.value));
     
     if (!validCategoryValues.includes(categoria_produto)) {
       return res.status(400).json({
@@ -602,7 +609,7 @@ router.post('/documentos', [authMiddleware, adminMiddleware, uploadWithCloudinar
     // Processar categoria do produto
     const categoria_produto = req.body.categoria_produto || 'PRINCIPAL';
     const validCategories = accessLevelService.getAllContentCategories();
-    const validCategoryValues = validCategories.map(cat => cat.value);
+    const validCategoryValues = ensureVerticalCategoryValue(validCategories.map(cat => cat.value));
     
     if (!validCategoryValues.includes(categoria_produto)) {
       return res.status(400).json({
