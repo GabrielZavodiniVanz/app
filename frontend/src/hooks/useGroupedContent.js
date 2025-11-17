@@ -11,6 +11,7 @@ export const useGroupedContent = (videos = [], documents = []) => {
     // Mapeamento de categorias para nomes amigáveis
     const categoryNames = {
       PRINCIPAL: 'KIT NIÑOS DE LUZ - RUTINAS CON AMOR Y FE',
+      PRINCIPAL_VERTICAL: 'KIT NIÑOS DE LUZ - RUTINAS CON AMOR Y FE (Horizontal)',
       PRODUTO_1: 'PACK EXTRA 1 - Tarjetas y Stickers de Rutinas con FE',
       PRODUTO_2: 'PACK EXTRA 2  - Versículos con Amor y Color',
       PRODUTO_3: 'Mi Libro para Colorear con Fe'
@@ -51,7 +52,7 @@ export const useGroupedContent = (videos = [], documents = []) => {
     });
 
     // Ordenar categorias por hierarquia (PRINCIPAL primeiro, depois PRODUTO_1, etc.)
-    const categoryOrder = ['PRINCIPAL', 'PRODUTO_1', 'PRODUTO_2', 'PRODUTO_3'];
+    const categoryOrder = ['PRINCIPAL', 'PRINCIPAL_VERTICAL', 'PRODUTO_1', 'PRODUTO_2', 'PRODUTO_3'];
     const sortedCategories = Object.keys(groupedContent).sort((a, b) => {
       const indexA = categoryOrder.indexOf(a);
       const indexB = categoryOrder.indexOf(b);

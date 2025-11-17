@@ -10,23 +10,42 @@ function AccessLevelSelector({ selectedLevel = 'PRINCIPAL', onChange, disabled =
     loadAccessLevels();
   }, []);
 
+  const ensureVerticalOption = (categories = []) => {
+    const hasVertical = categories.some(cat => cat.value === 'PRINCIPAL_VERTICAL');
+    if (hasVertical) return categories;
+
+    const verticalOption = {
+      value: 'PRINCIPAL_VERTICAL',
+      label: 'KIT NIÑOS DE LUZ - RUTINAS CON AMOR Y FE (Horizontal)'
+    };
+
+    const principalIndex = categories.findIndex(cat => cat.value === 'PRINCIPAL');
+    if (principalIndex !== -1) {
+      const updated = [...categories];
+      updated.splice(principalIndex + 1, 0, verticalOption);
+      return updated;
+    }
+
+    return [verticalOption, ...categories];
+  };
+
   const loadAccessLevels = async () => {
     try {
       console.log('🔄 Carregando categorias de conteúdo...');
       const response = await getContentCategories();
       console.log('📡 Resposta da API:', response);
       console.log('📋 Categorias de conteúdo recebidas:', response.categories);
-      setAccessLevels(response.categories || []);
+      setAccessLevels(ensureVerticalOption(response.categories));
     } catch (error) {
       console.error('❌ Erro ao carregar categorias de conteúdo:', error);
       console.log('🔄 Usando fallback...');
       // Fallback com categorias padrão
       console.log('🔄 Usando fallback com novas categorias');
-      setAccessLevels([
+      setAccessLevels(ensureVerticalOption([
         { value: 'PRINCIPAL', label: 'Conteúdo do Produto Principal' },
         { value: 'PRODUTO_1', label: 'Conteúdo do Produto 1 (Adicional)' },
         { value: 'PRODUTO_2', label: 'Conteúdo do Produto 2 (Adicional)' }
-      ]);
+      ]));
     } finally {
       setLoading(false);
     }

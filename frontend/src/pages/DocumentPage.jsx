@@ -6,7 +6,7 @@ import useGroupedContent from '../hooks/useGroupedContent';
 import DocumentCard from '../components/DocumentCard.jsx';
 import SkeletonLoader from '../components/SkeletonLoader.jsx';
 import EmptyState from '../components/EmptyState.jsx';
-import { FaSearch, FaFilter, FaTh, FaList, FaSortAmountDown, FaBars, FaFolder, FaChevronDown, FaChevronRight } from 'react-icons/fa';
+import { FaSearch, FaTh, FaList, FaSortAmountDown, FaFolder, FaChevronDown, FaChevronRight } from 'react-icons/fa';
 import styles from '../App.module.css';
 import pageStyles from './DocumentPage.module.css';
 
@@ -15,7 +15,6 @@ function DocumentPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('newest');
   const [viewMode, setViewMode] = useState('grid');
-  const [layout, setLayout] = useState('accordion'); // apenas accordion
 
   // Filtrar e ordenar documentos
   const filteredAndSortedDocuments = useMemo(() => {
@@ -44,7 +43,7 @@ function DocumentPage() {
     return filtered;
   }, [documents, searchTerm, sortBy]);
 
-  // Agrupar documentos por categoria
+  // Agrupar documentos por categoria (incluindo PRINCIPAL_VERTICAL - Horizontal)
   const { groupedContent, sortedCategories } = useGroupedContent([], filteredAndSortedDocuments);
 
   // Componente de layout em acordeão
@@ -111,12 +110,10 @@ function DocumentPage() {
         <EmptyState message="¡No hay documentos disponibles!" />;
     }
     
-    // Sempre mostrar agrupamento, mesmo com uma categoria
     if (sortedCategories.length === 0) {
       return <EmptyState message="¡No hay documentos disponibles!" />;
     }
     
-    // Sempre mostrar agrupamento em acordeão
     return (
       <div className={pageStyles.groupedContainer}>
         <AccordionLayout 
@@ -164,7 +161,6 @@ function DocumentPage() {
               <option value="alphabetical">A-Z</option>
             </select>
           </div>
-
 
           <div className={pageStyles.viewToggle}>
             <button
