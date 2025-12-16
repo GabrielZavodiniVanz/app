@@ -77,35 +77,68 @@ function HomePage() {
             className={styles.carouselTrack}
             style={{ transform: `translateX(-${currentSlide * 50}%)` }}
           >
-            {/* Slide 1 - Banner Upsell Libro para Colorear */}
+            {/* Slide 1 - Banner Colorea con Fe + Granja Didáctica */}
             <div className={styles.carouselSlide}>
               <div className={`${styles.banner} ${styles.banner1}`}>
+                <div className={styles.banner1Stars}></div>
+                <div className={styles.banner1StarRight}>⭐</div>
                 <div className={styles.banner1Content}>
-                  <div className={styles.banner1Text}>
-                    <div className={styles.banner1Title}>🌈 "Nuevo complemento del Kit Niños de Luz"</div>
-                    <div className={styles.banner1Subtitle}>🎨 Libro para Colorear con Versículos Bíblicos</div>
-                    <div className={styles.banner1Description}>
-                      💛 20 páginas llenas de fe, creatividad y amor familiar.<br/>
-                      Cada dibujo viene acompañado de una enseñanza de la Palabra.<br/>
-                      👉 Ideal para momentos de calma, reflexión y diversión en casa.
+                  <div className={styles.banner1Left}>
+                    <div className={styles.banner1Header}>
+                      <div className={styles.banner1Title}>Nuevo complemento del KIT NIÑOS DE LUZ</div>
+                      <div className={styles.banner1ProductName}>
+                        <span>Colorea con Fe</span>
+                        <span className={styles.doveIcon}>🕊️</span>
+                        <span>+</span>
+                        <span>Granja Didáctica</span>
+                        <span className={styles.lambIcon}>🐑</span>
+                      </div>
+                      <div className={styles.banner1TopRight}>
+                        Creatividad, aprendizaje y valores cristianos para tus hijos.
+                      </div>
                     </div>
-                    <div className={styles.banner1Features}>
-                      🔹 Disponible ahora – agrégalo a tu colección con un solo clic.
+                    
+                    <div className={styles.banner1Includes}>
+                      <div className={styles.includesTitle}>Incluye:</div>
+                      <ul className={styles.includesList}>
+                        <li>• 20 dibujos con versículos</li>
+                        <li>• Mini Granja Didáctica: aprende sobre los animales, juega y coloréalos</li>
+                        <li>• Material imprimible para niños de 3 a 10 años.</li>
+                      </ul>
                     </div>
-                    <div className={styles.banner1Verse}>
-                      📖 "Educa al niño en su camino, y aun cuando fuere viejo no se apartará de él." – Proverbios 22:6
+
+                    <div className={styles.banner1FarmAnimals}>
+                      <div className={styles.grassMound}>
+                        <div className={styles.rooster}>🐓</div>
+                        <div className={styles.pig}>🐷</div>
+                      </div>
                     </div>
+
                     <button 
                       className={styles.banner1CTA}
                       onClick={() => window.open('https://pay.kiwify.com/4V0ZI49', '_blank')}
                     >
-                      ¡Quiero mi libro para colorear!
+                      ¡LO QUIERO AHORA!
                     </button>
+
+                    <div className={styles.banner1BottomText}>
+                      Disponible ahora - agrégalo a tu colección con un solo clic
+                    </div>
                   </div>
-                  <div className={styles.banner1Visual}>
-                    <div className={styles.childrenImage}></div>
-                    <div className={styles.bookCover}></div>
-                    <div className={styles.bookOpen}></div>
+
+                  <div className={styles.banner1Right}>
+                    <div className={styles.productBoxContainer}>
+                      <div className={styles.productBox}>
+                        <div className={styles.productBoxRibbon}></div>
+                        <div className={styles.productBoxTitle}>COLOREA CON FE + GRANJA DIDÁCTICA</div>
+                        <div className={styles.productBoxCards}>
+                          <div className={styles.productCard}>👦</div>
+                          <div className={styles.productCard}>📖</div>
+                          <div className={styles.productCard}>🏠</div>
+                        </div>
+                        <div className={styles.productBoxStar}>⭐</div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
