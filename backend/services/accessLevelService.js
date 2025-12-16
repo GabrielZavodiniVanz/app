@@ -5,16 +5,16 @@
 // IDs dos produtos da Kiwify conforme especificação
 const PRODUCT_IDS = {
   PRINCIPAL: '89aece00-a51b-11f0-ab58-2f2096ded2ba',
-  PRODUTO_1: '2343e890-a538-11f0-98fb-c9aca982ba72', //PACK EXTRA 1 - Tarjetas y Stickers de Rutinas con FE
+  PRODUTO_1: '2343e890-a538-11f0-98fb-c9aca982ba72', //PACK 1 - Juego de las Elecciones y Stickers
   PRODUTO_2: '44c34a50-a53e-11f0-a7e3-c3b4bfe5981f', //PACK EXTRA 2  - Versículos con Amor y Color
-  PRODUTO_3: 'd614e9f0-a845-11f0-a8cd-a7de6dd83d71'  //Mi Libro para Colorear con Fe -- PRODUTO 3 - Upsell
+  PRODUTO_3: 'd614e9f0-a845-11f0-a8cd-a7de6dd83d71'  //Colorea con Fe + Granja Didáctica -- PRODUTO 3 - Upsell
 };
 
 // Níveis de acesso baseados nos produtos
 const ACCESS_LEVELS = {
   NENHUM: 'nenhum',
   PRODUTO_PRINCIPAL: 'PRODUTO_PRINCIPAL',
-  PRODUTO_1: 'PRODUTO_1', 
+  PRODUTO_1: 'PRODUTO_1',
   PRODUTO_2: 'PRODUTO_2',
   PRODUTO_3: 'PRODUTO_3'
 };
@@ -29,9 +29,9 @@ const PRODUCT_ACCESS_MAPPING = {
 // Nomes amigáveis dos produtos
 const PRODUCT_NAMES = {
   PRODUTO_PRINCIPAL: 'Kit Niños de Luz (Principal)',
-  PRODUTO_1: 'Tarjetas y Stickers de Rutinas con FE (Pack 1)',
+  PRODUTO_1: 'PACK 1 - Juego de las Elecciones y Stickers',
   PRODUTO_2: 'Versículos con Amor y Color (Pack 2)',
-  PRODUTO_3: 'Mi Libro para Colorear con Fe'
+  PRODUTO_3: 'Colorea con Fe + Granja Didáctica'
 };
 
 // Categorias de conteúdo (nova estrutura)
@@ -49,7 +49,7 @@ const CATEGORY_NAMES = {
   PRINCIPAL_VERTICAL: 'KIT NIÑOS DE LUZ - RUTINAS CON AMOR Y FE (Horizontal)',
   PRODUTO_1: 'Conteúdo do Produto 1 (Adicional)',
   PRODUTO_2: 'Conteúdo do Produto 2 (Adicional)',
-  PRODUTO_3: 'Conteúdo do Mi Libro para Colorear con Fe'
+  PRODUTO_3: 'Conteúdo do Colorea con Fe + Granja Didáctica'
 };
 
 /**
@@ -65,7 +65,7 @@ function determineAccessLevels(products) {
 
   // 1. Extrai a lista de IDs dos produtos comprados no webhook
   const idsDosProdutosComprados = products.map(product => product.product_id || product.id).filter(Boolean);
-  
+
   console.log('📦 IDs dos produtos comprados:', idsDosProdutosComprados);
 
   // 2. Mapeia os IDs para níveis de acesso
@@ -96,7 +96,7 @@ function determineAccessLevel(products) {
 
   // 1. Extrai a lista de IDs dos produtos comprados no webhook
   const idsDosProdutosComprados = products.map(product => product.product_id || product.id).filter(Boolean);
-  
+
   console.log('📦 IDs dos produtos comprados:', idsDosProdutosComprados);
 
   // 2. Mapeia os IDs para accessLevels tradicionais
@@ -111,10 +111,10 @@ function determineAccessLevel(products) {
   }
 
   // 4. Verifica se tem todos os produtos (ACESSO_COMPLETO)
-  const hasAllProducts = accessLevels.includes('BASICO') && 
-                        accessLevels.includes('INTERMEDIARIO') && 
-                        accessLevels.includes('AVANCADO');
-  
+  const hasAllProducts = accessLevels.includes('BASICO') &&
+    accessLevels.includes('INTERMEDIARIO') &&
+    accessLevels.includes('AVANCADO');
+
   if (hasAllProducts) {
     console.log('🏆 Usuário tem todos os produtos - ACESSO_COMPLETO');
     return 'ACESSO_COMPLETO';
@@ -133,7 +133,7 @@ function determineAccessLevel(products) {
 
   console.log(`🎯 AccessLevels encontrados: ${accessLevels.join(', ')}`);
   console.log(`🏆 AccessLevel mais alto determinado: ${highestLevel}`);
-  
+
   return highestLevel;
 }
 
@@ -177,7 +177,7 @@ function buildAccessFilter(userAccessLevels) {
       accessLevel: ['nenhum']
     };
   }
-  
+
   // Usuário pode ver conteúdo dos produtos que comprou
   return {
     accessLevel: userAccessLevels
@@ -194,7 +194,7 @@ function buildAccessFilter(userAccessLevels) {
 function getVisibleCategories(userAccessLevel, comprouProduto3 = false) {
   let allowedCategories = [];
   const principalCategories = ['PRINCIPAL', 'PRINCIPAL_VERTICAL'];
-  
+
   // LÓGICA CORRETA: Baseada nos accessLevels tradicionais
   switch (userAccessLevel) {
     case 'BASICO':
@@ -221,12 +221,12 @@ function getVisibleCategories(userAccessLevel, comprouProduto3 = false) {
       // Usuário sem acesso ou nível inválido não vê nada
       allowedCategories = [];
   }
-  
+
   // Adiciona PRODUTO_3 se o usuário comprou o upsell
   if (comprouProduto3 && !allowedCategories.includes('PRODUTO_3')) {
     allowedCategories.push('PRODUTO_3');
   }
-  
+
   console.log(`👤 Usuário com accessLevel '${userAccessLevel}' e comprouProduto3: ${comprouProduto3} pode ver categorias:`, allowedCategories);
   return allowedCategories;
 }
@@ -239,14 +239,14 @@ function getVisibleCategories(userAccessLevel, comprouProduto3 = false) {
  */
 function buildCategoryFilter(userAccessLevel, comprouProduto3 = false) {
   const allowedCategories = getVisibleCategories(userAccessLevel, comprouProduto3);
-  
+
   if (allowedCategories.length === 0) {
     // Usuário sem acesso - retorna filtro que não encontra nada
     return {
       categoria_produto: ['INVALID_CATEGORY'] // Categoria que não existe
     };
   }
-  
+
   return {
     categoria_produto: allowedCategories
   };
@@ -270,12 +270,12 @@ module.exports = {
   getAllAccessLevels,
   getProductHierarchy,
   buildAccessFilter,
-  
+
   // Novas funções para categorização
   getVisibleCategories,
   buildCategoryFilter,
   getAllContentCategories,
-  
+
   // Constantes
   PRODUCT_IDS,
   ACCESS_LEVELS,

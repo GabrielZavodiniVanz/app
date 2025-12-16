@@ -12,9 +12,9 @@ export const useGroupedContent = (videos = [], documents = []) => {
     const categoryNames = {
       PRINCIPAL: 'KIT NIÑOS DE LUZ - RUTINAS CON AMOR Y FE',
       PRINCIPAL_VERTICAL: 'KIT NIÑOS DE LUZ - RUTINAS CON AMOR Y FE (Horizontal)',
-      PRODUTO_1: 'PACK EXTRA 1 - Tarjetas y Stickers de Rutinas con FE',
+      PRODUTO_1: 'PACK 1 - Juego de las Elecciones y Stickers',
       PRODUTO_2: 'PACK EXTRA 2  - Versículos con Amor y Color',
-      PRODUTO_3: 'Mi Libro para Colorear con Fe'
+      PRODUTO_3: 'Colorea con Fe + Granja Didáctica'
     };
 
     // Função para agrupar por categoria
@@ -41,7 +41,7 @@ export const useGroupedContent = (videos = [], documents = []) => {
 
     // Criar estrutura final agrupada
     const groupedContent = {};
-    
+
     allCategories.forEach(category => {
       groupedContent[category] = {
         name: categoryNames[category] || category,
@@ -56,16 +56,16 @@ export const useGroupedContent = (videos = [], documents = []) => {
     const sortedCategories = Object.keys(groupedContent).sort((a, b) => {
       const indexA = categoryOrder.indexOf(a);
       const indexB = categoryOrder.indexOf(b);
-      
+
       // Se ambos estão na ordem definida, usar a ordem
       if (indexA !== -1 && indexB !== -1) {
         return indexA - indexB;
       }
-      
+
       // Se apenas um está na ordem, priorizar ele
       if (indexA !== -1) return -1;
       if (indexB !== -1) return 1;
-      
+
       // Se nenhum está na ordem, usar ordem alfabética
       return a.localeCompare(b);
     });
