@@ -47,8 +47,8 @@ const { router: fallbackRoutes } = require('./routes/notifications-fallback');
 
 // Rota de health check
 app.get('/health', (req, res) => {
-  res.status(200).json({ 
-    status: 'OK', 
+  res.status(200).json({
+    status: 'OK',
     timestamp: new Date().toISOString(),
     uptime: process.uptime()
   });
@@ -62,19 +62,19 @@ app.use('/api/notifications', fallbackRoutes);
 
 // Middleware de tratamento de rotas não encontradas
 app.use((req, res, next) => {
-  res.status(404).json({ 
+  res.status(404).json({
     message: 'Rota não encontrada',
-    path: req.originalUrl 
+    path: req.originalUrl
   });
 });
 
 // Middleware global de tratamento de erros
 app.use((error, req, res, next) => {
   console.error(`[ERROR] ${new Date().toISOString()}:`, error);
-  
+
   // Não expor detalhes do erro em produção
   const isDevelopment = process.env.NODE_ENV !== 'production';
-  
+
   res.status(error.status || 500).json({
     message: error.message || 'Erro interno do servidor',
     ...(isDevelopment && { stack: error.stack })
@@ -86,7 +86,7 @@ app.use((error, req, res, next) => {
 const startServer = async () => {
   try {
     console.log('🚀 Iniciando servidor...');
-    
+
     // Testar conexão com o banco de dados
     await sequelize.authenticate();
     console.log('✅ Conexão com o banco de dados estabelecida com sucesso.');
@@ -134,26 +134,26 @@ const startServer = async () => {
 function startKeepAlive() {
   const https = require('https');
   const BACKEND_URL = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
-  
+
   function pingSelf() {
     console.log(`[${new Date().toISOString()}] Keep-alive ping...`);
-    
+
     const url = BACKEND_URL.startsWith('https') ? `${BACKEND_URL}/health` : `http://localhost:${PORT}/health`;
     const client = BACKEND_URL.startsWith('https') ? https : require('http');
-    
+
     client.get(url, (res) => {
       console.log(`✅ Keep-alive OK: ${res.statusCode}`);
     }).on('error', (err) => {
       console.log(`❌ Keep-alive erro: ${err.message}`);
     });
   }
-  
+
   // Ping a cada 14 minutos (antes dos 15 min de timeout do Render)
   setInterval(pingSelf, 14 * 60 * 1000);
-  
+
   // Ping inicial após 1 minuto
   setTimeout(pingSelf, 60000);
-  
+
   console.log('🔄 Keep-alive iniciado - pingando a cada 14 minutos');
 }
 
