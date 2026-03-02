@@ -43,8 +43,9 @@ function AccessLevelSelector({ selectedLevel = 'PRINCIPAL', onChange, disabled =
       console.log('🔄 Usando fallback com novas categorias');
       setAccessLevels(ensureVerticalOption([
         { value: 'PRINCIPAL', label: 'Conteúdo do Produto Principal' },
-        { value: 'PRODUTO_1', label: 'Conteúdo do Produto 1 (Adicional)' },
-        { value: 'PRODUTO_2', label: 'Conteúdo do Produto 2 (Adicional)' }
+        { value: 'PRODUTO_1', label: 'Conteúdo do PACK EXPANSIÓN - MOTIVACIÓN Y JUEGO' },
+        { value: 'PRODUTO_2', label: 'Conteúdo do PACK EXPANSIÓN 2 - VALORES Y FE' },
+        { value: 'PRODUTO_3', label: 'Conteúdo do KIT ESENCIAL - RUTINAS SIN GRITOS' }
       ]));
     } finally {
       setLoading(false);
@@ -73,7 +74,7 @@ function AccessLevelSelector({ selectedLevel = 'PRINCIPAL', onChange, disabled =
           Selecione a qual produto este conteúdo pertence
         </span>
       </label>
-      
+
       <div className={styles.selector}>
         <div className={styles.levelsContainer}>
           {accessLevels.map(level => (

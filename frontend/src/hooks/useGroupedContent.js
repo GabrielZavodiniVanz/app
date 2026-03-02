@@ -12,9 +12,9 @@ export const useGroupedContent = (videos = [], documents = []) => {
     const categoryNames = {
       PRINCIPAL: 'KIT NIÑOS DE LUZ - RUTINAS CON AMOR Y FE',
       PRINCIPAL_VERTICAL: 'KIT NIÑOS DE LUZ - RUTINAS CON AMOR Y FE (Horizontal)',
-      PRODUTO_1: 'PACK 1 - Juego de las Elecciones y Stickers',
-      PRODUTO_2: 'PACK EXTRA 2  - Versículos con Amor y Color',
-      PRODUTO_3: 'Colorea con Fe + Granja Didáctica'
+      PRODUTO_1: 'PACK EXPANSIÓN - MOTIVACIÓN Y JUEGO',
+      PRODUTO_2: 'PACK EXPANSIÓN 2 - VALORES Y FE',
+      PRODUTO_3: 'KIT ESENCIAL - RUTINAS SIN GRITOS'
     };
 
     // Função para agrupar por categoria
