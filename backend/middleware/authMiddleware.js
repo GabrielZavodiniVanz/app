@@ -35,9 +35,9 @@ const authMiddleware = async (req, res, next) => {
       });
     }
 
-    // 6. Buscar dados atualizados do usuário no banco (incluindo comprou_produto_3)
+    // 6. Buscar dados atualizados do usuário no banco (incluindo todas as flags de produtos)
     const user = await User.findByPk(decoded.id, {
-      attributes: ['id', 'name', 'email', 'role', 'accessLevel', 'comprou_produto_3']
+      attributes: ['id', 'name', 'email', 'role', 'accessLevel', 'comprou_produto_3', 'tem_kit_principal', 'tem_pack_1', 'tem_pack_2']
     });
 
     if (!user) {
@@ -54,7 +54,10 @@ const authMiddleware = async (req, res, next) => {
       email: user.email,
       role: user.role,
       accessLevel: user.accessLevel,
-      comprou_produto_3: user.comprou_produto_3
+      comprou_produto_3: user.comprou_produto_3,
+      tem_kit_principal: user.tem_kit_principal,
+      tem_pack_1: user.tem_pack_1,
+      tem_pack_2: user.tem_pack_2
     };
 
     // 8. Deixa a requisição continuar para a próxima etapa

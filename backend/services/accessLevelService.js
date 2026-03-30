@@ -173,9 +173,32 @@ const PRODUCT_ACCESS_MAPPING = {
 };
 
 function determineAccessLevel(products) {
-  // Mantido apenas para não quebrar chamadas antigas se existirem
-  // A lógica real agora deve usar determineUserProducts
-  return "BASICO";
+  // Determina o accessLevel legacy baseado nos produtos comprados
+  // IMPORTANTE: Só retorna 'BASICO' se o Kit Principal foi comprado
+  // Para produtos que não são o Kit Principal, retorna 'nenhum'
+  // pois o acesso é controlado pelas flags (tem_pack_1, tem_pack_2, etc.)
+  if (!products || !Array.isArray(products)) return 'nenhum';
+
+  const productIds = products.map(p => p.product_id || p.id).filter(Boolean);
+
+  const hasKitPrincipal = productIds.includes(PRODUCT_IDS.PRINCIPAL);
+  const hasPack1 = productIds.includes(PRODUCT_IDS.PRODUTO_1);
+  const hasPack2 = productIds.includes(PRODUCT_IDS.PRODUTO_2);
+
+  // Se não comprou Kit Principal, não deve ter access level legacy
+  if (!hasKitPrincipal && !hasPack1 && !hasPack2) {
+    return 'nenhum';
+  }
+
+  // Se comprou Kit Principal + ambos packs
+  if (hasKitPrincipal && hasPack1 && hasPack2) return 'ACESSO_COMPLETO';
+  // Kit Principal + Pack 2 ou Pack 1 + Pack 2
+  if ((hasKitPrincipal && hasPack2) || (hasPack1 && hasPack2)) return 'ACESSO_COMPLETO';
+  if ((hasKitPrincipal && hasPack1) || (hasPack1)) return 'INTERMEDIARIO';
+  if (hasPack2) return 'AVANCADO';
+  if (hasKitPrincipal) return 'BASICO';
+
+  return 'nenhum';
 }
 
 function determineAccessLevels(products) {

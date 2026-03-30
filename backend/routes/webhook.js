@@ -107,7 +107,12 @@ router.post('/kiwify',
         // Se comprou produto 3 (upsell) nesta transação, enviar email específico
         if (currentPurchaseFlags.comprou_produto_3 && !existingUser.comprou_produto_3) {
           try {
-            await emailService.sendUpsellConfirmationEmail(customer.email, customer.full_name);
+            await emailService.sendUpsellConfirmationEmail({
+              name: customer.full_name,
+              email: customer.email,
+              loginUrl: process.env.FRONTEND_URL || 'https://www.ninosdeluz.site/login',
+              productName: 'Kit Esencial - Rutinas sin Gritos'
+            });
             console.log(`📧 Email de confirmação do upsell enviado para: ${customer.email}`);
           } catch (emailError) {
             console.error('❌ Erro ao enviar email de upsell:', emailError);
@@ -183,8 +188,12 @@ router.post('/kiwify',
 
       // Enviar e-mail de upsell se aplicável
       if (currentPurchaseFlags.comprou_produto_3) {
-        emailService.sendUpsellConfirmationEmail(customer.email, customer.full_name)
-          .catch(err => console.error('❌ Erro email upsell:', err));
+        emailService.sendUpsellConfirmationEmail({
+          name: customer.full_name,
+          email: customer.email,
+          loginUrl: loginUrl,
+          productName: 'Kit Esencial - Rutinas sin Gritos'
+        }).catch(err => console.error('❌ Erro email upsell:', err));
       }
 
       res.status(200).json({
