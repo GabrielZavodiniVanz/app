@@ -128,21 +128,15 @@ class EmailService {
     // Usando apenas o módulo HTTPS nativo do Node.js (sem dependências externas)
 
     const requestBody = {
-      from: 'Niños de Luz <contacto@ninosdeluz.site>', // Email com nome personalizado
+      from: 'Niños de Luz <contacto@ninosdeluz.site>',
       to: [mailOptions.to],
       subject: mailOptions.subject,
       html: mailOptions.html,
       text: mailOptions.text || '¡Hola! Tu acceso a Niños de Luz está listo. Visita nuestro sitio web para más información.',
-      reply_to: 'contactoninosdeluz@gmail.com', // Seu email pessoal para respostas
+      reply_to: 'contactoninosdeluz@gmail.com',
       headers: {
-        'X-Mailer': 'Niños de Luz Web App',
-        'X-Priority': '3',
-        'Importance': 'normal',
         'List-Unsubscribe': '<https://ninosdeluz.site/unsubscribe?email=' + mailOptions.to + '>',
-        'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
-        'X-Entity-Ref-ID': 'ninosdeluz-' + Date.now(),
-        'Return-Path': 'contato@ninosdeluz.site',
-        'Message-ID': '<' + Date.now() + '.' + Math.random().toString(36).substr(2, 9) + '@ninosdeluz.site>'
+        'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click'
       }
     };
 
