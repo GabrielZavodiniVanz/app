@@ -7,22 +7,20 @@ const validateHotmartWebhook = (req, res, next) => {
     const hottoken = req.headers['h-hotmart-hottoken'];
     const expectedToken = process.env.HOTMART_WEBHOOK_TOKEN;
 
-    // Se não há token configurado no .env, permitir em modo de desenvolvimento/teste
+    // Se não há token configurado no .env, permitir (modo sem token)
     if (!expectedToken) {
-      console.warn('⚠️ HOTMART_WEBHOOK_TOKEN não configurado no .env - permitindo em modo de teste');
+      console.warn('⚠️ HOTMART_WEBHOOK_TOKEN não configurado no .env - permitindo requisição');
       return next();
     }
 
-    // Se não há token no header, bloquear
+    // Se o token está configurado mas não foi enviado, apenas avisar e continuar
+    // (O painel atual da Hotmart não expõe o campo de Hottoken na interface)
     if (!hottoken) {
-      console.error('❌ Webhook Hotmart sem token de autenticação');
-      return res.status(401).json({ 
-        error: 'Unauthorized',
-        message: 'Hottoken missing' 
-      });
+      console.warn('⚠️ Webhook Hotmart sem token de autenticação - aceitando sem validação de token');
+      return next();
     }
 
-    // Validar token
+    // Se o token foi enviado, validar
     if (hottoken !== expectedToken) {
       console.error('❌ Token do webhook Hotmart inválido');
       return res.status(401).json({ 
@@ -31,7 +29,7 @@ const validateHotmartWebhook = (req, res, next) => {
       });
     }
 
-    console.log('✅ Webhook da Hotmart validado com sucesso');
+    console.log('✅ Webhook da Hotmart validado com sucesso (token OK)');
     next();
 
   } catch (error) {
