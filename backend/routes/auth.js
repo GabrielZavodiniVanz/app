@@ -6,6 +6,8 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { Op } = require('sequelize');
 const emailService = require('../services/emailService');
+const authMiddleware = require('../middleware/authMiddleware');
+const adminMiddleware = require('../middleware/adminMiddleware');
 const { validateUserRegistration, validateUserLogin } = require('../middleware/validationMiddleware');
 
 // --- ROTA DE REGISTRO (POST /api/auth/register) ---
@@ -73,7 +75,8 @@ router.post('/login', validateUserLogin, async (req, res) => {
       name: user.name, 
       email: user.email,
       role: user.role,
-      accessLevel: user.accessLevel
+      accessLevel: user.accessLevel,
+      firstLogin: user.firstLogin
     };
     
     const token = jwt.sign(
@@ -268,7 +271,7 @@ router.post('/reset-password', async (req, res) => {
  * Endpoint para teste específico do Resend
  * POST /api/auth/test-resend
  */
-router.post('/test-resend', async (req, res) => {
+router.post('/test-resend', [authMiddleware, adminMiddleware], async (req, res) => {
   try {
     const { email } = req.body;
 
@@ -403,7 +406,7 @@ router.post('/test-resend', async (req, res) => {
  * Endpoint para mudança de senha
  * PUT /api/auth/change-password
  */
-router.put('/change-password', async (req, res) => {
+router.put('/change-password', authMiddleware, async (req, res) => {
   try {
     const { email, currentPassword, newPassword, confirmPassword } = req.body;
 
