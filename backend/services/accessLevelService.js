@@ -13,9 +13,9 @@ const PRODUCT_IDS = {
 // IDs dos produtos da Hotmart (Placeholders - Substituir pelos IDs reais do painel Hotmart)
 const HOTMART_PRODUCT_IDS = {
   // PRINCIPAL: "2943269", // FALTA ESTE - Substituir pelo real do Kit Principal
-  PRODUTO_1: "7505378",
-  PRODUTO_2: "7518117",
-  PRODUTO_3: "7515543",
+  PRODUTO_1: "7505378", //PACK EXPANSIÓN - MOTIVACIÓN Y JUEGO
+  PRODUTO_2: "7518117", //PACK EXPANSIÓN 2 - VALORES Y FE
+  PRODUTO_3: "7515543", //KIT ESENCIAL – RUTINAS SIN GRITOS
 };
 
 // Nomes amigáveis dos produtos
