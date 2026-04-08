@@ -10,6 +10,14 @@ const PRODUCT_IDS = {
   PRODUTO_3: "d614e9f0-a845-11f0-a8cd-a7de6dd83d71", // KIT ESENCIAL - RUTINAS SIN GRITOS (FRONT)
 };
 
+// IDs dos produtos da Hotmart (Placeholders - Substituir pelos IDs reais do painel Hotmart)
+const HOTMART_PRODUCT_IDS = {
+  // PRINCIPAL: "2943269", // FALTA ESTE - Substituir pelo real do Kit Principal
+  PRODUTO_1: "7505378",
+  PRODUTO_2: "7518117",
+  PRODUTO_3: "7515543",
+};
+
 // Nomes amigáveis dos produtos
 const PRODUCT_NAMES = {
   PRODUTO_PRINCIPAL: "Kit Niños de Luz (Principal)",
@@ -38,11 +46,11 @@ const CATEGORY_NAMES = {
 
 /**
  * Determina quais produtos o usuário possui com base na lista de compras
- * @param {Array} products - Array de produtos da compra
+ * @param {Array|string|number} products - Array de produtos (Kiwify) ou ID do produto (Hotmart)
  * @returns {Object} - Objeto com as flags de produtos
  */
 function determineUserProducts(products) {
-  if (!products || !Array.isArray(products)) {
+  if (!products) {
     return {
       tem_kit_principal: false,
       tem_pack_1: false,
@@ -51,13 +59,21 @@ function determineUserProducts(products) {
     };
   }
 
-  const productIds = products.map((p) => p.product_id || p.id).filter(Boolean);
+  let productIds = [];
+
+  if (Array.isArray(products)) {
+    // Formato Kiwify: Array de objetos
+    productIds = products.map((p) => p.product_id || p.id).filter(Boolean);
+  } else {
+    // Formato Hotmart: ID único (string ou number)
+    productIds = [products.toString()];
+  }
 
   return {
-    tem_kit_principal: productIds.includes(PRODUCT_IDS.PRINCIPAL),
-    tem_pack_1: productIds.includes(PRODUCT_IDS.PRODUTO_1),
-    tem_pack_2: productIds.includes(PRODUCT_IDS.PRODUTO_2),
-    comprou_produto_3: productIds.includes(PRODUCT_IDS.PRODUTO_3),
+    tem_kit_principal: productIds.includes(PRODUCT_IDS.PRINCIPAL) || productIds.includes(HOTMART_PRODUCT_IDS.PRINCIPAL),
+    tem_pack_1: productIds.includes(PRODUCT_IDS.PRODUTO_1) || productIds.includes(HOTMART_PRODUCT_IDS.PRODUTO_1),
+    tem_pack_2: productIds.includes(PRODUCT_IDS.PRODUTO_2) || productIds.includes(HOTMART_PRODUCT_IDS.PRODUTO_2),
+    comprou_produto_3: productIds.includes(PRODUCT_IDS.PRODUTO_3) || productIds.includes(HOTMART_PRODUCT_IDS.PRODUTO_3),
   };
 }
 
