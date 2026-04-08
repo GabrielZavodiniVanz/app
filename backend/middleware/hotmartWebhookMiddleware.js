@@ -64,8 +64,16 @@ const validateHotmartWebhookData = (req, res, next) => {
   const body = req.body;
 
   // Verificar se é um evento de pagamento aprovado (formatos possíveis)
-  const allowedEvents = ['PURCHASE_APPROVED', 'purchase_approved', 'APPROVED', 'approved'];
-  const currentEvent = body.event || body.event_type;
+  const allowedEvents = [
+    'PURCHASE_APPROVED', 
+    'purchase_approved', 
+    'APPROVED', 
+    'approved',
+    'compra_aprovada',
+    'Compra aprovada',
+    'COMPRA_APROVADA'
+  ];
+  const currentEvent = body.event || body.event_type || (body.data && body.data.status);
 
   if (!allowedEvents.includes(currentEvent)) {
     console.log(`ℹ️ Evento Hotmart ignorado: ${currentEvent || 'unknown'}`);
@@ -80,7 +88,12 @@ const validateHotmartWebhookData = (req, res, next) => {
   const buyer = data.buyer;
   const product = data.product;
 
-  if (!buyer || !buyer.email || !buyer.name || !product || !product.id) {
+  // IMPORTANTE: Hotmart envia id: 0 em eventos de teste. 
+  // Precisamos verificar se ele é undefined/null em vez de apenas !product.id
+  const hasProductId = product && (product.id !== undefined && product.id !== null);
+  const hasBuyerInfo = buyer && buyer.email && buyer.name;
+
+  if (!hasBuyerInfo || !hasProductId) {
     console.error('❌ Dados essenciais ausentes no webhook Hotmart (buyer ou product)');
     return res.status(400).json({ 
       error: 'Bad Request',
