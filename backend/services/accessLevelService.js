@@ -12,10 +12,10 @@ const PRODUCT_IDS = {
 
 // IDs dos produtos da Hotmart (Placeholders - Substituir pelos IDs reais do painel Hotmart)
 const HOTMART_PRODUCT_IDS = {
-  // PRINCIPAL: "2943269", // FALTA ESTE - Substituir pelo real do Kit Principal
-  PRODUTO_1: "7505378", //PACK EXPANSIÓN - MOTIVACIÓN Y JUEGO
-  PRODUTO_2: "7518117", //PACK EXPANSIÓN 2 - VALORES Y FE
-  PRODUTO_3: "7515543", //KIT ESENCIAL – RUTINAS SIN GRITOS
+  PRINCIPAL: "2943269", // ⚠️IMPORTANTE: Substituir pelo ID real do Kit Principal
+  PRODUTO_1: "7505378", // PACK EXPANSIÓN - MOTIVACIÓN Y JUEGO
+  PRODUTO_2: "7518117", // PACK EXPANSIÓN 2 - VALORES Y FE
+  PRODUTO_3: "7515543", // KIT ESENCIAL – RUTINAS SIN GRITOS
 };
 
 // Nomes amigáveis dos produtos
@@ -191,15 +191,17 @@ const PRODUCT_ACCESS_MAPPING = {
 function determineAccessLevel(products) {
   // Determina o accessLevel legacy baseado nos produtos comprados
   // IMPORTANTE: Só retorna 'BASICO' se o Kit Principal foi comprado
-  // Para produtos que não são o Kit Principal, retorna 'nenhum'
-  // pois o acesso é controlado pelas flags (tem_pack_1, tem_pack_2, etc.)
   if (!products || !Array.isArray(products)) return 'nenhum';
 
-  const productIds = products.map(p => p.product_id || p.id).filter(Boolean);
+  // Suporte tanto para array de objetos (Kiwify) quanto array de strings/números (Hotmart formatado)
+  const productIds = products.map(p => {
+    if (typeof p === 'object') return p.product_id || p.id;
+    return p.toString();
+  }).filter(Boolean);
 
-  const hasKitPrincipal = productIds.includes(PRODUCT_IDS.PRINCIPAL);
-  const hasPack1 = productIds.includes(PRODUCT_IDS.PRODUTO_1);
-  const hasPack2 = productIds.includes(PRODUCT_IDS.PRODUTO_2);
+  const hasKitPrincipal = productIds.includes(PRODUCT_IDS.PRINCIPAL) || productIds.includes(HOTMART_PRODUCT_IDS.PRINCIPAL);
+  const hasPack1 = productIds.includes(PRODUCT_IDS.PRODUTO_1) || productIds.includes(HOTMART_PRODUCT_IDS.PRODUTO_1);
+  const hasPack2 = productIds.includes(PRODUCT_IDS.PRODUTO_2) || productIds.includes(HOTMART_PRODUCT_IDS.PRODUTO_2);
 
   // Se não comprou Kit Principal, não deve ter access level legacy
   if (!hasKitPrincipal && !hasPack1 && !hasPack2) {

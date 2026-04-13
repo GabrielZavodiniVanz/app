@@ -227,21 +227,34 @@ router.post('/hotmart',
   async (req, res) => {
     try {
       const body = req.body;
-      // Hotmart Webhook V2 costuma vir com os dados em body.data ou direto no body dependendo da configuração
       const data = body.data || body;
+      
+      // Extrair status da compra
+      const status = (data.purchase && data.purchase.status) || data.status;
+      console.log(`📡 Webhook Hotmart recebido com status: ${status}`);
+
+      // 👉 Regra: Só liberar acesso se status for 'approved' (case-insensitive)
+      if (!status || status.toString().toLowerCase() !== 'approved') {
+        console.log(`⏳ Pagamento Hotmart com status "${status}". Acesso NÃO liberado ainda.`);
+        return res.status(200).json({
+          success: true,
+          message: `Webhook received. Status is ${status}. Access will be released when status is approved.`
+        });
+      }
+
       const buyer = data.buyer;
       const product = data.product;
 
       const result = await handlePurchase({
         email: buyer.email,
         name: buyer.name,
-        products: product.id, // Hotmart envia um ID de produto por webhook de compra
+        products: product.id,
         source: 'Hotmart'
       });
 
       res.status(200).json({
         success: true,
-        message: result.status === 'created' ? 'User created successfully' : 'User access updated',
+        message: result.status === 'created' ? 'User created and access released' : 'User access updated',
         ...result
       });
 
