@@ -190,7 +190,7 @@ const PRODUCT_ACCESS_MAPPING = {
 
 function determineAccessLevel(products) {
   // Determina o accessLevel legacy baseado nos produtos comprados
-  // IMPORTANTE: Só retorna 'BASICO' se o Kit Principal foi comprado
+  // IMPORTANTE: Só retorna 'BASICO' ou superior se o Kit Principal foi comprado
   if (!products || !Array.isArray(products)) return 'nenhum';
 
   // Suporte tanto para array de objetos (Kiwify) quanto array de strings/números (Hotmart formatado)
@@ -203,20 +203,19 @@ function determineAccessLevel(products) {
   const hasPack1 = productIds.includes(PRODUCT_IDS.PRODUTO_1) || productIds.includes(HOTMART_PRODUCT_IDS.PRODUTO_1);
   const hasPack2 = productIds.includes(PRODUCT_IDS.PRODUTO_2) || productIds.includes(HOTMART_PRODUCT_IDS.PRODUTO_2);
 
-  // Se não comprou Kit Principal, não deve ter access level legacy
-  if (!hasKitPrincipal && !hasPack1 && !hasPack2) {
+  // Se não comprou Kit Principal, não deve ter access level legacy (para evitar concessão indevida de conteúdo)
+  if (!hasKitPrincipal) {
     return 'nenhum';
   }
 
   // Se comprou Kit Principal + ambos packs
-  if (hasKitPrincipal && hasPack1 && hasPack2) return 'ACESSO_COMPLETO';
-  // Kit Principal + Pack 2 ou Pack 1 + Pack 2
-  if ((hasKitPrincipal && hasPack2) || (hasPack1 && hasPack2)) return 'ACESSO_COMPLETO';
-  if ((hasKitPrincipal && hasPack1) || (hasPack1)) return 'INTERMEDIARIO';
-  if (hasPack2) return 'AVANCADO';
-  if (hasKitPrincipal) return 'BASICO';
-
-  return 'nenhum';
+  if (hasPack1 && hasPack2) return 'ACESSO_COMPLETO';
+  // Kit Principal + Pack 2
+  if (hasPack2) return 'ACESSO_COMPLETO';
+  // Kit Principal + Pack 1
+  if (hasPack1) return 'INTERMEDIARIO';
+  
+  return 'BASICO';
 }
 
 function determineAccessLevels(products) {
