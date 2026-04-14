@@ -92,18 +92,26 @@ async function handlePurchase({ email, name, products, source }) {
     );
     console.log(`🔄 Usuário atualizado com flags:`, updatedFlags);
 
-    // Se comprou produto 3 (upsell) nesta transação, e não tinha antes, enviar email específico
-    if (currentPurchaseFlags.comprou_produto_3 && !existingUser.comprou_produto_3) {
-      try {
-        await emailService.sendUpsellConfirmationEmail({
-          name: name,
-          email: email,
-          loginUrl: process.env.FRONTEND_URL || 'https://www.ninosdeluz.site/login',
-          productName: 'Kit Esencial - Rutinas sin Gritos'
-        });
-        console.log(`📧 Email de confirmação do upsell enviado para: ${email}`);
-      } catch (emailError) {
-        console.error('❌ Erro ao enviar email de upsell:', emailError);
+    // Enviar emails específicos se adicionou algum destes produtos à conta existente
+    const upgrades = [
+      { flag: 'tem_pack_1', name: 'Pack Expansión - Motivación y Juego' },
+      { flag: 'tem_pack_2', name: 'Pack Expansión 2 - Valores y Fe' },
+      { flag: 'comprou_produto_3', name: 'Kit Esencial - Rutinas sin Gritos' }
+    ];
+
+    for (const upgrade of upgrades) {
+      if (currentPurchaseFlags[upgrade.flag] && !existingUser[upgrade.flag]) {
+        try {
+          await emailService.sendUpsellConfirmationEmail({
+            name: name,
+            email: email,
+            loginUrl: process.env.FRONTEND_URL || 'https://www.ninosdeluz.site/login',
+            productName: upgrade.name
+          });
+          console.log(`📧 Email de confirmação do upsell (${upgrade.name}) enviado para: ${email}`);
+        } catch (emailError) {
+          console.error(`❌ Erro ao enviar email de upsell (${upgrade.name}):`, emailError);
+        }
       }
     }
 
@@ -161,14 +169,22 @@ async function handlePurchase({ email, name, products, source }) {
     loginUrl: loginUrl
   }).catch(err => console.error('❌ Erro ao enviar boas-vindas:', err));
 
-  // Enviar e-mail de upsell se aplicável
-  if (currentPurchaseFlags.comprou_produto_3) {
-    emailService.sendUpsellConfirmationEmail({
-      name: name,
-      email: email,
-      loginUrl: loginUrl,
-      productName: 'Kit Esencial - Rutinas sin Gritos'
-    }).catch(err => console.error('❌ Erro email upsell:', err));
+  // Enviar e-mail de upsell se aplicável (para compras iniciais simultâneas)
+  const initialUpgrades = [
+    { flag: 'tem_pack_1', name: 'Pack Expansión - Motivación y Juego' },
+    { flag: 'tem_pack_2', name: 'Pack Expansión 2 - Valores y Fe' },
+    { flag: 'comprou_produto_3', name: 'Kit Esencial - Rutinas sin Gritos' }
+  ];
+
+  for (const upgrade of initialUpgrades) {
+    if (currentPurchaseFlags[upgrade.flag]) {
+      emailService.sendUpsellConfirmationEmail({
+        name: name,
+        email: email,
+        loginUrl: loginUrl,
+        productName: upgrade.name
+      }).catch(err => console.error(`❌ Erro email upsell (${upgrade.name}):`, err));
+    }
   }
 
   return {

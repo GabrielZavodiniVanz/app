@@ -606,14 +606,14 @@ class EmailService {
       const mailOptions = {
         from: process.env.EMAIL_USER,
         to: email,
-        subject: 'Mi Libro para Colorear con Fe - Nuevo Contenido Disponible',
+        subject: `¡Nuevo Contenido Liberado! - ${productName}`,
         html: `<!doctype html>
 <html lang="es">
 <head>
 <meta charset="utf-8">
 <meta name="x-apple-disable-message-reformatting">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Mi Libro para Colorear con Fe • Niños de Luz</title>
+<title>Nuevo Contenido • Niños de Luz</title>
 <!--[if mso]>
 <style>
 * {font-family: Arial, sans-serif !important;}
@@ -679,7 +679,7 @@ class EmailService {
           <!-- INTRO -->
           <tr>
             <td class="p-32">
-              <p>¡Excelente decisión! Has adquirido el <strong>Mi Libro para Colorear con Fe</strong> y ahora tienes acceso inmediato a contenido adicional exclusivo en tu <strong>Web App de Niños de Luz</strong> 🌟</p>
+              <p>¡Excelente decisión! Has adquirido <strong>${productName}</strong> y ahora tienes acceso inmediato a contenido adicional exclusivo en tu <strong>Web App de Niños de Luz</strong> 🌟</p>
             </td>
           </tr>
 
