@@ -613,7 +613,7 @@ class EmailService {
 <meta charset="utf-8">
 <meta name="x-apple-disable-message-reformatting">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Nuevo Contenido • Niños de Luz</title>
+<title>${productName} • Niños de Luz</title>
 <!--[if mso]>
 <style>
 * {font-family: Arial, sans-serif !important;}
@@ -646,7 +646,6 @@ class EmailService {
   h2{font-family:'Mochiy Pop One', Arial, sans-serif;margin:0 0 8px 0;color:var(--ink);font-size:20px;}
   p{margin:0 0 12px 0;color:var(--ink);font-family:'Poppins', Arial, sans-serif;font-size:16px;line-height:1.6;}
   .muted{color:var(--muted);}
-  .card{border:1px solid #EFE7D8;border-radius:12px;background:#FFFCF3;}
   .btn{
     display:inline-block;padding:14px 22px;border-radius:999px;
     font-family:'Mochiy Pop One', Arial, sans-serif;font-size:16px;text-decoration:none;
@@ -670,8 +669,8 @@ class EmailService {
           <tr>
             <td class="p-24">
               <div class="hero p-24">
-                <h1>🎉 ¡Nuevo Contenido Liberado!</h1>
-                <p style="margin-top:8px;font-family:'Poppins',Arial,sans-serif;">Hola ${name}, tu compra adicional fue confirmada ✨</p>
+                <h1>🎉 ¡Compra Confirmada!</h1>
+                <p style="margin-top:8px;font-family:'Poppins',Arial,sans-serif;">Hola ${name}, tu compra fue confirmada con éxito ✨</p>
               </div>
             </td>
           </tr>
@@ -679,20 +678,8 @@ class EmailService {
           <!-- INTRO -->
           <tr>
             <td class="p-32">
-              <p>¡Excelente decisión! Has adquirido <strong>${productName}</strong> y ahora tienes acceso inmediato a contenido adicional exclusivo en tu <strong>Web App de Niños de Luz</strong> 🌟</p>
-            </td>
-          </tr>
-
-          <!-- CONTENT -->
-          <tr>
-            <td class="p-32">
-              <div class="card p-24">
-                <h2>🎁 Lo que tienes ahora</h2>
-                <p>✨ <strong>Contenido adicional liberado</strong> - Nuevas actividades y materiales</p>
-                <p>📚 <strong>Materiales exclusivos</strong> - Solo para quienes compraron el Libro para Colorear</p>
-                <p>🎨 <strong>Actividades premium</strong> - Experiencias de aprendizaje únicas</p>
-                <p class="muted">🔓 El contenido ya está disponible en tu cuenta</p>
-              </div>
+              <p>¡Excelente decisión! Has adquirido <strong>${productName}</strong> y el contenido ya fue liberado en tu <strong>Web App de Niños de Luz</strong> 🌟</p>
+              <p>Inicia sesión con tu cuenta para acceder al nuevo contenido de inmediato.</p>
             </td>
           </tr>
 
@@ -704,12 +691,7 @@ class EmailService {
           </tr>
           <tr>
             <td align="center" class="p-24" style="padding-top:0;">
-              <a class="btn btn-secondary" href="${loginUrl}?refresh=true&upsell=success" target="_blank" rel="noopener">🔄 Actualizar Página Automáticamente</a>
-            </td>
-          </tr>
-          <tr>
-            <td align="center" class="p-24" style="padding-top:0;">
-              <div class="chip">Acceso inmediato • Contenido premium</div>
+              <div class="chip">Acceso inmediato • ${productName}</div>
             </td>
           </tr>
 
@@ -750,16 +732,11 @@ class EmailService {
 </body>
 </html>`,
         text: `
-          Nuevo Contenido Liberado - Niños de Luz
+          Compra Confirmada - Niños de Luz
           
           Hola ${name},
           
-          ¡Excelente decisión! Has adquirido el ${productName} y ahora tienes acceso inmediato a contenido adicional exclusivo.
-          
-          Lo que tienes ahora:
-          - Contenido adicional liberado
-          - Materiales exclusivos
-          - Actividades premium
+          ¡Excelente decisión! Has adquirido ${productName} y el contenido ya fue liberado en tu Web App.
           
           Accede a tu cuenta: ${loginUrl}
           
