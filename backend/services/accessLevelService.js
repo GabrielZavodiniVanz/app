@@ -10,13 +10,31 @@ const PRODUCT_IDS = {
   PRODUTO_3: "d614e9f0-a845-11f0-a8cd-a7de6dd83d71", // KIT ESENCIAL - RUTINAS SIN GRITOS (FRONT)
 };
 
-// IDs dos produtos da Hotmart (Placeholders - Substituir pelos IDs reais do painel Hotmart)
+// IDs dos produtos da Hotmart
 const HOTMART_PRODUCT_IDS = {
-  PRINCIPAL: "2943269", // ⚠️IMPORTANTE: Substituir pelo ID real do Kit Principal
-  PRODUTO_1: "7505378", // PACK EXPANSIÓN - MOTIVACIÓN Y JUEGO
-  PRODUTO_2: "7518117", // PACK EXPANSIÓN 2 - VALORES Y FE
-  PRODUTO_3: "7515543", // KIT ESENCIAL – RUTINAS SIN GRITOS
+  PRINCIPAL: "7611899", // KIT NIÑOS DE LUZ - RUTINAS CON AMOR Y FE
+  PRODUTO_1: "7505378", // PACK EXPANSIÓN 1
+  PRODUTO_2: "7518117", // PACK EXPANSIÓN 2
+  PRODUTO_3: "7515543", // KIT ESENCIAL
 };
+
+// Mapeamento de produto Hotmart para accessLevel legacy
+// Usado quando o produto tem um nível de acesso específico independente das flags
+// Kit Principal usa 'nenhum' pois o acesso é controlado pela flag tem_kit_principal
+const HOTMART_ACCESS_LEVEL_OVERRIDES = {
+  "7611899": "nenhum", // KIT NIÑOS DE LUZ - acesso via flag tem_kit_principal
+};
+
+
+/**
+ * Retorna o accessLevel override para um produto Hotmart específico
+ * @param {number|string} productId
+ * @returns {string|null} - accessLevel ou null se não houver override
+ */
+function getHotmartAccessLevel(productId) {
+  if (!productId && productId !== 0) return null;
+  return HOTMART_ACCESS_LEVEL_OVERRIDES[productId.toString()] || null;
+}
 
 // Nomes amigáveis dos produtos
 const PRODUCT_NAMES = {
@@ -239,7 +257,9 @@ module.exports = {
   getVisibleCategories,
   buildCategoryFilter,
   getAllContentCategories,
+  getHotmartAccessLevel,
   PRODUCT_IDS,
+  HOTMART_PRODUCT_IDS,
   PRODUCT_NAMES,
   CONTENT_CATEGORIES,
   CATEGORY_NAMES,

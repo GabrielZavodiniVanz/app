@@ -55,7 +55,7 @@ function determineUpgradedAccessLevel(currentAccessLevel, newProductAccessLevel)
  * Lógica Central de Processamento de Compra
  * Gerencia criação de usuários, atualização de acesso e envio de e-mails
  */
-async function handlePurchase({ email, name, products, source }) {
+async function handlePurchase({ email, name, products, source, accessLevelOverride }) {
   console.log(`🚀 Processando compra via ${source} para: ${email}`);
 
   // Determinar flags dos produtos comprados Nesta Transação
@@ -78,8 +78,10 @@ async function handlePurchase({ email, name, products, source }) {
       comprou_produto_3: existingUser.comprou_produto_3 || currentPurchaseFlags.comprou_produto_3
     };
 
-    // Lógica Legacy para AccessLevel (apenas para não quebrar compatibilidade)
-    const currentAccessLevelLegacy = accessLevelService.determineAccessLevel(Array.isArray(products) ? products : [products]);
+    // Lógica Legacy para AccessLevel
+    // Se há um override explícito (ex: Kit Principal Hotmart), usa ele
+    const currentAccessLevelLegacy = accessLevelOverride ||
+      accessLevelService.determineAccessLevel(Array.isArray(products) ? products : [products]);
     const newAccessLevelLegacy = determineUpgradedAccessLevel(existingUser.accessLevel, currentAccessLevelLegacy);
 
     // Atualizar usuário
@@ -127,7 +129,9 @@ async function handlePurchase({ email, name, products, source }) {
   console.log('🆕 Criando novo usuário...');
 
   // Legacy Access Level
-  const accessLevelLegacy = accessLevelService.determineAccessLevel(Array.isArray(products) ? products : [products]);
+  // Se há um override explícito (ex: Kit Principal Hotmart), usa ele
+  const accessLevelLegacy = accessLevelOverride ||
+    accessLevelService.determineAccessLevel(Array.isArray(products) ? products : [products]);
 
   // Gerar senha
   const generatedPassword = passwordService.generateSecurePassword();
@@ -261,11 +265,16 @@ router.post('/hotmart',
       const buyer = data.buyer;
       const product = data.product;
 
+      // Detectar override de accessLevel para produtos Hotmart específicos
+      // (ex: Kit Principal concede ACESSO_COMPLETO sem ativar flags dos packs)
+      const accessLevelOverride = accessLevelService.getHotmartAccessLevel(product.id);
+
       const result = await handlePurchase({
         email: buyer.email,
         name: buyer.name,
         products: product.id,
-        source: 'Hotmart'
+        source: 'Hotmart',
+        accessLevelOverride
       });
 
       res.status(200).json({
