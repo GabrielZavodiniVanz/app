@@ -50,7 +50,7 @@ function HomePage() {
           <div
             className={styles.cardBackground}
             style={{
-              backgroundImage: `url('/images/FundoCard.jpeg')`,
+              backgroundImage: `url('/images/aventuras.jpeg')`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat',
@@ -73,7 +73,7 @@ function HomePage() {
           <div
             className={styles.cardBackground}
             style={{
-              backgroundImage: `url('/images/FundoCard.jpeg')`,
+              backgroundImage: `url('/images/atividades.jpeg')`,
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat',
